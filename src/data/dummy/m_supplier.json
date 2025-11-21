@@ -1,0 +1,26 @@
+[
+  {
+    "kode_supplier": "SUP001",
+    "nama_supplier": "PT Supplier Jaya",
+    "alamat": "Jl. Supplier No. 123, Jakarta",
+    "telepon": "021-1234567",
+    "email": "supplier@example.com",
+    "created_at": "2024-01-15T08:00:00Z"
+  },
+  {
+    "kode_supplier": "SUP002",
+    "nama_supplier": "CV Maju Jaya",
+    "alamat": "Jl. Maju No. 456, Bandung",
+    "telepon": "022-7654321",
+    "email": "maju@example.com",
+    "created_at": "2024-01-15T08:00:00Z"
+  },
+  {
+    "kode_supplier": "SUP003",
+    "nama_supplier": "PT Berkah Selalu",
+    "alamat": "Jl. Berkah No. 789, Surabaya",
+    "telepon": "031-9876543",
+    "email": "berkah@example.com",
+    "created_at": "2024-01-15T08:00:00Z"
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "kode_barang": "BRG001",
+    "nama_barang": "Sparepart A",
+    "kategori_id": "KAT001",
+    "satuan": "pcs",
+    "stok": 100,
+    "stok_minimal": 10,
+    "harga_beli": 50000,
+    "harga_jual": 75000,
+    "lokasi_rak": "A1-01",
+    "created_at": "2024-01-15T08:00:00Z"
+  },
+  {
+    "kode_barang": "BRG002",
+    "nama_barang": "Sparepart B",
+    "kategori_id": "KAT002",
+    "satuan": "pcs",
+    "stok": 5,
+    "stok_minimal": 15,
+    "harga_beli": 120000,
+    "harga_jual": 180000,
+    "lokasi_rak": "B2-05",
+    "created_at": "2024-01-15T08:00:00Z"
+  },
+  {
+    "kode_barang": "BRG003",
+    "nama_barang": "Sparepart C",
+    "kategori_id": "KAT001",
+    "satuan": "box",
+    "stok": 50,
+    "stok_minimal": 20,
+    "harga_beli": 35000,
+    "harga_jual": 52500,
+    "lokasi_rak": "A1-02",
+    "created_at": "2024-01-15T08:00:00Z"
+  }
+]

@@ -1,0 +1,29 @@
+[
+  {
+    "kode_customer": "CST001",
+    "nama_customer": "Toko ABC",
+    "alamat": "Jl. Customer No. 111, Jakarta",
+    "telepon": "021-1111111",
+    "kode_area": "AREA001",
+    "kode_sales": "SLS001",
+    "created_at": "2024-01-15T08:00:00Z"
+  },
+  {
+    "kode_customer": "CST002",
+    "nama_customer": "Toko XYZ",
+    "alamat": "Jl. Customer No. 222, Bandung",
+    "telepon": "022-2222222",
+    "kode_area": "AREA002",
+    "kode_sales": "SLS001",
+    "created_at": "2024-01-15T08:00:00Z"
+  },
+  {
+    "kode_customer": "CST003",
+    "nama_customer": "Toko 123",
+    "alamat": "Jl. Customer No. 333, Surabaya",
+    "telepon": "031-3333333",
+    "kode_area": "AREA003",
+    "kode_sales": "SLS002",
+    "created_at": "2024-01-15T08:00:00Z"
+  }
+]

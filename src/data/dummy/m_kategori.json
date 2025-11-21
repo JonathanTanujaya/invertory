@@ -1,0 +1,20 @@
+[
+  {
+    "id": "KAT001",
+    "nama_kategori": "Elektronik",
+    "deskripsi": "Komponen dan peralatan elektronik",
+    "created_at": "2024-01-15T08:00:00Z"
+  },
+  {
+    "id": "KAT002",
+    "nama_kategori": "Mekanik",
+    "deskripsi": "Komponen mekanik dan spare part",
+    "created_at": "2024-01-15T08:00:00Z"
+  },
+  {
+    "id": "KAT003",
+    "nama_kategori": "Aksesoris",
+    "deskripsi": "Aksesoris dan pelengkap",
+    "created_at": "2024-01-15T08:00:00Z"
+  }
+]
