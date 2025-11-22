@@ -19,6 +19,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 
+// Inventory-only navigation (finance & non-inventory masters removed)
 const menuItems = [
   {
     title: 'Dashboard',
@@ -33,9 +34,6 @@ const menuItems = [
       { title: 'Data Barang', path: '/master/sparepart', icon: Package },
       { title: 'Supplier', path: '/master/supplier', icon: Building2 },
       { title: 'Customer', path: '/master/customer', icon: Users },
-      { title: 'Area', path: '/master/area', icon: MapPin },
-      { title: 'Sales', path: '/master/sales', icon: UserCircle },
-      { title: 'Bank', path: '/master/bank', icon: CreditCard },
     ],
   },
   {
@@ -47,29 +45,16 @@ const menuItems = [
       { title: 'Retur Pembelian', path: '/transactions/retur-pembelian' },
       { title: 'Retur Penjualan', path: '/transactions/retur-penjualan' },
       { title: 'Stok Opname', path: '/transactions/stok-opname' },
-      { title: 'Bonus Pembelian', path: '/transactions/pembelian-bonus' },
-      { title: 'Bonus Penjualan', path: '/transactions/penjualan-bonus' },
       { title: 'Customer Claim', path: '/transactions/customer-claim' },
-    ],
-  },
-  {
-    title: 'Finance',
-    icon: CreditCard,
-    submenu: [
-      { title: 'Penerimaan Resi', path: '/finance/penerimaan-resi' },
-      { title: 'Piutang Resi', path: '/finance/piutang-resi' },
-      { title: 'Piutang Retur', path: '/finance/piutang-retur' },
-      { title: 'Penambahan Saldo', path: '/finance/penambahan-saldo' },
-      { title: 'Pengurangan Saldo', path: '/finance/pengurangan-saldo' },
     ],
   },
   {
     title: 'Laporan',
     icon: FileText,
     submenu: [
-      { title: 'Laporan Stok', path: '/reports/stok-barang' },
-      { title: 'Laporan Pembelian', path: '/reports/pembelian' },
-      { title: 'Laporan Penjualan', path: '/reports/penjualan' },
+      { title: 'Stok Barang', path: '/reports/stok-barang' },
+      { title: 'Stok Alert', path: '/reports/stok-alert' },
+      { title: 'Kartu Stok', path: '/reports/kartu-stok' },
     ],
   },
   {

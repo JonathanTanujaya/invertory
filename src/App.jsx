@@ -6,7 +6,18 @@ import 'react-toastify/dist/ReactToastify.css';
 import Layout from './components/layout/Layout';
 import Dashboard from './pages/Dashboard';
 import BarangList from './pages/master/BarangList';
+import KategoriList from './pages/master/KategoriList';
+import SupplierList from './pages/master/SupplierList';
+import CustomerList from './pages/master/CustomerList';
+import KartuStok from './pages/reports/KartuStok';
+import StokAlert from './pages/reports/StokAlert';
+import StokBarang from './pages/reports/StokBarang';
 import PurchaseForm from './pages/transactions/PurchaseForm';
+import SalesForm from './pages/transactions/SalesForm';
+import ReturPembelianForm from './pages/transactions/ReturPembelianForm';
+import ReturPenjualanForm from './pages/transactions/ReturPenjualanForm';
+import StokOpnameForm from './pages/transactions/StokOpnameForm';
+import CustomerClaimForm from './pages/transactions/CustomerClaimForm';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -28,13 +39,26 @@ function App() {
             {/* Master Data */}
             <Route path="master">
               <Route path="sparepart" element={<BarangList />} />
-              {/* Add more master routes */}
+              <Route path="kategori" element={<KategoriList />} />
+              <Route path="supplier" element={<SupplierList />} />
+              <Route path="customer" element={<CustomerList />} />
             </Route>
 
             {/* Transactions */}
             <Route path="transactions">
               <Route path="pembelian" element={<PurchaseForm />} />
-              {/* Add more transaction routes */}
+              <Route path="penjualan" element={<SalesForm />} />
+              <Route path="retur-pembelian" element={<ReturPembelianForm />} />
+              <Route path="retur-penjualan" element={<ReturPenjualanForm />} />
+              <Route path="stok-opname" element={<StokOpnameForm />} />
+              <Route path="customer-claim" element={<CustomerClaimForm />} />
+            </Route>
+
+            {/* Reports */}
+            <Route path="reports">
+              <Route path="stok-barang" element={<StokBarang />} />
+              <Route path="stok-alert" element={<StokAlert />} />
+              <Route path="kartu-stok" element={<KartuStok />} />
             </Route>
 
             {/* Catch all */}

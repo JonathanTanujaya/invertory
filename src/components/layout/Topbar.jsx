@@ -2,15 +2,26 @@ import { Bell, Search, User, LogOut, Moon, Sun, Menu } from 'lucide-react';
 import { useThemeStore } from '@/store/themeStore';
 import { useAuthStore } from '@/store/authStore';
 import { useState } from 'react';
+import { clsx } from 'clsx';
 import Button from '@/components/ui/Button';
 
 export default function Topbar() {
-  const { mode, toggleTheme, toggleSidebar } = useThemeStore();
+  const { mode, toggleTheme, toggleSidebar, sidebarCollapsed } = useThemeStore();
   const { user, logout } = useAuthStore();
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   return (
-    <header className="h-16 bg-white border-b border-gray-200 fixed top-0 right-0 left-0 z-30">
+    <header
+      className={clsx(
+        'fixed top-0 right-0 z-30 h-16 bg-white border-b border-gray-200 transition-all duration-300',
+        // Base full width on small screens
+        'w-full',
+        // Adjust for sidebar on large screens only
+        sidebarCollapsed
+          ? 'lg:ml-20 lg:w-[calc(100%-5rem)]'
+          : 'lg:ml-64 lg:w-[calc(100%-16rem)]'
+      )}
+    >
       <div className="flex items-center justify-between h-full px-6">
         {/* Left section */}
         <div className="flex items-center gap-4">
