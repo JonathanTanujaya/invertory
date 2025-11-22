@@ -20,7 +20,6 @@ export default function BarangForm({ initialData, mode, onSubmit, onCancel }) {
       stok_minimal: 0,
       harga_beli: 0,
       harga_jual: 0,
-      lokasi_rak: '',
     },
   });
 
@@ -130,15 +129,6 @@ export default function BarangForm({ initialData, mode, onSubmit, onCancel }) {
           required
         />
       </div>
-
-      {/* Row 5 */}
-      <Input
-        label="Lokasi Rak"
-        {...register('lokasi_rak')}
-        error={errors.lokasi_rak?.message}
-        disabled={isViewMode}
-        helperText="Contoh: A1-01, B2-05"
-      />
 
       {/* Actions */}
       {!isViewMode && (

@@ -15,11 +15,11 @@ function fetchBarang() {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve([
-        { kode_barang: 'BRG001', nama_barang: 'Sparepart A', kategori: 'Elektronik', satuan: 'pcs', stok: 100, stok_minimal: 10, lokasi_rak: 'A1-01' },
-        { kode_barang: 'BRG002', nama_barang: 'Sparepart B', kategori: 'Mekanik', satuan: 'pcs', stok: 5, stok_minimal: 15, lokasi_rak: 'B2-05' },
-        { kode_barang: 'BRG003', nama_barang: 'Sparepart C', kategori: 'Elektronik', satuan: 'box', stok: 22, stok_minimal: 20, lokasi_rak: 'A1-02' },
-        { kode_barang: 'BRG004', nama_barang: 'Sparepart D', kategori: 'Aksesoris', satuan: 'pcs', stok: 18, stok_minimal: 10, lokasi_rak: 'C3-11' },
-        { kode_barang: 'BRG005', nama_barang: 'Sparepart E', kategori: 'Mekanik', satuan: 'pcs', stok: 11, stok_minimal: 10, lokasi_rak: 'D4-07' },
+        { kode_barang: 'BRG001', nama_barang: 'Sparepart A', kategori: 'Elektronik', satuan: 'pcs', stok: 100, stok_minimal: 10 },
+        { kode_barang: 'BRG002', nama_barang: 'Sparepart B', kategori: 'Mekanik', satuan: 'pcs', stok: 5, stok_minimal: 15 },
+        { kode_barang: 'BRG003', nama_barang: 'Sparepart C', kategori: 'Elektronik', satuan: 'box', stok: 22, stok_minimal: 20 },
+        { kode_barang: 'BRG004', nama_barang: 'Sparepart D', kategori: 'Aksesoris', satuan: 'pcs', stok: 18, stok_minimal: 10 },
+        { kode_barang: 'BRG005', nama_barang: 'Sparepart E', kategori: 'Mekanik', satuan: 'pcs', stok: 11, stok_minimal: 10 },
       ]);
     }, 350);
   });
@@ -77,7 +77,6 @@ export default function StokAlert() {
       if (row.warning) return <Badge variant="warning">Warning</Badge>;
       return <Badge variant="success">OK</Badge>;
     } },
-    { key: 'lokasi_rak', label: 'Lokasi', align: 'center' },
     { key: 'actions', label: 'Aksi', align: 'center', render: (_, row) => (
       <Button size="sm" variant="ghost" onClick={() => { setSelected(row); setShowModal(true); }}>
         <Eye className="w-4 h-4" />
@@ -86,8 +85,8 @@ export default function StokAlert() {
   ];
 
   const exportCsv = () => {
-    const headerLine = 'Kode,Nama,Kategori,Stok,Min,Status,Lokasi';
-    const lines = filtered.map(r => [r.kode_barang, r.nama_barang, r.kategori, r.stok, r.stok_minimal, r.critical ? 'Critical' : r.warning ? 'Warning' : 'OK', r.lokasi_rak].join(','));
+    const headerLine = 'Kode,Nama,Kategori,Stok,Min,Status';
+    const lines = filtered.map(r => [r.kode_barang, r.nama_barang, r.kategori, r.stok, r.stok_minimal, r.critical ? 'Critical' : r.warning ? 'Warning' : 'OK'].join(','));
     const csv = [headerLine, ...lines].join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob); const a = document.createElement('a');
@@ -212,7 +211,6 @@ export default function StokAlert() {
               satuan: selected.satuan,
               stok: selected.stok,
               stok_minimal: selected.stok_minimal,
-              lokasi_rak: selected.lokasi_rak,
             }}
             mode="view"
             onCancel={() => setShowModal(false)}

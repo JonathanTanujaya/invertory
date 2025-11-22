@@ -15,14 +15,14 @@ function fetchStokBarang() {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve([
-        { kode_barang: 'BRG001', nama_barang: 'Sparepart A', kategori: 'Elektronik', satuan: 'pcs', stok: 100, stok_minimal: 10, lokasi_rak: 'A1-01' },
-        { kode_barang: 'BRG002', nama_barang: 'Sparepart B', kategori: 'Mekanik', satuan: 'pcs', stok: 5, stok_minimal: 15, lokasi_rak: 'B2-05' },
-        { kode_barang: 'BRG003', nama_barang: 'Sparepart C', kategori: 'Elektronik', satuan: 'box', stok: 22, stok_minimal: 20, lokasi_rak: 'A1-02' },
-        { kode_barang: 'BRG004', nama_barang: 'Sparepart D', kategori: 'Aksesoris', satuan: 'pcs', stok: 18, stok_minimal: 10, lokasi_rak: 'C3-11' },
-        { kode_barang: 'BRG005', nama_barang: 'Sparepart E', kategori: 'Mekanik', satuan: 'pcs', stok: 50, stok_minimal: 10, lokasi_rak: 'D4-07' },
-        { kode_barang: 'BRG006', nama_barang: 'Sparepart F', kategori: 'Elektronik', satuan: 'unit', stok: 75, stok_minimal: 20, lokasi_rak: 'A1-03' },
-        { kode_barang: 'BRG007', nama_barang: 'Sparepart G', kategori: 'Aksesoris', satuan: 'pcs', stok: 0, stok_minimal: 5, lokasi_rak: 'C3-12' },
-        { kode_barang: 'BRG008', nama_barang: 'Sparepart H', kategori: 'Mekanik', satuan: 'box', stok: 30, stok_minimal: 15, lokasi_rak: 'B2-06' },
+        { kode_barang: 'BRG001', nama_barang: 'Sparepart A', kategori: 'Elektronik', satuan: 'pcs', stok: 100, stok_minimal: 10 },
+        { kode_barang: 'BRG002', nama_barang: 'Sparepart B', kategori: 'Mekanik', satuan: 'pcs', stok: 5, stok_minimal: 15 },
+        { kode_barang: 'BRG003', nama_barang: 'Sparepart C', kategori: 'Elektronik', satuan: 'box', stok: 22, stok_minimal: 20 },
+        { kode_barang: 'BRG004', nama_barang: 'Sparepart D', kategori: 'Aksesoris', satuan: 'pcs', stok: 18, stok_minimal: 10 },
+        { kode_barang: 'BRG005', nama_barang: 'Sparepart E', kategori: 'Mekanik', satuan: 'pcs', stok: 50, stok_minimal: 10 },
+        { kode_barang: 'BRG006', nama_barang: 'Sparepart F', kategori: 'Elektronik', satuan: 'unit', stok: 75, stok_minimal: 20 },
+        { kode_barang: 'BRG007', nama_barang: 'Sparepart G', kategori: 'Aksesoris', satuan: 'pcs', stok: 0, stok_minimal: 5 },
+        { kode_barang: 'BRG008', nama_barang: 'Sparepart H', kategori: 'Mekanik', satuan: 'box', stok: 30, stok_minimal: 15 },
       ]);
     }, 400);
   });
@@ -90,7 +90,6 @@ export default function StokBarang() {
       return <Badge variant={variant}>{formatNumber(val)} {row.satuan}</Badge>;
     }},
     { key: 'stok_minimal', label: 'Min', align: 'center', render: (val, row) => <span className="text-sm text-gray-600">{formatNumber(val)}</span> },
-    { key: 'lokasi_rak', label: 'Lokasi', align: 'center' },
     { key: 'actions', label: 'Aksi', align: 'center', render: (_, row) => (
       <Button size="sm" variant="ghost" onClick={() => { setSelected(row); setShowModal(true); }}>
         <Eye className="w-4 h-4" />
@@ -99,8 +98,8 @@ export default function StokBarang() {
   ];
 
   const exportCsv = () => {
-    const headerLine = 'Kode,Nama,Kategori,Stok,Satuan,Min,Lokasi';
-    const lines = filtered.map(r => [r.kode_barang, r.nama_barang, r.kategori, r.stok, r.satuan, r.stok_minimal, r.lokasi_rak].join(','));
+    const headerLine = 'Kode,Nama,Kategori,Stok,Satuan,Min';
+    const lines = filtered.map(r => [r.kode_barang, r.nama_barang, r.kategori, r.stok, r.satuan, r.stok_minimal].join(','));
     const csv = [headerLine, ...lines].join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
@@ -124,11 +123,6 @@ export default function StokBarang() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Stok Barang</h1>
-        <p className="text-gray-500 mt-1">Laporan lengkap stok semua barang</p>
-      </div>
-
       {/* Summary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
@@ -289,7 +283,6 @@ export default function StokBarang() {
               satuan: selected.satuan,
               stok: selected.stok,
               stok_minimal: selected.stok_minimal,
-              lokasi_rak: selected.lokasi_rak,
             }}
             mode="view"
             onCancel={() => setShowModal(false)}

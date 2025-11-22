@@ -70,11 +70,6 @@ export default function BarangList() {
       render: (value) => formatCurrency(value),
     },
     {
-      key: 'lokasi_rak',
-      label: 'Lokasi',
-      align: 'center',
-    },
-    {
       key: 'actions',
       label: 'Aksi',
       align: 'center',
@@ -125,7 +120,6 @@ export default function BarangList() {
             stok_minimal: 10,
             harga_beli: 50000,
             harga_jual: 75000,
-            lokasi_rak: 'A1-01',
           },
           {
             kode_barang: 'BRG002',
@@ -136,7 +130,6 @@ export default function BarangList() {
             stok_minimal: 15,
             harga_beli: 120000,
             harga_jual: 180000,
-            lokasi_rak: 'B2-05',
           },
           {
             kode_barang: 'BRG003',
@@ -147,7 +140,6 @@ export default function BarangList() {
             stok_minimal: 20,
             harga_beli: 35000,
             harga_jual: 52500,
-            lokasi_rak: 'A1-02',
           },
         ];
         setData(dummyData);
