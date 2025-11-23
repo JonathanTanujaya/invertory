@@ -137,11 +137,6 @@ export default function KategoriList() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Kategori & Area</h1>
-        <p className="text-gray-500 mt-1">Kelola kategori barang dan area customer</p>
-      </div>
-
       <div className="grid grid-cols-2 gap-6">
         {/* Kategori Section */}
         <Card>

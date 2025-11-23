@@ -146,11 +146,7 @@ export default function CustomerClaimForm() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Form Customer Claim</h1>
-          <p className="text-gray-600 mt-1">Buat klaim baru dari customer</p>
-        </div>
+      <div className="flex items-center justify-end">
         <Button
           variant="ghost"
           onClick={() => navigate('/transactions/customer-claim/list')}

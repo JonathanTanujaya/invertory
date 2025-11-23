@@ -120,11 +120,7 @@ export default function AreaList() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Area</h1>
-          <p className="text-gray-500 mt-1">Kelola wilayah pemasaran</p>
-        </div>
+      <div className="flex items-center justify-end">
         <Button onClick={handleCreate} startIcon={<Plus className="w-4 h-4" />}>
           Tambah Area
         </Button>

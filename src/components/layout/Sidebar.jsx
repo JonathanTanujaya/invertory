@@ -30,7 +30,7 @@ const menuItems = [
     title: 'Master Data',
     icon: Package,
     submenu: [
-      { title: 'Kategori', path: '/master/kategori', icon: Tags },
+      { title: 'Kategori & Area', path: '/master/kategori', icon: Tags },
       { title: 'Data Barang', path: '/master/sparepart', icon: Package },
       { title: 'Supplier', path: '/master/supplier', icon: Building2 },
       { title: 'Customer', path: '/master/customer', icon: Users },

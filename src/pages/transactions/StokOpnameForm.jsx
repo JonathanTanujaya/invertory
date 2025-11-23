@@ -128,13 +128,6 @@ export default function StokOpnameForm() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Form Stok Opname</h1>
-          <p className="text-gray-600 mt-1">Rekonsiliasi stok sistem dengan stok fisik</p>
-        </div>
-      </div>
-
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Form Input */}
         <Card>

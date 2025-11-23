@@ -69,11 +69,6 @@ export default function KartuStok() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Kartu Stok</h1>
-        <p className="text-gray-500 mt-1">Riwayat lengkap pergerakan stok barang per item</p>
-      </div>
-
       {/* Filter Panel */}
       <Card>
         <div className="grid md:grid-cols-6 gap-4">

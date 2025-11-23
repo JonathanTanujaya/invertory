@@ -75,25 +75,13 @@ export default function BarangList() {
       align: 'center',
       render: (_, row) => (
         <div className="flex items-center justify-center gap-2">
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => handleView(row)}
-          >
+          <Button size="sm" variant="ghost" onClick={() => handleView(row)}>
             <Eye className="w-4 h-4" />
           </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => handleEdit(row)}
-          >
+          <Button size="sm" variant="ghost" onClick={() => handleEdit(row)}>
             <Edit className="w-4 h-4" />
           </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => handleDelete(row)}
-          >
+          <Button size="sm" variant="ghost" onClick={() => handleDelete(row)}>
             <Trash2 className="w-4 h-4 text-error-500" />
           </Button>
         </div>
@@ -200,28 +188,18 @@ export default function BarangList() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Data Barang</h1>
-          <p className="text-gray-500 mt-1">Kelola master data barang/sparepart</p>
-        </div>
-        <Button onClick={handleCreate} startIcon={<Plus className="w-4 h-4" />}>
-          Tambah Barang
-        </Button>
-      </div>
-
       {/* Filters */}
-      <Card>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <Card className="shadow-sm ring-1 ring-gray-100">
+        <div className="grid grid-cols-[1fr_220px_auto] items-center gap-3">
           <Input
-            placeholder="Cari kode/nama barang..."
+            placeholder="Cari nama barang"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             startIcon={<Search className="w-4 h-4 text-gray-500" />}
+            className="rounded-lg"
           />
           <Select
-            placeholder="Semua Kategori"
+            placeholder="Kategori"
             value={kategoriFilter}
             onChange={(e) => setKategoriFilter(e.target.value)}
             options={[
@@ -229,10 +207,27 @@ export default function BarangList() {
               { value: 'mekanik', label: 'Mekanik' },
               { value: 'aksesoris', label: 'Aksesoris' },
             ]}
+            className="rounded-lg"
           />
-          <Button variant="outline" startIcon={<Filter className="w-4 h-4" />}>
-            Filter Lainnya
-          </Button>
+          <div className="flex items-center justify-end gap-2">
+            <Button
+              variant="outline"
+              size="md"
+              startIcon={<Filter className="w-4 h-4" />}
+              className="rounded-lg shadow-sm border-primary-400 text-primary-600 hover:bg-primary-50"
+              onClick={() => { }}
+            >
+              Filter Lainnya
+            </Button>
+            <Button
+              size="md"
+              startIcon={<Plus className="w-4 h-4" />}
+              className="rounded-lg shadow-sm px-4"
+              onClick={handleCreate}
+            >
+              Tambah Barang
+            </Button>
+          </div>
         </div>
       </Card>
 
@@ -258,8 +253,8 @@ export default function BarangList() {
           mode === 'create'
             ? 'Tambah Barang'
             : mode === 'edit'
-            ? 'Edit Barang'
-            : 'Detail Barang'
+              ? 'Edit Barang'
+              : 'Detail Barang'
         }
         size="lg"
       >
