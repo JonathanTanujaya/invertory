@@ -3,9 +3,6 @@ import { useForm } from 'react-hook-form';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
-import Select from '@/components/ui/Select';
-// Removed modal ItemSelector; inline autocomplete implemented
-// helpers not needed for inventory-only table
 import { toast } from 'react-toastify';
 
 export default function PurchaseForm() {
@@ -13,7 +10,8 @@ export default function PurchaseForm() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    watch,
+    setValue,
+    getValues,
   } = useForm({
     defaultValues: {
       no_faktur: '',
@@ -27,97 +25,81 @@ export default function PurchaseForm() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [highlightIndex, setHighlightIndex] = useState(-1);
   const [pendingQty, setPendingQty] = useState(1);
+  const [supplierQuery, setSupplierQuery] = useState('');
+  const [showSupplierSuggestions, setShowSupplierSuggestions] = useState(false);
+  const [supplierHighlightIndex, setSupplierHighlightIndex] = useState(-1);
 
+  // Dummy suppliers (replace with API later)
   const supplierOptions = [
     { value: 'SUP001', label: 'PT Supplier Jaya' },
     { value: 'SUP002', label: 'CV Maju Jaya' },
     { value: 'SUP003', label: 'PT Berkah Selalu' },
   ];
 
-  // Dummy items dataset (could be fetched from API)
+  // Dummy items dataset (replace with API later)
   const allItems = [
-    {
-      kode_barang: 'BRG001',
-      nama_barang: 'Sparepart A',
-      kategori: 'Elektronik',
-      satuan: 'pcs',
-      stok: 100,
-      harga_beli: 50000,
-    },
-    {
-      kode_barang: 'BRG002',
-      nama_barang: 'Sparepart B',
-      kategori: 'Mekanik',
-      satuan: 'pcs',
-      stok: 5,
-      harga_beli: 120000,
-    },
-    {
-      kode_barang: 'BRG003',
-      nama_barang: 'Sparepart C',
-      kategori: 'Elektronik',
-      satuan: 'box',
-      stok: 50,
-      harga_beli: 35000,
-    },
+    { kode_barang: 'BRG001', nama_barang: 'Sparepart A', kategori: 'Elektronik', satuan: 'pcs', stok: 100 },
+    { kode_barang: 'BRG002', nama_barang: 'Sparepart B', kategori: 'Mekanik', satuan: 'pcs', stok: 5 },
+    { kode_barang: 'BRG003', nama_barang: 'Sparepart C', kategori: 'Elektronik', satuan: 'box', stok: 50 },
   ];
 
   const filteredItems = searchQuery
     ? allItems.filter(
-        (item) =>
-          item.nama_barang.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          item.kode_barang.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+      (it) =>
+        it.nama_barang.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        it.kode_barang.toLowerCase().includes(searchQuery.toLowerCase())
+    )
     : allItems.slice(0, 10);
 
+  const filteredSuppliers = supplierQuery
+    ? supplierOptions.filter(
+      (s) =>
+        s.label.toLowerCase().includes(supplierQuery.toLowerCase()) ||
+        s.value.toLowerCase().includes(supplierQuery.toLowerCase())
+    )
+    : supplierOptions;
+
   const handleAddItem = (item, qtyOverride) => {
-    const existing = items.find((i) => i.kode_barang === item.kode_barang);
-    if (existing) {
+    const exists = items.find((i) => i.kode_barang === item.kode_barang);
+    if (exists) {
       toast.warning('Item sudah ditambahkan');
       return;
     }
-
-    setItems([
-      ...items,
-      {
-        ...item,
-        jumlah: qtyOverride || 1,
-      },
-    ]);
+    const jumlah = Math.max(1, parseInt(qtyOverride || pendingQty || 1, 10));
+    setItems((prev) => [...prev, { ...item, jumlah }]);
     setSearchQuery('');
     setShowSuggestions(false);
     setHighlightIndex(-1);
   };
 
   const handleUpdateItem = (index, field, value) => {
-    const newItems = [...items];
-    newItems[index][field] = parseFloat(value) || 0;
-    setItems(newItems);
+    setItems((prev) => {
+      const next = [...prev];
+      const v = field === 'jumlah' ? Math.max(1, parseInt(value || '1', 10)) : value;
+      next[index] = { ...next[index], [field]: v };
+      return next;
+    });
   };
 
-  const handleRemoveItem = (index) => {
-    setItems(items.filter((_, i) => i !== index));
-  };
-
-  const onSubmit = async (data) => {
-    if (items.length === 0) {
-      toast.error('Minimal tambahkan 1 item');
+  const onSubmit = (data) => {
+    if (!data.no_faktur) {
+      toast.error('No faktur wajib');
       return;
     }
-
+    if (!data.kode_supplier) {
+      toast.error('Supplier wajib dipilih');
+      return;
+    }
+    if (items.length === 0) {
+      toast.error('Tambahkan minimal satu item');
+      return;
+    }
     const payload = {
       ...data,
-      items,
+      items: items.map(({ kode_barang, jumlah }) => ({ kode_barang, jumlah })),
     };
-
-    try {
-      // API call
-      console.log('Submit:', payload);
-      toast.success('Pembelian berhasil disimpan');
-      // Reset or redirect
-    } catch (error) {
-      toast.error('Gagal menyimpan pembelian');
-    }
+    console.log('Submit pembelian (inventory only):', payload);
+    toast.success('Pembelian tersimpan');
   };
 
   return (
@@ -125,7 +107,8 @@ export default function PurchaseForm() {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Header Info Stok Masuk (Compact) */}
         <Card>
-          <div className="flex items-start gap-4 flex-nowrap overflow-x-auto pb-1">
+          {/* Baris 1: No Faktur, Supplier, Kode/Nama Barang, Qty */}
+          <div className="relative z-30 flex items-start gap-4 flex-nowrap overflow-visible pb-1">
             <div className="w-48 flex-shrink-0">
               <Input
                 label="No Faktur"
@@ -135,26 +118,73 @@ export default function PurchaseForm() {
                 required
               />
             </div>
-            <div className="w-56 flex-shrink-0">
-              <Select
-                label="Supplier"
+            <div className={`w-64 flex-shrink-0 relative ${showSupplierSuggestions ? 'z-[60]' : 'z-10'}`}>
+              {/* Hidden field to store selected supplier code */}
+              <input
+                type="hidden"
                 {...register('kode_supplier', { required: 'Supplier wajib' })}
-                options={supplierOptions}
-                error={errors.kode_supplier?.message}
-                required
               />
-            </div>
-            <div className="min-w-[220px] flex-1">
               <Input
-                label="Catatan"
-                {...register('catatan')}
-                placeholder="Catatan (opsional)"
+                label="Supplier"
+                placeholder="Cari supplier..."
+                value={supplierQuery}
+                error={errors.kode_supplier?.message}
+                onChange={(e) => {
+                  setSupplierQuery(e.target.value);
+                  setShowSupplierSuggestions(true);
+                }}
+                onFocus={() => setShowSupplierSuggestions(true)}
+                onKeyDown={(e) => {
+                  if (!showSupplierSuggestions) return;
+                  if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    setSupplierHighlightIndex((prev) => Math.min(prev + 1, filteredSuppliers.length - 1));
+                  } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    setSupplierHighlightIndex((prev) => Math.max(prev - 1, 0));
+                  } else if (e.key === 'Enter') {
+                    if (supplierHighlightIndex >= 0 && filteredSuppliers[supplierHighlightIndex]) {
+                      e.preventDefault();
+                      const sup = filteredSuppliers[supplierHighlightIndex];
+                      setValue('kode_supplier', sup.value, { shouldValidate: true });
+                      setSupplierQuery(sup.label);
+                      setShowSupplierSuggestions(false);
+                    }
+                  } else if (e.key === 'Escape') {
+                    setShowSupplierSuggestions(false);
+                  }
+                }}
               />
+              {showSupplierSuggestions && (
+                <div className="absolute z-[70] mt-1 w-full max-h-64 overflow-y-auto bg-white border border-gray-200 rounded-md shadow-lg text-sm">
+                  {filteredSuppliers.length === 0 ? (
+                    <div className="px-3 py-2 text-gray-500">Supplier tidak ditemukan</div>
+                  ) : (
+                    filteredSuppliers.map((s, idx) => (
+                      <div
+                        key={s.value}
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => {
+                          setValue('kode_supplier', s.value, { shouldValidate: true });
+                          setSupplierQuery(s.label);
+                          setShowSupplierSuggestions(false);
+                          setSupplierHighlightIndex(-1);
+                        }}
+                        className={`px-3 py-2 cursor-pointer border-b last:border-b-0 ${supplierHighlightIndex === idx ? 'bg-primary-50' : 'hover:bg-gray-50'
+                          }`}
+                        onMouseEnter={() => setSupplierHighlightIndex(idx)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium text-gray-900">{s.label}</span>
+                          <span className="text-xs text-gray-500">{s.value}</span>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
             </div>
-          </div>
-          {/* Row pencarian barang */}
-          <div className="mt-4 flex gap-4 flex-nowrap overflow-x-visible relative">
-            <div className="flex-1 min-w-[320px]">
+            <div className={`flex-1 min-w-[320px] relative ${showSuggestions ? 'z-20' : ''}`}>
               <Input
                 label="Kode Barang / Nama Barang"
                 placeholder="Ketik kode atau nama barang..."
@@ -183,7 +213,7 @@ export default function PurchaseForm() {
                 }}
               />
               {showSuggestions && searchQuery && (
-                <div className="absolute z-30 mt-1 w-full max-h-72 overflow-y-auto bg-white border border-gray-200 rounded-md shadow-lg text-sm">
+                <div className="absolute z-[60] mt-1 w-full max-h-72 overflow-y-auto bg-white border border-gray-200 rounded-md shadow-lg text-sm">
                   {filteredItems.length === 0 ? (
                     <div className="px-3 py-2 text-gray-500">Tidak ada barang</div>
                   ) : (
@@ -194,9 +224,8 @@ export default function PurchaseForm() {
                           e.preventDefault();
                           handleAddItem(item, pendingQty);
                         }}
-                        className={`px-3 py-2 cursor-pointer flex flex-col gap-0.5 border-b last:border-b-0 ${
-                          highlightIndex === idx ? 'bg-primary-50' : 'hover:bg-gray-50'
-                        }`}
+                        className={`px-3 py-2 cursor-pointer flex flex-col gap-0.5 border-b last:border-b-0 ${highlightIndex === idx ? 'bg-primary-50' : 'hover:bg-gray-50'
+                          }`}
                         onMouseEnter={() => setHighlightIndex(idx)}
                       >
                         <div className="flex items-center justify-between">
@@ -213,7 +242,7 @@ export default function PurchaseForm() {
                 </div>
               )}
             </div>
-            <div className="w-32 flex-shrink-0">
+            <div className="w-28 flex-shrink-0">
               <Input
                 label="Qty"
                 type="number"
@@ -223,10 +252,19 @@ export default function PurchaseForm() {
               />
             </div>
           </div>
+
+          {/* Baris 2: Catatan full */}
+          <div className="mt-4 relative z-0">
+            <Input
+              label="Catatan"
+              {...register('catatan')}
+              placeholder="Catatan (opsional)"
+            />
+          </div>
         </Card>
 
         {/* Items */}
-        <Card title="Daftar Barang">
+        <Card>
           {items.length === 0 ? (
             <div className="py-12 text-center text-gray-500">
               Belum ada item. Ketik pada pencarian di atas untuk menambahkan.
@@ -236,19 +274,19 @@ export default function PurchaseForm() {
               <table className="min-w-full text-sm">
                 <thead className="bg-gray-50 text-gray-700">
                   <tr>
-                    <th className="px-3 py-2 text-center w-12">No</th>
-                    <th className="px-3 py-2 text-left w-40">Kode Barang</th>
-                    <th className="px-3 py-2 text-left">Nama Barang</th>
-                    <th className="px-3 py-2 text-center w-28">Qty</th>
+                    <th className="p-0 text-center w-12">No</th>
+                    <th className="p-0 text-left w-40">Kode Barang</th>
+                    <th className="p-0 text-left">Nama Barang</th>
+                    <th className="p-0 text-center w-28">Qty</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {items.map((item, index) => (
                     <tr key={item.kode_barang} className="hover:bg-gray-50">
-                      <td className="px-3 py-2 text-center align-middle">{index + 1}</td>
-                      <td className="px-3 py-2 align-middle font-medium text-gray-900 whitespace-nowrap">{item.kode_barang}</td>
-                      <td className="px-3 py-2 align-middle text-gray-900">{item.nama_barang}</td>
-                      <td className="px-3 py-2 text-center align-middle">
+                      <td className="p-0 text-center align-middle">{index + 1}</td>
+                      <td className="p-0 align-middle font-medium text-gray-900 whitespace-nowrap">{item.kode_barang}</td>
+                      <td className="p-0 align-middle text-gray-900">{item.nama_barang}</td>
+                      <td className="p-0 text-center align-middle">
                         <input
                           type="number"
                           min="1"

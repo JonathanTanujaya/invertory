@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Eye } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, Search } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
 import DataTable from '@/components/ui/DataTable';
 import Modal from '@/components/ui/Modal';
 import CustomerForm from './CustomerForm';
@@ -13,6 +14,7 @@ export default function CustomerList() {
   const [showModal, setShowModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [mode, setMode] = useState('create');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const columns = [
     { key: 'kode', label: 'Kode', sortable: true },
@@ -62,13 +64,34 @@ export default function CustomerList() {
     fetchData();
   };
 
+  // Filter sederhana berdasarkan kode, nama, kontak
+  const filteredData = data.filter((item) => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      item.kode?.toLowerCase().includes(q) ||
+      item.nama?.toLowerCase().includes(q) ||
+      item.kontak?.toLowerCase().includes(q)
+    );
+  });
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-end">
-        <Button onClick={handleCreate} startIcon={<Plus className="w-4 h-4" />}>Tambah Customer</Button>
-      </div>
+      <Card>
+        <div className="flex items-center gap-3">
+          <div className="flex-1">
+            <Input
+              placeholder="Cari customer (kode, nama, kontak)..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              startIcon={<Search className="w-4 h-4" />}
+            />
+          </div>
+          <Button onClick={handleCreate} startIcon={<Plus className="w-4 h-4" />}>Tambah Customer</Button>
+        </div>
+      </Card>
       <Card padding={false}>
-        <DataTable columns={columns} data={data} loading={loading} pagination={false} />
+        <DataTable columns={columns} data={filteredData} loading={loading} pagination={false} />
       </Card>
       <Modal
         open={showModal}

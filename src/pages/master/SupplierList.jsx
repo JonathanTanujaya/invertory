@@ -19,17 +19,17 @@ export default function SupplierList() {
   const [pageSize] = useState(10);
 
   const columns = [
-    { 
-      key: 'kode_supplier', 
-      label: 'Kode', 
+    {
+      key: 'kode_supplier',
+      label: 'Kode',
       sortable: true,
       render: (value) => (
         <span className="font-mono font-semibold text-primary-600">{value}</span>
       ),
     },
     { key: 'nama_supplier', label: 'Nama Supplier', sortable: true },
-    { 
-      key: 'alamat', 
+    {
+      key: 'alamat',
       label: 'Alamat',
       render: (value) => (
         <span className="text-sm text-gray-600 line-clamp-2">{value || '-'}</span>
@@ -57,23 +57,23 @@ export default function SupplierList() {
     setLoading(true);
     setTimeout(() => {
       const dummy = [
-        { 
-          kode_supplier: 'SUP001', 
-          nama_supplier: 'PT Sumber Sparepart', 
+        {
+          kode_supplier: 'SUP001',
+          nama_supplier: 'PT Sumber Sparepart',
           alamat: 'Jl. Sudirman No. 123, Jakarta Selatan',
           telepon: '021-12345678',
           email: 'info@sumbersparepart.com'
         },
-        { 
-          kode_supplier: 'SUP002', 
-          nama_supplier: 'CV Mekanik Jaya', 
+        {
+          kode_supplier: 'SUP002',
+          nama_supplier: 'CV Mekanik Jaya',
           alamat: 'Jl. Gatot Subroto No. 45, Jakarta Pusat',
           telepon: '08123456789',
           email: 'contact@mekanikjaya.com'
         },
-        { 
-          kode_supplier: 'SUP003', 
-          nama_supplier: 'UD Elektronik Sejahtera', 
+        {
+          kode_supplier: 'SUP003',
+          nama_supplier: 'UD Elektronik Sejahtera',
           alamat: 'Jl. Ahmad Yani No. 78, Bandung',
           telepon: '022-87654321',
           email: null
@@ -129,23 +129,22 @@ export default function SupplierList() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-end">
-        <Button onClick={handleCreate} startIcon={<Plus className="w-4 h-4" />}>
-          Tambah Supplier
-        </Button>
-      </div>
-
       <Card>
-        <div className="mb-4">
-          <Input
-            placeholder="Cari supplier (kode, nama, alamat, telepon, email)..."
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setCurrentPage(1);
-            }}
-            startIcon={<Search className="w-4 h-4" />}
-          />
+        <div className="flex items-center gap-3">
+          <div className="flex-1">
+            <Input
+              placeholder="Cari supplier (kode, nama, alamat, telepon, email)..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              startIcon={<Search className="w-4 h-4" />}
+            />
+          </div>
+          <Button onClick={handleCreate} startIcon={<Plus className="w-4 h-4" />}>
+            Tambah Supplier
+          </Button>
         </div>
       </Card>
 
@@ -162,11 +161,11 @@ export default function SupplierList() {
           </div>
         ) : (
           <>
-            <DataTable 
-              columns={columns} 
-              data={paginatedData} 
-              loading={loading} 
-              pagination={false} 
+            <DataTable
+              columns={columns}
+              data={paginatedData}
+              loading={loading}
+              pagination={false}
             />
             {totalPages > 1 && (
               <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200">
@@ -201,10 +200,10 @@ export default function SupplierList() {
         open={showModal}
         onClose={() => setShowModal(false)}
         title={
-          mode === 'create' 
-            ? 'Tambah Supplier' 
-            : mode === 'edit' 
-              ? 'Edit Supplier' 
+          mode === 'create'
+            ? 'Tambah Supplier'
+            : mode === 'edit'
+              ? 'Edit Supplier'
               : 'Detail Supplier'
         }
       >
