@@ -16,10 +16,7 @@ export default function BarangForm({ initialData, mode, onSubmit, onCancel }) {
       nama_barang: '',
       kategori_id: '',
       satuan: '',
-      stok: 0,
       stok_minimal: 0,
-      harga_beli: 0,
-      harga_jual: 0,
     },
   });
 
@@ -78,19 +75,8 @@ export default function BarangForm({ initialData, mode, onSubmit, onCancel }) {
         />
       </div>
 
-      {/* Row 3 */}
+      {/* Row 3: Stok Minimal */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Input
-          label="Stok"
-          type="number"
-          {...register('stok', { 
-            required: 'Stok wajib diisi',
-            min: { value: 0, message: 'Stok minimal 0' }
-          })}
-          error={errors.stok?.message}
-          disabled={isViewMode}
-          required
-        />
         <Input
           label="Stok Minimal"
           type="number"
@@ -99,32 +85,6 @@ export default function BarangForm({ initialData, mode, onSubmit, onCancel }) {
             min: { value: 0, message: 'Stok minimal 0' }
           })}
           error={errors.stok_minimal?.message}
-          disabled={isViewMode}
-          required
-        />
-      </div>
-
-      {/* Row 4 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Input
-          label="Harga Beli"
-          type="number"
-          {...register('harga_beli', { 
-            required: 'Harga beli wajib diisi',
-            min: { value: 0, message: 'Harga minimal 0' }
-          })}
-          error={errors.harga_beli?.message}
-          disabled={isViewMode}
-          required
-        />
-        <Input
-          label="Harga Jual"
-          type="number"
-          {...register('harga_jual', { 
-            required: 'Harga jual wajib diisi',
-            min: { value: 0, message: 'Harga minimal 0' }
-          })}
-          error={errors.harga_jual?.message}
           disabled={isViewMode}
           required
         />

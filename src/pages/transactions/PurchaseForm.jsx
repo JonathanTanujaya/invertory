@@ -15,6 +15,7 @@ export default function PurchaseForm() {
   } = useForm({
     defaultValues: {
       no_faktur: '',
+      tanggal: new Date().toISOString().split('T')[0],
       kode_supplier: '',
       catatan: '',
     },
@@ -81,6 +82,10 @@ export default function PurchaseForm() {
     });
   };
 
+  const handleDeleteItem = (index) => {
+    setItems((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const onSubmit = (data) => {
     if (!data.no_faktur) {
       toast.error('No faktur wajib');
@@ -103,13 +108,13 @@ export default function PurchaseForm() {
   };
 
   return (
-    <div className="space-y-6">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <div className="flex flex-col h-[calc(100vh-120px)]">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col h-full gap-4">
         {/* Header Info Stok Masuk (Compact) */}
-        <Card>
-          {/* Baris 1: No Faktur, Supplier, Kode/Nama Barang, Qty */}
-          <div className="relative z-30 flex items-start gap-4 flex-nowrap overflow-visible pb-1">
-            <div className="w-48 flex-shrink-0">
+        <Card className="px-1.5 py-0">
+          {/* Baris 1: No Faktur, Tanggal, Supplier, Kode/Nama Barang, Qty */}
+          <div className="relative z-30 flex items-start gap-3 flex-nowrap overflow-visible pb-0">
+            <div className="w-36 flex-shrink-0">
               <Input
                 label="No Faktur"
                 {...register('no_faktur', { required: 'No faktur wajib' })}
@@ -118,7 +123,14 @@ export default function PurchaseForm() {
                 required
               />
             </div>
-            <div className={`w-64 flex-shrink-0 relative ${showSupplierSuggestions ? 'z-[60]' : 'z-10'}`}>
+            <div className="w-36 flex-shrink-0">
+              <Input
+                label="Tanggal"
+                type="date"
+                {...register('tanggal')}
+              />
+            </div>
+            <div className={`w-52 flex-shrink-0 relative ${showSupplierSuggestions ? 'z-[60]' : 'z-10'}`}>
               {/* Hidden field to store selected supplier code */}
               <input
                 type="hidden"
@@ -184,7 +196,7 @@ export default function PurchaseForm() {
                 </div>
               )}
             </div>
-            <div className={`flex-1 min-w-[320px] relative ${showSuggestions ? 'z-20' : ''}`}>
+            <div className={`flex-1 min-w-[240px] relative ${showSuggestions ? 'z-20' : ''}`}>
               <Input
                 label="Kode Barang / Nama Barang"
                 placeholder="Ketik kode atau nama barang..."
@@ -263,57 +275,108 @@ export default function PurchaseForm() {
           </div>
         </Card>
 
-        {/* Items */}
-        <Card>
-          {items.length === 0 ? (
-            <div className="py-12 text-center text-gray-500">
-              Belum ada item. Ketik pada pencarian di atas untuk menambahkan.
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
+        <Card padding={false} className="flex-1 overflow-hidden">
+          <div className="h-full overflow-x-auto">
+            <div className="h-full overflow-y-auto">
               <table className="min-w-full text-sm">
-                <thead className="bg-gray-50 text-gray-700">
-                  <tr>
-                    <th className="p-0 text-center w-12">No</th>
-                    <th className="p-0 text-left w-40">Kode Barang</th>
+                <thead className="bg-gray-50 text-gray-700 sticky top-0 z-10 shadow-sm">
+                  <tr className="h-10">
+                    <th className="p-0 text-center w-10">No</th>
+                    <th className="p-0 text-left w-32">Kode Barang</th>
                     <th className="p-0 text-left">Nama Barang</th>
-                    <th className="p-0 text-center w-28">Qty</th>
+                    <th className="p-0 text-center w-24">Qty</th>
+                    <th className="p-0 text-center w-16">Aksi</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {items.map((item, index) => (
-                    <tr key={item.kode_barang} className="hover:bg-gray-50">
-                      <td className="p-0 text-center align-middle">{index + 1}</td>
-                      <td className="p-0 align-middle font-medium text-gray-900 whitespace-nowrap">{item.kode_barang}</td>
-                      <td className="p-0 align-middle text-gray-900">{item.nama_barang}</td>
-                      <td className="p-0 text-center align-middle">
-                        <input
-                          type="number"
-                          min="1"
-                          value={item.jumlah}
-                          onChange={(e) => handleUpdateItem(index, 'jumlah', e.target.value)}
-                          className="input w-20 text-center px-2 py-1 border rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed border-gray-300"
-                        />
+                <tbody className="divide-y divide-gray-200/60">
+                  {items.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="py-16 text-center">
+                        <div className="text-gray-500 text-base">
+                          Belum ada item. Ketik pada pencarian di atas untuk menambahkan.
+                        </div>
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    items.map((item, index) => (
+                      <tr key={item.kode_barang} className="h-10 hover:bg-gray-50 transition-colors">
+                        <td className="p-0 text-center align-middle text-gray-600">{index + 1}</td>
+                        <td className="p-0 align-middle font-medium text-gray-900 whitespace-nowrap">{item.kode_barang}</td>
+                        <td className="p-0 align-middle text-gray-900 truncate max-w-[180px]">{item.nama_barang}</td>
+                        <td className="p-0 text-center align-middle">
+                          <input
+                            type="number"
+                            min="1"
+                            value={item.jumlah}
+                            onChange={(e) => handleUpdateItem(index, 'jumlah', e.target.value)}
+                            className="w-14 h-8 text-center border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
+                          />
+                        </td>
+                        <td className="p-0 text-center align-middle">
+                          <div className="flex items-center justify-center gap-2">
+                            <button
+                              type="button"
+                              aria-label="Edit Qty"
+                              onClick={() => {
+                                const el = document.getElementById(`qty-${index}`);
+                                if (el) el.focus();
+                              }}
+                              className="text-gray-400 hover:text-primary-600 transition-colors"
+                            >
+                              {/* Pencil icon */}
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                                <path d="M15.586 2.586a2 2 0 0 0-2.828 0L4.414 10.93a2 2 0 0 0-.586 1.414V15a1 1 0 0 0 1 1h2.657a2 2 0 0 0 1.414-.586l8.344-8.344a2 2 0 0 0 0-2.828l-1.657-1.656Zm-3.172.828 3.172 3.172-1.172 1.172-3.172-3.172 1.172-1.172ZM11 7.414l-5 5V13h.586l5-5L11 7.414Z" />
+                              </svg>
+                            </button>
+                            <button
+                              type="button"
+                              aria-label="Hapus Row"
+                              onClick={() => handleDeleteItem(index)}
+                              className="text-gray-400 hover:text-red-600 transition-colors"
+                            >
+                              {/* Trash icon */}
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                                <path d="M8.5 3a1 1 0 0 0-.94.658L7.11 5H4a1 1 0 1 0 0 2h.278l.805 8.053A2 2 0 0 0 7.07 17h5.86a2 2 0 0 0 1.988-1.947L15.722 7H16a1 1 0 1 0 0-2h-3.11l-.45-1.342A1 1 0 0 0 11.5 3h-3ZM9 9a1 1 0 0 1 2 0v5a1 1 0 1 1-2 0V9Z" />
+                              </svg>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
-          )}
-        </Card>
-
-        {/* Actions */}
-        <Card>
-          <div className="flex items-center justify-end gap-3">
-            <Button type="button" variant="outline">
-              Batal
-            </Button>
-            <Button type="submit" loading={isSubmitting}>
-              Simpan Pembelian
-            </Button>
           </div>
         </Card>
+
+        {/* Actions - Always at bottom */}
+        <div className="px-5 py-2.5 bg-white border border-gray-200 rounded-lg shadow-sm flex-shrink-0">
+          <div className="flex items-center justify-between gap-4 h-12">
+            {items.length > 0 ? (
+              <div className="flex items-center gap-6 text-sm text-gray-800 font-medium">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-semibold">Total Item:</span>
+                  <span className="font-bold text-primary-700">{items.length}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-semibold">Total Qty:</span>
+                  <span className="font-bold text-primary-700">{items.reduce((sum, it) => sum + (parseInt(it.jumlah, 10) || 0), 0)}</span>
+                </div>
+              </div>
+            ) : (
+              <div className="text-sm text-gray-400 font-medium">Belum ada item</div>
+            )}
+            <div className="flex items-center gap-2 ml-auto">
+              <Button type="button" variant="outline" className="px-4 py-1.5 text-sm h-9">
+                Batal
+              </Button>
+              <Button type="submit" loading={isSubmitting} className="px-4 py-1.5 text-sm h-9">
+                Simpan Pembelian
+              </Button>
+            </div>
+          </div>
+        </div>
       </form>
 
       {/* Inline suggestions replaces modal selector */}

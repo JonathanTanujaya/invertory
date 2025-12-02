@@ -44,6 +44,12 @@ export default function BarangList() {
       render: (value) => <Badge variant="default">{value}</Badge>,
     },
     {
+      key: 'satuan',
+      label: 'Satuan',
+      align: 'center',
+      sortable: true,
+    },
+    {
       key: 'stok',
       label: 'Stok',
       align: 'center',
@@ -52,22 +58,10 @@ export default function BarangList() {
         const isLow = value <= row.stok_minimal;
         return (
           <Badge variant={isLow ? 'error' : 'success'}>
-            {formatNumber(value)} {row.satuan}
+            {formatNumber(value)}
           </Badge>
         );
       },
-    },
-    {
-      key: 'harga_beli',
-      label: 'Harga Beli',
-      align: 'right',
-      render: (value) => formatCurrency(value),
-    },
-    {
-      key: 'harga_jual',
-      label: 'Harga Jual',
-      align: 'right',
-      render: (value) => formatCurrency(value),
     },
     {
       key: 'actions',
