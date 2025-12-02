@@ -31,7 +31,7 @@ export default function SupplierList() {
     { key: 'nama_supplier', label: 'Nama', sortable: true },
     { key: 'alamat', label: 'Alamat' },
     { key: 'telepon', label: 'No Telp' },
-    { key: 'email', label: 'Email' },
+    { key: 'kontak', label: 'Kontak' },
     {
       key: 'actions',
       label: 'Aksi',
@@ -88,7 +88,7 @@ export default function SupplierList() {
       item.nama_supplier?.toLowerCase().includes(query) ||
       item.alamat?.toLowerCase().includes(query) ||
       item.telepon?.toLowerCase().includes(query) ||
-      item.email?.toLowerCase().includes(query)
+      item.kontak?.toLowerCase().includes(query)
     );
   });
 

@@ -1,48 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Trash2, Save, X } from 'lucide-react';
+import { Trash2, Save, X, Search, Package } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import Button from '@components/ui/Button';
-import Input from '@components/ui/Input';
-import Select from '@components/ui/Select';
-import Card from '@components/ui/Card';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import Card from '@/components/ui/Card';
+import { formatCurrency } from '@/utils/helpers';
+import { toast } from 'react-toastify';
 
-// Dummy data services
-const fetchPembelianInvoices = () => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve([
-        { 
-          no_faktur: 'PB20240115001', 
-          kode_supplier: 'SUP001',
-          tanggal: '2024-01-15',
-          total_harga: 5000000
-        },
-        { 
-          no_faktur: 'PB20240116002', 
-          kode_supplier: 'SUP002',
-          tanggal: '2024-01-16',
-          total_harga: 3500000
-        },
-      ]);
-    }, 300);
-  });
-};
-
-const fetchPembelianDetail = (no_faktur) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve([
-        { kode_barang: 'BRG001', nama_barang: 'Bearing 6205', jumlah: 50 },
-        { kode_barang: 'BRG002', nama_barang: 'Seal Kit AHM', jumlah: 30 },
-      ]);
-    }, 300);
-  });
-};
+// Import dummy data
+import stokMasukData from '@/data/dummy/t_stok_masuk.json';
+import supplierData from '@/data/dummy/m_supplier.json';
 
 export default function ReturPembelianForm() {
   const navigate = useNavigate();
-  const { register, handleSubmit, formState: { errors }, reset, watch } = useForm({
+  const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm({
     defaultValues: {
       no_retur: '',
       no_faktur_pembelian: '',
@@ -51,43 +23,51 @@ export default function ReturPembelianForm() {
     }
   });
 
-  const [invoices, setInvoices] = useState([]);
-  const [availableItems, setAvailableItems] = useState([]);
+  const [searchFaktur, setSearchFaktur] = useState('');
+  const [showFakturDropdown, setShowFakturDropdown] = useState(false);
+  const [selectedFaktur, setSelectedFaktur] = useState(null);
   const [returItems, setReturItems] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [loadingItems, setLoadingItems] = useState(false);
 
-  const selectedInvoice = watch('no_faktur_pembelian');
+  // Buat mapping supplier
+  const supplierMap = useMemo(() => {
+    return supplierData.reduce((acc, sup) => {
+      acc[sup.kode_supplier] = sup.nama_supplier;
+      return acc;
+    }, {});
+  }, []);
 
+  // Generate nomor retur
   useEffect(() => {
-    fetchPembelianInvoices().then(setInvoices);
-    
-    // Generate retur number
     const today = new Date();
-    const returNo = `RP${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`;
-    reset({ 
-      no_retur: returNo,
-      tanggal_retur: today.toISOString().split('T')[0]
-    });
-  }, [reset]);
+    const returNo = `RP-${today.getFullYear()}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`;
+    setValue('no_retur', returNo);
+  }, [setValue]);
 
-  useEffect(() => {
-    if (selectedInvoice) {
-      setLoadingItems(true);
-      fetchPembelianDetail(selectedInvoice).then(items => {
-        setAvailableItems(items);
-        setLoadingItems(false);
-      });
-    } else {
-      setAvailableItems([]);
-      setReturItems([]);
-    }
-  }, [selectedInvoice]);
+  // Filter faktur berdasarkan pencarian
+  const filteredFaktur = useMemo(() => {
+    if (!searchFaktur) return stokMasukData.slice(0, 10);
+    const query = searchFaktur.toLowerCase();
+    return stokMasukData.filter(faktur => 
+      faktur.no_faktur.toLowerCase().includes(query) ||
+      supplierMap[faktur.kode_supplier]?.toLowerCase().includes(query)
+    ).slice(0, 10);
+  }, [searchFaktur, supplierMap]);
 
+  // Handle pilih faktur
+  const handleSelectFaktur = (faktur) => {
+    setSelectedFaktur(faktur);
+    setValue('no_faktur_pembelian', faktur.no_faktur);
+    setSearchFaktur(faktur.no_faktur);
+    setShowFakturDropdown(false);
+    setReturItems([]); // Reset retur items
+  };
+
+  // Handle tambah item ke retur
   const handleAddItem = (item) => {
     const exists = returItems.find(r => r.kode_barang === item.kode_barang);
     if (exists) {
-      alert('Barang sudah ditambahkan');
+      toast.warning('Barang sudah ditambahkan ke daftar retur');
       return;
     }
 
@@ -95,35 +75,51 @@ export default function ReturPembelianForm() {
       kode_barang: item.kode_barang,
       nama_barang: item.nama_barang,
       jumlah_pembelian: item.jumlah,
-      jumlah_retur: 1
+      harga: item.harga,
+      jumlah_retur: 1,
+      subtotal: item.harga
     }]);
+    toast.success('Barang ditambahkan ke daftar retur');
   };
 
+  // Handle hapus item dari retur
   const handleRemoveItem = (kode_barang) => {
     setReturItems(returItems.filter(item => item.kode_barang !== kode_barang));
   };
 
+  // Handle ubah jumlah retur
   const handleItemChange = (kode_barang, value) => {
     setReturItems(returItems.map(item => {
       if (item.kode_barang === kode_barang) {
-        return { ...item, jumlah_retur: parseInt(value) || 0 };
+        const jumlah = parseInt(value) || 0;
+        return { 
+          ...item, 
+          jumlah_retur: jumlah,
+          subtotal: jumlah * item.harga
+        };
       }
       return item;
     }));
   };
 
+  // Hitung total retur
+  const totalRetur = useMemo(() => {
+    return returItems.reduce((sum, item) => sum + item.subtotal, 0);
+  }, [returItems]);
+
+  // Submit form
   const onSubmit = async (data) => {
     if (returItems.length === 0) {
-      alert('Tambahkan minimal 1 barang untuk diretur');
+      toast.error('Tambahkan minimal 1 barang untuk diretur');
       return;
     }
 
-    // Validate quantities
+    // Validasi jumlah retur
     const invalidItems = returItems.filter(item => 
       item.jumlah_retur <= 0 || item.jumlah_retur > item.jumlah_pembelian
     );
     if (invalidItems.length > 0) {
-      alert('Jumlah retur tidak valid untuk beberapa barang');
+      toast.error('Jumlah retur tidak valid untuk beberapa barang');
       return;
     }
 
@@ -131,23 +127,26 @@ export default function ReturPembelianForm() {
 
     const payload = {
       ...data,
+      kode_supplier: selectedFaktur?.kode_supplier,
       detail_items: returItems.map(item => ({
         kode_barang: item.kode_barang,
-        jumlah: item.jumlah_retur
-      }))
+        nama_barang: item.nama_barang,
+        jumlah: item.jumlah_retur,
+        harga: item.harga,
+        subtotal: item.subtotal
+      })),
+      total: totalRetur
     };
 
     try {
-      // TODO: Replace with actual API call
       console.log('Submitting retur pembelian:', payload);
-      
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      alert('Retur pembelian berhasil disimpan!');
-      navigate('/transactions/retur-pembelian/list');
+      toast.success('Retur pembelian berhasil disimpan!');
+      navigate('/transactions/retur-pembelian');
     } catch (error) {
       console.error('Error saving retur pembelian:', error);
-      alert('Gagal menyimpan retur pembelian');
+      toast.error('Gagal menyimpan retur pembelian');
     } finally {
       setLoading(false);
     }
@@ -155,23 +154,12 @@ export default function ReturPembelianForm() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-end">
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/transactions/retur-pembelian/list')}
-        >
-          <X className="w-4 h-4 mr-2" />
-          Batal
-        </Button>
-      </div>
-
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Header Information */}
+        {/* Informasi Retur */}
         <Card>
-          <div className="p-6 space-y-4">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Informasi Retur</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="px-4 py-3 space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* No Retur */}
               <Input
                 label="No. Retur"
                 {...register('no_retur', { required: 'No. retur wajib diisi' })}
@@ -180,165 +168,253 @@ export default function ReturPembelianForm() {
                 className="bg-gray-50"
               />
 
-              <Select
-                label="No. Faktur Pembelian"
-                {...register('no_faktur_pembelian', { required: 'Faktur pembelian wajib dipilih' })}
-                error={errors.no_faktur_pembelian?.message}
-              >
-                <option value="">-- Pilih Faktur Pembelian --</option>
-                {invoices.map(invoice => (
-                  <option key={invoice.no_faktur} value={invoice.no_faktur}>
-                    {invoice.no_faktur} - {new Date(invoice.tanggal).toLocaleDateString('id-ID')}
-                  </option>
-                ))}
-              </Select>
-
+              {/* Tanggal Retur */}
               <Input
                 label="Tanggal Retur"
                 type="date"
                 {...register('tanggal_retur', { required: 'Tanggal wajib diisi' })}
                 error={errors.tanggal_retur?.message}
               />
+
+              {/* Pilih Faktur Pembelian */}
+              <div className="relative">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  No. Faktur Pembelian <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <Input
+                    placeholder="Cari faktur..."
+                    value={searchFaktur}
+                    onChange={(e) => {
+                      setSearchFaktur(e.target.value);
+                      setShowFakturDropdown(true);
+                    }}
+                    onFocus={() => setShowFakturDropdown(true)}
+                    startIcon={<Search className="w-4 h-4 text-gray-400" />}
+                  />
+                  <input type="hidden" {...register('no_faktur_pembelian', { required: 'Faktur pembelian wajib dipilih' })} />
+                </div>
+                {errors.no_faktur_pembelian && (
+                  <p className="mt-1 text-sm text-red-500">{errors.no_faktur_pembelian.message}</p>
+                )}
+
+                {/* Dropdown Faktur */}
+                {showFakturDropdown && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                    {filteredFaktur.length === 0 ? (
+                      <div className="p-4 text-center text-gray-500">
+                        Tidak ada faktur ditemukan
+                      </div>
+                    ) : (
+                      filteredFaktur.map(faktur => (
+                        <div
+                          key={faktur.no_faktur}
+                          className="p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                          onClick={() => handleSelectFaktur(faktur)}
+                        >
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <div className="font-medium text-primary-600">{faktur.no_faktur}</div>
+                              <div className="text-sm text-gray-600">{supplierMap[faktur.kode_supplier]}</div>
+                              <div className="text-xs text-gray-400">
+                                {new Date(faktur.tanggal).toLocaleDateString('id-ID', {
+                                  day: 'numeric',
+                                  month: 'long',
+                                year: 'numeric'
+                              })}
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-sm font-medium text-gray-900">{formatCurrency(faktur.total)}</div>
+                            <div className="text-xs text-gray-500">{faktur.items.length} item</div>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Alasan Retur <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                {...register('alasan', { required: 'Alasan wajib diisi' })}
-                rows={3}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
-                  errors.alasan ? 'border-red-500' : 'border-gray-300'
-                }`}
-                placeholder="Jelaskan alasan retur barang..."
-              />
-              {errors.alasan && (
-                <p className="mt-1 text-sm text-red-500">{errors.alasan.message}</p>
-              )}
-            </div>
+            {/* Info Supplier dari Faktur Terpilih */}
+            {selectedFaktur && (
+              <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-500">Supplier:</span>
+                    <p className="font-medium text-gray-900">{supplierMap[selectedFaktur.kode_supplier]}</p>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Tanggal Pembelian:</span>
+                    <p className="font-medium text-gray-900">
+                      {new Date(selectedFaktur.tanggal).toLocaleDateString('id-ID')}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Total Pembelian:</span>
+                    <p className="font-medium text-gray-900">{formatCurrency(selectedFaktur.total)}</p>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Jumlah Item:</span>
+                    <p className="font-medium text-gray-900">{selectedFaktur.items.length} item</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Alasan Retur */}
+            <Input
+              label="Alasan Retur"
+              {...register('alasan', { required: 'Alasan wajib diisi' })}
+              error={errors.alasan?.message}
+              placeholder="Jelaskan alasan retur barang..."
+            />
           </div>
         </Card>
 
-        {/* Available Items from Invoice */}
-        {selectedInvoice && (
+        {/* Barang dari Faktur */}
+        {selectedFaktur && (
           <Card>
             <div className="p-6 space-y-4">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Barang yang Dibeli</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                <Package className="w-5 h-5 inline-block mr-2" />
+                Barang dalam Faktur {selectedFaktur.no_faktur}
+              </h2>
               
-              {loadingItems ? (
-                <div className="text-center py-8 text-gray-500">
-                  Memuat data barang...
-                </div>
-              ) : availableItems.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  Tidak ada data barang
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {availableItems.map(item => {
-                    const isAdded = returItems.find(r => r.kode_barang === item.kode_barang);
-                    return (
-                      <div
-                        key={item.kode_barang}
-                        className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
-                      >
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {selectedFaktur.items.map(item => {
+                  const isAdded = returItems.find(r => r.kode_barang === item.kode_barang);
+                  return (
+                    <div
+                      key={item.kode_barang}
+                      className={`p-4 border rounded-lg ${isAdded ? 'bg-green-50 border-green-200' : 'bg-white border-gray-200 hover:border-primary-300'}`}
+                    >
+                      <div className="flex justify-between items-start mb-2">
                         <div>
-                          <div className="font-medium text-gray-900">
-                            {item.kode_barang} - {item.nama_barang}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            Jumlah dibeli: {item.jumlah}
-                          </div>
+                          <div className="font-mono text-xs text-gray-500">{item.kode_barang}</div>
+                          <div className="font-medium text-gray-900">{item.nama_barang}</div>
                         </div>
-                        <Button
-                          type="button"
-                          variant={isAdded ? 'ghost' : 'primary'}
-                          size="sm"
-                          onClick={() => handleAddItem(item)}
-                          disabled={isAdded}
-                        >
-                          {isAdded ? 'Sudah Ditambahkan' : 'Tambahkan'}
-                        </Button>
                       </div>
-                    );
-                  })}
-                </div>
-              )}
+                      <div className="text-sm text-gray-600 mb-3">
+                        <div>Qty: <span className="font-medium">{item.jumlah}</span></div>
+                        <div>Harga: <span className="font-medium">{formatCurrency(item.harga)}</span></div>
+                        <div>Subtotal: <span className="font-medium">{formatCurrency(item.subtotal)}</span></div>
+                      </div>
+                      <Button
+                        type="button"
+                        variant={isAdded ? 'outline' : 'primary'}
+                        size="sm"
+                        className="w-full"
+                        onClick={() => !isAdded && handleAddItem(item)}
+                        disabled={isAdded}
+                      >
+                        {isAdded ? '✓ Sudah Ditambahkan' : 'Tambah ke Retur'}
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </Card>
         )}
 
-        {/* Retur Items */}
+        {/* Daftar Barang Retur */}
         <Card>
           <div className="p-6 space-y-4">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Barang yang Diretur</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Daftar Barang Retur</h2>
 
             {returItems.length === 0 ? (
               <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                <Package className="w-12 h-12 text-gray-400 mx-auto mb-3" />
                 <p className="text-gray-600">Belum ada barang untuk diretur</p>
                 <p className="text-sm text-gray-500 mt-1">
-                  Pilih faktur pembelian terlebih dahulu, lalu pilih barang yang akan diretur
+                  Pilih faktur pembelian dan tambahkan barang yang akan diretur
                 </p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50 border-b border-gray-200">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">
-                        Kode Barang
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">
-                        Nama Barang
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">
-                        Jumlah Dibeli
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">
-                        Jumlah Retur
-                      </th>
-                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase">
-                        Aksi
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {returItems.map(item => (
-                      <tr key={item.kode_barang}>
-                        <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                          {item.kode_barang}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-700">
-                          {item.nama_barang}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-700">
-                          {item.jumlah_pembelian}
-                        </td>
-                        <td className="px-4 py-3">
-                          <input
-                            type="number"
-                            min="1"
-                            max={item.jumlah_pembelian}
-                            value={item.jumlah_retur}
-                            onChange={(e) => handleItemChange(item.kode_barang, e.target.value)}
-                            className="w-24 px-2 py-1 border border-gray-300 rounded text-sm"
-                          />
-                        </td>
-                        <td className="px-4 py-3 text-center">
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveItem(item.kode_barang)}
-                            className="text-red-600 hover:text-red-800"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </td>
+              <>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50 border-b border-gray-200">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">
+                          Kode
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">
+                          Nama Barang
+                        </th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase">
+                          Qty Beli
+                        </th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase">
+                          Qty Retur
+                        </th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-700 uppercase">
+                          Harga
+                        </th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-700 uppercase">
+                          Subtotal
+                        </th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase">
+                          Aksi
+                        </th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {returItems.map(item => (
+                        <tr key={item.kode_barang}>
+                          <td className="px-4 py-3 text-sm font-mono text-primary-600">
+                            {item.kode_barang}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-900">
+                            {item.nama_barang}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-700 text-center">
+                            {item.jumlah_pembelian}
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            <input
+                              type="number"
+                              min="1"
+                              max={item.jumlah_pembelian}
+                              value={item.jumlah_retur}
+                              onChange={(e) => handleItemChange(item.kode_barang, e.target.value)}
+                              className="w-20 px-2 py-1 border border-gray-300 rounded text-sm text-center"
+                            />
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-700 text-right">
+                            {formatCurrency(item.harga)}
+                          </td>
+                          <td className="px-4 py-3 text-sm font-medium text-gray-900 text-right">
+                            {formatCurrency(item.subtotal)}
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveItem(item.kode_barang)}
+                              className="text-red-600 hover:text-red-800 p-1"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot className="bg-gray-50">
+                      <tr>
+                        <td colSpan={5} className="px-4 py-3 text-right font-semibold text-gray-900">
+                          Total Retur:
+                        </td>
+                        <td className="px-4 py-3 text-right font-bold text-lg text-primary-600">
+                          {formatCurrency(totalRetur)}
+                        </td>
+                        <td></td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </>
             )}
           </div>
         </Card>
@@ -347,21 +423,28 @@ export default function ReturPembelianForm() {
         <div className="flex justify-end space-x-3">
           <Button
             type="button"
-            variant="ghost"
-            onClick={() => navigate('/transactions/retur-pembelian/list')}
+            variant="outline"
+            onClick={() => navigate('/transactions/retur-pembelian')}
           >
             Batal
           </Button>
           <Button
             type="submit"
-            variant="primary"
-            disabled={loading}
+            disabled={loading || returItems.length === 0}
           >
             <Save className="w-4 h-4 mr-2" />
             {loading ? 'Menyimpan...' : 'Simpan Retur'}
           </Button>
         </div>
       </form>
+
+      {/* Click outside to close dropdown */}
+      {showFakturDropdown && (
+        <div 
+          className="fixed inset-0 z-0" 
+          onClick={() => setShowFakturDropdown(false)}
+        />
+      )}
     </div>
   );
 }

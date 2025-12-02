@@ -27,9 +27,9 @@ export default function CustomerList() {
   const columns = [
     { key: 'kode', label: 'Kode', sortable: true },
     { key: 'nama', label: 'Nama Customer', sortable: true },
+    { key: 'area', label: 'Area', sortable: true },
     { key: 'telepon', label: 'No Telp' },
     { key: 'kontak_person', label: 'Kontak Person' },
-    { key: 'area', label: 'Area', sortable: true },
     {
       key: 'actions',
       label: 'Aksi',

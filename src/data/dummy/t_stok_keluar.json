@@ -1,0 +1,528 @@
+[
+  {
+    "no_faktur": "SL-2024-0001",
+    "tanggal": "2024-01-21",
+    "kode_customer": "CST001",
+    "catatan": "Penjualan reguler",
+    "items": [
+      { "kode_barang": "BRG001", "nama_barang": "Bearing 6205", "jumlah": 10, "harga": 35000, "subtotal": 350000 },
+      { "kode_barang": "BRG006", "nama_barang": "Busi NGK Iridium", "jumlah": 5, "harga": 120000, "subtotal": 600000 }
+    ],
+    "total": 950000,
+    "status": "completed",
+    "created_by": "admin",
+    "created_at": "2024-01-21T09:15:00Z"
+  },
+  {
+    "no_faktur": "SL-2024-0002",
+    "tanggal": "2024-01-22",
+    "kode_customer": "CST003",
+    "catatan": "Penjualan sparepart",
+    "items": [
+      { "kode_barang": "BRG011", "nama_barang": "Oli Mesin Yamalube", "jumlah": 12, "harga": 55000, "subtotal": 660000 },
+      { "kode_barang": "BRG012", "nama_barang": "Oli Mesin MPX", "jumlah": 8, "harga": 60000, "subtotal": 480000 },
+      { "kode_barang": "BRG013", "nama_barang": "Oli Gardan", "jumlah": 6, "harga": 35000, "subtotal": 210000 }
+    ],
+    "total": 1350000,
+    "status": "completed",
+    "created_by": "admin",
+    "created_at": "2024-01-22T10:30:00Z"
+  },
+  {
+    "no_faktur": "SL-2024-0003",
+    "tanggal": "2024-01-23",
+    "kode_customer": "CST005",
+    "catatan": "Pembelian bengkel",
+    "items": [
+      { "kode_barang": "BRG004", "nama_barang": "Kampas Rem Depan", "jumlah": 8, "harga": 50000, "subtotal": 400000 },
+      { "kode_barang": "BRG005", "nama_barang": "Kampas Rem Belakang", "jumlah": 6, "harga": 45000, "subtotal": 270000 }
+    ],
+    "total": 670000,
+    "status": "completed",
+    "created_by": "admin",
+    "created_at": "2024-01-23T08:45:00Z"
+  },
+  {
+    "no_faktur": "SL-2024-0004",
+    "tanggal": "2024-01-24",
+    "kode_customer": "CST002",
+    "catatan": "Order mingguan",
+    "items": [
+      { "kode_barang": "BRG008", "nama_barang": "V-Belt Vario 150", "jumlah": 4, "harga": 135000, "subtotal": 540000 },
+      { "kode_barang": "BRG009", "nama_barang": "V-Belt Beat", "jumlah": 5, "harga": 120000, "subtotal": 600000 },
+      { "kode_barang": "BRG010", "nama_barang": "Roller CVT Set", "jumlah": 3, "harga": 65000, "subtotal": 195000 },
+      { "kode_barang": "BRG007", "nama_barang": "Busi Denso", "jumlah": 10, "harga": 65000, "subtotal": 650000 }
+    ],
+    "total": 1985000,
+    "status": "completed",
+    "created_by": "admin",
+    "created_at": "2024-01-24T11:00:00Z"
+  },
+  {
+    "no_faktur": "SL-2024-0005",
+    "tanggal": "2024-01-25",
+    "kode_customer": "CST007",
+    "catatan": "Penjualan grosir",
+    "items": [
+      { "kode_barang": "BRG001", "nama_barang": "Bearing 6205", "jumlah": 20, "harga": 35000, "subtotal": 700000 },
+      { "kode_barang": "BRG003", "nama_barang": "Oil Filter Yamaha", "jumlah": 15, "harga": 28000, "subtotal": 420000 },
+      { "kode_barang": "BRG006", "nama_barang": "Busi NGK Iridium", "jumlah": 15, "harga": 120000, "subtotal": 1800000 }
+    ],
+    "total": 2920000,
+    "status": "completed",
+    "created_by": "admin",
+    "created_at": "2024-01-25T09:30:00Z"
+  },
+  {
+    "no_faktur": "SL-2024-0006",
+    "tanggal": "2024-01-27",
+    "kode_customer": "CST010",
+    "catatan": "Order rutin",
+    "items": [
+      { "kode_barang": "BRG016", "nama_barang": "Lampu Depan LED H4", "jumlah": 6, "harga": 95000, "subtotal": 570000 },
+      { "kode_barang": "BRG017", "nama_barang": "Lampu Sen LED", "jumlah": 12, "harga": 40000, "subtotal": 480000 }
+    ],
+    "total": 1050000,
+    "status": "completed",
+    "created_by": "admin",
+    "created_at": "2024-01-27T10:15:00Z"
+  },
+  {
+    "no_faktur": "SL-2024-0007",
+    "tanggal": "2024-01-29",
+    "kode_customer": "CST004",
+    "catatan": "Pembelian campuran",
+    "items": [
+      { "kode_barang": "BRG018", "nama_barang": "Aki Motor MF 5Ah", "jumlah": 4, "harga": 220000, "subtotal": 880000 },
+      { "kode_barang": "BRG019", "nama_barang": "Aki Motor MF 7Ah", "jumlah": 3, "harga": 265000, "subtotal": 795000 },
+      { "kode_barang": "BRG011", "nama_barang": "Oli Mesin Yamalube", "jumlah": 10, "harga": 55000, "subtotal": 550000 }
+    ],
+    "total": 2225000,
+    "status": "completed",
+    "created_by": "admin",
+    "created_at": "2024-01-29T08:00:00Z"
+  },
+  {
+    "no_faktur": "SL-2024-0008",
+    "tanggal": "2024-01-30",
+    "kode_customer": "CST008",
+    "catatan": "Penjualan akhir bulan",
+    "items": [
+      { "kode_barang": "BRG020", "nama_barang": "Ban Tubeless 80/90", "jumlah": 4, "harga": 175000, "subtotal": 700000 },
+      { "kode_barang": "BRG021", "nama_barang": "Ban Tubeless 90/90", "jumlah": 3, "harga": 195000, "subtotal": 585000 },
+      { "kode_barang": "BRG022", "nama_barang": "Ban Dalam 250-17", "jumlah": 8, "harga": 45000, "subtotal": 360000 }
+    ],
+    "total": 1645000,
+    "status": "completed",
+    "created_by": "admin",
+    "created_at": "2024-01-30T14:30:00Z"
+  },
+  {
+    "no_faktur": "SL-2024-0009",
+    "tanggal": "2024-02-01",
+    "kode_customer": "CST012",
+    "catatan": "Order awal bulan",
+    "items": [
+      { "kode_barang": "BRG014", "nama_barang": "Rantai Motor 428H", "jumlah": 5, "harga": 110000, "subtotal": 550000 },
+      { "kode_barang": "BRG015", "nama_barang": "Gear Set Supra X", "jumlah": 3, "harga": 250000, "subtotal": 750000 }
+    ],
+    "total": 1300000,
+    "status": "completed",
+    "created_by": "admin",
+    "created_at": "2024-02-01T09:00:00Z"
+  },
+  {
+    "no_faktur": "SL-2024-0010",
+    "tanggal": "2024-02-03",
+    "kode_customer": "CST006",
+    "catatan": "Pembelian bengkel motor",
+    "items": [
+      { "kode_barang": "BRG023", "nama_barang": "Kabel Gas", "jumlah": 8, "harga": 30000, "subtotal": 240000 },
+      { "kode_barang": "BRG024", "nama_barang": "Kabel Kopling", "jumlah": 6, "harga": 35000, "subtotal": 210000 },
+      { "kode_barang": "BRG025", "nama_barang": "Kabel Speedometer", "jumlah": 5, "harga": 40000, "subtotal": 200000 },
+      { "kode_barang": "BRG004", "nama_barang": "Kampas Rem Depan", "jumlah": 10, "harga": 50000, "subtotal": 500000 }
+    ],
+    "total": 1150000,
+    "status": "completed",
+    "created_by": "admin",
+    "created_at": "2024-02-03T10:45:00Z"
+  },
+  {
+    "no_faktur": "SL-2024-0011",
+    "tanggal": "2024-02-05",
+    "kode_customer": "CST009",
+    "catatan": "Order sparepart",
+    "items": [
+      { "kode_barang": "BRG002", "nama_barang": "Seal Kit Honda", "jumlah": 3, "harga": 195000, "subtotal": 585000 },
+      { "kode_barang": "BRG001", "nama_barang": "Bearing 6205", "jumlah": 15, "harga": 35000, "subtotal": 525000 }
+    ],
+    "total": 1110000,
+    "status": "completed",
+    "created_by": "admin",
+    "created_at": "2024-02-05T08:30:00Z"
+  },
+  {
+    "no_faktur": "SL-2024-0012",
+    "tanggal": "2024-02-07",
+    "kode_customer": "CST011",
+    "catatan": "Penjualan grosir",
+    "items": [
+      { "kode_barang": "BRG006", "nama_barang": "Busi NGK Iridium", "jumlah": 20, "harga": 120000, "subtotal": 2400000 },
+      { "kode_barang": "BRG007", "nama_barang": "Busi Denso", "jumlah": 25, "harga": 65000, "subtotal": 1625000 },
+      { "kode_barang": "BRG011", "nama_barang": "Oli Mesin Yamalube", "jumlah": 15, "harga": 55000, "subtotal": 825000 },
+      { "kode_barang": "BRG012", "nama_barang": "Oli Mesin MPX", "jumlah": 12, "harga": 60000, "subtotal": 720000 }
+    ],
+    "total": 5570000,
+    "status": "completed",
+    "created_by": "admin",
+    "created_at": "2024-02-07T11:15:00Z"
+  },
+  {
+    "no_faktur": "SL-2024-0013",
+    "tanggal": "2024-02-09",
+    "kode_customer": "CST014",
+    "catatan": "Order reguler",
+    "items": [
+      { "kode_barang": "BRG008", "nama_barang": "V-Belt Vario 150", "jumlah": 3, "harga": 135000, "subtotal": 405000 },
+      { "kode_barang": "BRG009", "nama_barang": "V-Belt Beat", "jumlah": 4, "harga": 120000, "subtotal": 480000 }
+    ],
+    "total": 885000,
+    "status": "completed",
+    "created_by": "admin",
+    "created_at": "2024-02-09T09:45:00Z"
+  },
+  {
+    "no_faktur": "SL-2024-0014",
+    "tanggal": "2024-02-12",
+    "kode_customer": "CST015",
+    "catatan": "Pembelian toko",
+    "items": [
+      { "kode_barang": "BRG016", "nama_barang": "Lampu Depan LED H4", "jumlah": 8, "harga": 95000, "subtotal": 760000 },
+      { "kode_barang": "BRG017", "nama_barang": "Lampu Sen LED", "jumlah": 15, "harga": 40000, "subtotal": 600000 },
+      { "kode_barang": "BRG018", "nama_barang": "Aki Motor MF 5Ah", "jumlah": 5, "harga": 220000, "subtotal": 1100000 }
+    ],
+    "total": 2460000,
+    "status": "completed",
+    "created_by": "admin",
+    "created_at": "2024-02-12T10:00:00Z"
+  },
+  {
+    "no_faktur": "SL-2024-0015",
+    "tanggal": "2024-02-14",
+    "kode_customer": "CST001",
+    "catatan": "Order Valentine",
+    "items": [
+      { "kode_barang": "BRG001", "nama_barang": "Bearing 6205", "jumlah": 25, "harga": 35000, "subtotal": 875000 },
+      { "kode_barang": "BRG003", "nama_barang": "Oil Filter Yamaha", "jumlah": 20, "harga": 28000, "subtotal": 560000 },
+      { "kode_barang": "BRG005", "nama_barang": "Kampas Rem Belakang", "jumlah": 12, "harga": 45000, "subtotal": 540000 },
+      { "kode_barang": "BRG010", "nama_barang": "Roller CVT Set", "jumlah": 8, "harga": 65000, "subtotal": 520000 },
+      { "kode_barang": "BRG013", "nama_barang": "Oli Gardan", "jumlah": 10, "harga": 35000, "subtotal": 350000 }
+    ],
+    "total": 2845000,
+    "status": "completed",
+    "created_by": "admin",
+    "created_at": "2024-02-14T08:30:00Z"
+  },
+  {
+    "no_faktur": "SL-2024-0016",
+    "tanggal": "2024-02-16",
+    "kode_customer": "CST017",
+    "catatan": "Penjualan akhir pekan",
+    "items": [
+      { "kode_barang": "BRG020", "nama_barang": "Ban Tubeless 80/90", "jumlah": 6, "harga": 175000, "subtotal": 1050000 },
+      { "kode_barang": "BRG022", "nama_barang": "Ban Dalam 250-17", "jumlah": 12, "harga": 45000, "subtotal": 540000 }
+    ],
+    "total": 1590000,
+    "status": "completed",
+    "created_by": "admin",
+    "created_at": "2024-02-16T14:00:00Z"
+  },
+  {
+    "no_faktur": "SL-2024-0017",
+    "tanggal": "2024-02-19",
+    "kode_customer": "CST003",
+    "catatan": "Order mingguan",
+    "items": [
+      { "kode_barang": "BRG014", "nama_barang": "Rantai Motor 428H", "jumlah": 6, "harga": 110000, "subtotal": 660000 },
+      { "kode_barang": "BRG015", "nama_barang": "Gear Set Supra X", "jumlah": 4, "harga": 250000, "subtotal": 1000000 },
+      { "kode_barang": "BRG004", "nama_barang": "Kampas Rem Depan", "jumlah": 15, "harga": 50000, "subtotal": 750000 }
+    ],
+    "total": 2410000,
+    "status": "completed",
+    "created_by": "admin",
+    "created_at": "2024-02-19T09:15:00Z"
+  },
+  {
+    "no_faktur": "SL-2024-0018",
+    "tanggal": "2024-02-21",
+    "kode_customer": "CST018",
+    "catatan": "Pembelian bengkel",
+    "items": [
+      { "kode_barang": "BRG011", "nama_barang": "Oli Mesin Yamalube", "jumlah": 20, "harga": 55000, "subtotal": 1100000 },
+      { "kode_barang": "BRG012", "nama_barang": "Oli Mesin MPX", "jumlah": 15, "harga": 60000, "subtotal": 900000 },
+      { "kode_barang": "BRG013", "nama_barang": "Oli Gardan", "jumlah": 12, "harga": 35000, "subtotal": 420000 }
+    ],
+    "total": 2420000,
+    "status": "completed",
+    "created_by": "admin",
+    "created_at": "2024-02-21T10:30:00Z"
+  },
+  {
+    "no_faktur": "SL-2024-0019",
+    "tanggal": "2024-02-23",
+    "kode_customer": "CST013",
+    "catatan": "Order sparepart",
+    "items": [
+      { "kode_barang": "BRG019", "nama_barang": "Aki Motor MF 7Ah", "jumlah": 4, "harga": 265000, "subtotal": 1060000 },
+      { "kode_barang": "BRG006", "nama_barang": "Busi NGK Iridium", "jumlah": 10, "harga": 120000, "subtotal": 1200000 }
+    ],
+    "total": 2260000,
+    "status": "completed",
+    "created_by": "admin",
+    "created_at": "2024-02-23T08:45:00Z"
+  },
+  {
+    "no_faktur": "SL-2024-0020",
+    "tanggal": "2024-02-26",
+    "kode_customer": "CST019",
+    "catatan": "Penjualan grosir",
+    "items": [
+      { "kode_barang": "BRG001", "nama_barang": "Bearing 6205", "jumlah": 30, "harga": 35000, "subtotal": 1050000 },
+      { "kode_barang": "BRG002", "nama_barang": "Seal Kit Honda", "jumlah": 5, "harga": 195000, "subtotal": 975000 },
+      { "kode_barang": "BRG007", "nama_barang": "Busi Denso", "jumlah": 20, "harga": 65000, "subtotal": 1300000 },
+      { "kode_barang": "BRG023", "nama_barang": "Kabel Gas", "jumlah": 10, "harga": 30000, "subtotal": 300000 }
+    ],
+    "total": 3625000,
+    "status": "completed",
+    "created_by": "admin",
+    "created_at": "2024-02-26T11:00:00Z"
+  },
+  {
+    "no_faktur": "SL-2024-0021",
+    "tanggal": "2024-02-28",
+    "kode_customer": "CST002",
+    "catatan": "Order akhir bulan",
+    "items": [
+      { "kode_barang": "BRG008", "nama_barang": "V-Belt Vario 150", "jumlah": 5, "harga": 135000, "subtotal": 675000 },
+      { "kode_barang": "BRG009", "nama_barang": "V-Belt Beat", "jumlah": 6, "harga": 120000, "subtotal": 720000 },
+      { "kode_barang": "BRG010", "nama_barang": "Roller CVT Set", "jumlah": 4, "harga": 65000, "subtotal": 260000 }
+    ],
+    "total": 1655000,
+    "status": "completed",
+    "created_by": "admin",
+    "created_at": "2024-02-28T09:30:00Z"
+  },
+  {
+    "no_faktur": "SL-2024-0022",
+    "tanggal": "2024-03-01",
+    "kode_customer": "CST005",
+    "catatan": "Order awal Maret",
+    "items": [
+      { "kode_barang": "BRG016", "nama_barang": "Lampu Depan LED H4", "jumlah": 10, "harga": 95000, "subtotal": 950000 },
+      { "kode_barang": "BRG017", "nama_barang": "Lampu Sen LED", "jumlah": 20, "harga": 40000, "subtotal": 800000 }
+    ],
+    "total": 1750000,
+    "status": "completed",
+    "created_by": "admin",
+    "created_at": "2024-03-01T08:00:00Z"
+  },
+  {
+    "no_faktur": "SL-2024-0023",
+    "tanggal": "2024-03-04",
+    "kode_customer": "CST020",
+    "catatan": "Pembelian rutin",
+    "items": [
+      { "kode_barang": "BRG004", "nama_barang": "Kampas Rem Depan", "jumlah": 12, "harga": 50000, "subtotal": 600000 },
+      { "kode_barang": "BRG005", "nama_barang": "Kampas Rem Belakang", "jumlah": 10, "harga": 45000, "subtotal": 450000 },
+      { "kode_barang": "BRG003", "nama_barang": "Oil Filter Yamaha", "jumlah": 8, "harga": 28000, "subtotal": 224000 }
+    ],
+    "total": 1274000,
+    "status": "completed",
+    "created_by": "admin",
+    "created_at": "2024-03-04T10:15:00Z"
+  },
+  {
+    "no_faktur": "SL-2024-0024",
+    "tanggal": "2024-03-06",
+    "kode_customer": "CST007",
+    "catatan": "Order sparepart motor",
+    "items": [
+      { "kode_barang": "BRG020", "nama_barang": "Ban Tubeless 80/90", "jumlah": 5, "harga": 175000, "subtotal": 875000 },
+      { "kode_barang": "BRG021", "nama_barang": "Ban Tubeless 90/90", "jumlah": 4, "harga": 195000, "subtotal": 780000 },
+      { "kode_barang": "BRG022", "nama_barang": "Ban Dalam 250-17", "jumlah": 10, "harga": 45000, "subtotal": 450000 },
+      { "kode_barang": "BRG018", "nama_barang": "Aki Motor MF 5Ah", "jumlah": 3, "harga": 220000, "subtotal": 660000 }
+    ],
+    "total": 2765000,
+    "status": "completed",
+    "created_by": "admin",
+    "created_at": "2024-03-06T09:00:00Z"
+  },
+  {
+    "no_faktur": "SL-2024-0025",
+    "tanggal": "2024-03-08",
+    "kode_customer": "CST010",
+    "catatan": "Penjualan grosir",
+    "items": [
+      { "kode_barang": "BRG011", "nama_barang": "Oli Mesin Yamalube", "jumlah": 25, "harga": 55000, "subtotal": 1375000 },
+      { "kode_barang": "BRG012", "nama_barang": "Oli Mesin MPX", "jumlah": 20, "harga": 60000, "subtotal": 1200000 }
+    ],
+    "total": 2575000,
+    "status": "completed",
+    "created_by": "admin",
+    "created_at": "2024-03-08T11:30:00Z"
+  },
+  {
+    "no_faktur": "SL-2024-0026",
+    "tanggal": "2024-03-11",
+    "kode_customer": "CST004",
+    "catatan": "Order mingguan",
+    "items": [
+      { "kode_barang": "BRG001", "nama_barang": "Bearing 6205", "jumlah": 18, "harga": 35000, "subtotal": 630000 },
+      { "kode_barang": "BRG006", "nama_barang": "Busi NGK Iridium", "jumlah": 12, "harga": 120000, "subtotal": 1440000 },
+      { "kode_barang": "BRG007", "nama_barang": "Busi Denso", "jumlah": 15, "harga": 65000, "subtotal": 975000 }
+    ],
+    "total": 3045000,
+    "status": "completed",
+    "created_by": "admin",
+    "created_at": "2024-03-11T08:45:00Z"
+  },
+  {
+    "no_faktur": "SL-2024-0027",
+    "tanggal": "2024-03-13",
+    "kode_customer": "CST016",
+    "catatan": "Pembelian campuran",
+    "items": [
+      { "kode_barang": "BRG014", "nama_barang": "Rantai Motor 428H", "jumlah": 8, "harga": 110000, "subtotal": 880000 },
+      { "kode_barang": "BRG015", "nama_barang": "Gear Set Supra X", "jumlah": 5, "harga": 250000, "subtotal": 1250000 },
+      { "kode_barang": "BRG024", "nama_barang": "Kabel Kopling", "jumlah": 8, "harga": 35000, "subtotal": 280000 },
+      { "kode_barang": "BRG025", "nama_barang": "Kabel Speedometer", "jumlah": 6, "harga": 40000, "subtotal": 240000 }
+    ],
+    "total": 2650000,
+    "status": "completed",
+    "created_by": "admin",
+    "created_at": "2024-03-13T10:00:00Z"
+  },
+  {
+    "no_faktur": "SL-2024-0028",
+    "tanggal": "2024-03-15",
+    "kode_customer": "CST008",
+    "catatan": "Order reguler",
+    "items": [
+      { "kode_barang": "BRG008", "nama_barang": "V-Belt Vario 150", "jumlah": 6, "harga": 135000, "subtotal": 810000 },
+      { "kode_barang": "BRG009", "nama_barang": "V-Belt Beat", "jumlah": 8, "harga": 120000, "subtotal": 960000 }
+    ],
+    "total": 1770000,
+    "status": "completed",
+    "created_by": "admin",
+    "created_at": "2024-03-15T09:15:00Z"
+  },
+  {
+    "no_faktur": "SL-2024-0029",
+    "tanggal": "2024-03-18",
+    "kode_customer": "CST012",
+    "catatan": "Penjualan akhir pekan",
+    "items": [
+      { "kode_barang": "BRG019", "nama_barang": "Aki Motor MF 7Ah", "jumlah": 5, "harga": 265000, "subtotal": 1325000 },
+      { "kode_barang": "BRG016", "nama_barang": "Lampu Depan LED H4", "jumlah": 8, "harga": 95000, "subtotal": 760000 },
+      { "kode_barang": "BRG017", "nama_barang": "Lampu Sen LED", "jumlah": 16, "harga": 40000, "subtotal": 640000 }
+    ],
+    "total": 2725000,
+    "status": "completed",
+    "created_by": "admin",
+    "created_at": "2024-03-18T14:00:00Z"
+  },
+  {
+    "no_faktur": "SL-2024-0030",
+    "tanggal": "2024-03-20",
+    "kode_customer": "CST001",
+    "catatan": "Order besar",
+    "items": [
+      { "kode_barang": "BRG001", "nama_barang": "Bearing 6205", "jumlah": 40, "harga": 35000, "subtotal": 1400000 },
+      { "kode_barang": "BRG002", "nama_barang": "Seal Kit Honda", "jumlah": 8, "harga": 195000, "subtotal": 1560000 },
+      { "kode_barang": "BRG003", "nama_barang": "Oil Filter Yamaha", "jumlah": 25, "harga": 28000, "subtotal": 700000 },
+      { "kode_barang": "BRG006", "nama_barang": "Busi NGK Iridium", "jumlah": 20, "harga": 120000, "subtotal": 2400000 },
+      { "kode_barang": "BRG011", "nama_barang": "Oli Mesin Yamalube", "jumlah": 30, "harga": 55000, "subtotal": 1650000 }
+    ],
+    "total": 7710000,
+    "status": "completed",
+    "created_by": "admin",
+    "created_at": "2024-03-20T08:30:00Z"
+  },
+  {
+    "no_faktur": "SL-2024-0031",
+    "tanggal": "2024-03-22",
+    "kode_customer": "CST006",
+    "catatan": "Pembelian bengkel",
+    "items": [
+      { "kode_barang": "BRG004", "nama_barang": "Kampas Rem Depan", "jumlah": 20, "harga": 50000, "subtotal": 1000000 },
+      { "kode_barang": "BRG005", "nama_barang": "Kampas Rem Belakang", "jumlah": 15, "harga": 45000, "subtotal": 675000 },
+      { "kode_barang": "BRG010", "nama_barang": "Roller CVT Set", "jumlah": 10, "harga": 65000, "subtotal": 650000 }
+    ],
+    "total": 2325000,
+    "status": "completed",
+    "created_by": "admin",
+    "created_at": "2024-03-22T10:45:00Z"
+  },
+  {
+    "no_faktur": "SL-2024-0032",
+    "tanggal": "2024-03-25",
+    "kode_customer": "CST011",
+    "catatan": "Order sparepart",
+    "items": [
+      { "kode_barang": "BRG020", "nama_barang": "Ban Tubeless 80/90", "jumlah": 8, "harga": 175000, "subtotal": 1400000 },
+      { "kode_barang": "BRG021", "nama_barang": "Ban Tubeless 90/90", "jumlah": 6, "harga": 195000, "subtotal": 1170000 }
+    ],
+    "total": 2570000,
+    "status": "completed",
+    "created_by": "admin",
+    "created_at": "2024-03-25T09:00:00Z"
+  },
+  {
+    "no_faktur": "SL-2024-0033",
+    "tanggal": "2024-03-27",
+    "kode_customer": "CST014",
+    "catatan": "Penjualan grosir",
+    "items": [
+      { "kode_barang": "BRG007", "nama_barang": "Busi Denso", "jumlah": 30, "harga": 65000, "subtotal": 1950000 },
+      { "kode_barang": "BRG013", "nama_barang": "Oli Gardan", "jumlah": 15, "harga": 35000, "subtotal": 525000 },
+      { "kode_barang": "BRG023", "nama_barang": "Kabel Gas", "jumlah": 12, "harga": 30000, "subtotal": 360000 }
+    ],
+    "total": 2835000,
+    "status": "completed",
+    "created_by": "admin",
+    "created_at": "2024-03-27T11:15:00Z"
+  },
+  {
+    "no_faktur": "SL-2024-0034",
+    "tanggal": "2024-03-29",
+    "kode_customer": "CST009",
+    "catatan": "Order akhir bulan",
+    "items": [
+      { "kode_barang": "BRG018", "nama_barang": "Aki Motor MF 5Ah", "jumlah": 6, "harga": 220000, "subtotal": 1320000 },
+      { "kode_barang": "BRG019", "nama_barang": "Aki Motor MF 7Ah", "jumlah": 4, "harga": 265000, "subtotal": 1060000 },
+      { "kode_barang": "BRG016", "nama_barang": "Lampu Depan LED H4", "jumlah": 10, "harga": 95000, "subtotal": 950000 },
+      { "kode_barang": "BRG017", "nama_barang": "Lampu Sen LED", "jumlah": 18, "harga": 40000, "subtotal": 720000 }
+    ],
+    "total": 4050000,
+    "status": "completed",
+    "created_by": "admin",
+    "created_at": "2024-03-29T08:00:00Z"
+  },
+  {
+    "no_faktur": "SL-2024-0035",
+    "tanggal": "2024-03-30",
+    "kode_customer": "CST003",
+    "catatan": "Penjualan akhir Maret",
+    "items": [
+      { "kode_barang": "BRG001", "nama_barang": "Bearing 6205", "jumlah": 35, "harga": 35000, "subtotal": 1225000 },
+      { "kode_barang": "BRG008", "nama_barang": "V-Belt Vario 150", "jumlah": 7, "harga": 135000, "subtotal": 945000 },
+      { "kode_barang": "BRG009", "nama_barang": "V-Belt Beat", "jumlah": 9, "harga": 120000, "subtotal": 1080000 },
+      { "kode_barang": "BRG014", "nama_barang": "Rantai Motor 428H", "jumlah": 6, "harga": 110000, "subtotal": 660000 },
+      { "kode_barang": "BRG015", "nama_barang": "Gear Set Supra X", "jumlah": 4, "harga": 250000, "subtotal": 1000000 }
+    ],
+    "total": 4910000,
+    "status": "completed",
+    "created_by": "admin",
+    "created_at": "2024-03-30T14:30:00Z"
+  }
+]
