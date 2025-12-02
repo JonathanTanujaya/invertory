@@ -7,6 +7,7 @@ import DataTable from '@/components/ui/DataTable';
 import Modal from '@/components/ui/Modal';
 import SupplierForm from './SupplierForm';
 import { toast } from 'react-toastify';
+import supplierData from '@/data/dummy/m_supplier.json';
 
 export default function SupplierList() {
   const [data, setData] = useState([]);
@@ -27,16 +28,10 @@ export default function SupplierList() {
         <span className="font-mono font-semibold text-primary-600">{value}</span>
       ),
     },
-    { key: 'nama_supplier', label: 'Nama Supplier', sortable: true },
-    {
-      key: 'alamat',
-      label: 'Alamat',
-      render: (value) => (
-        <span className="text-sm text-gray-600 line-clamp-2">{value || '-'}</span>
-      ),
-    },
-    { key: 'telepon', label: 'Telepon' },
-    { key: 'email', label: 'Email', render: (value) => value || '-' },
+    { key: 'nama_supplier', label: 'Nama', sortable: true },
+    { key: 'alamat', label: 'Alamat' },
+    { key: 'telepon', label: 'No Telp' },
+    { key: 'email', label: 'Email' },
     {
       key: 'actions',
       label: 'Aksi',
@@ -56,30 +51,7 @@ export default function SupplierList() {
   const fetchData = () => {
     setLoading(true);
     setTimeout(() => {
-      const dummy = [
-        {
-          kode_supplier: 'SUP001',
-          nama_supplier: 'PT Sumber Sparepart',
-          alamat: 'Jl. Sudirman No. 123, Jakarta Selatan',
-          telepon: '021-12345678',
-          email: 'info@sumbersparepart.com'
-        },
-        {
-          kode_supplier: 'SUP002',
-          nama_supplier: 'CV Mekanik Jaya',
-          alamat: 'Jl. Gatot Subroto No. 45, Jakarta Pusat',
-          telepon: '08123456789',
-          email: 'contact@mekanikjaya.com'
-        },
-        {
-          kode_supplier: 'SUP003',
-          nama_supplier: 'UD Elektronik Sejahtera',
-          alamat: 'Jl. Ahmad Yani No. 78, Bandung',
-          telepon: '022-87654321',
-          email: null
-        },
-      ];
-      setData(dummy);
+      setData(supplierData);
       setLoading(false);
     }, 300);
   };
@@ -128,12 +100,12 @@ export default function SupplierList() {
   );
 
   return (
-    <div className="space-y-6">
-      <Card>
+    <div className="flex flex-col gap-4 h-[calc(100vh-120px)]">
+      <Card className="flex-shrink-0">
         <div className="flex items-center gap-3">
           <div className="flex-1">
             <Input
-              placeholder="Cari supplier (kode, nama, alamat, telepon, email)..."
+              placeholder="Cari supplier (kode, nama, telepon, kota)..."
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
@@ -148,7 +120,7 @@ export default function SupplierList() {
         </div>
       </Card>
 
-      <Card padding={false}>
+      <Card padding={false} className="flex-1 overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
@@ -160,39 +132,14 @@ export default function SupplierList() {
             </p>
           </div>
         ) : (
-          <>
-            <DataTable
-              columns={columns}
-              data={paginatedData}
-              loading={loading}
-              pagination={false}
-            />
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200">
-                <p className="text-sm text-gray-700">
-                  Menampilkan {((currentPage - 1) * pageSize) + 1} - {Math.min(currentPage * pageSize, filteredData.length)} dari {filteredData.length} data
-                </p>
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={currentPage === 1}
-                    onClick={() => setCurrentPage(prev => prev - 1)}
-                  >
-                    Sebelumnya
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage(prev => prev + 1)}
-                  >
-                    Selanjutnya
-                  </Button>
-                </div>
-              </div>
-            )}
-          </>
+          <DataTable
+            columns={columns}
+            data={filteredData}
+            loading={loading}
+            pagination={false}
+            stickyHeader
+            maxHeight="100%"
+          />
         )}
       </Card>
 

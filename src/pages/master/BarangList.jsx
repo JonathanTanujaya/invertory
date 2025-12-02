@@ -10,6 +10,7 @@ import Badge from '@/components/ui/Badge';
 import BarangForm from './BarangForm';
 import { formatCurrency, formatNumber } from '@/utils/helpers';
 import { toast } from 'react-toastify';
+import barangData from '@/data/dummy/m_barang.json';
 
 export default function BarangList() {
   const [data, setData] = useState([]);
@@ -46,14 +47,14 @@ export default function BarangList() {
     {
       key: 'satuan',
       label: 'Satuan',
-      align: 'center',
       sortable: true,
+      align: 'center',
     },
     {
       key: 'stok',
       label: 'Stok',
-      align: 'center',
       sortable: true,
+      align: 'center',
       render: (value, row) => {
         const isLow = value <= row.stok_minimal;
         return (
@@ -64,11 +65,31 @@ export default function BarangList() {
       },
     },
     {
+      key: 'harga_beli',
+      label: 'Harga Beli',
+      sortable: true,
+      render: (value) => (
+        <span className="font-medium text-gray-700">
+          {value ? formatCurrency(value) : '-'}
+        </span>
+      ),
+    },
+    {
+      key: 'harga_jual',
+      label: 'Harga Jual',
+      sortable: true,
+      render: (value) => (
+        <span className="font-medium text-green-600">
+          {value ? formatCurrency(value) : '-'}
+        </span>
+      ),
+    },
+    {
       key: 'actions',
       label: 'Aksi',
       align: 'center',
       render: (_, row) => (
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex items-center justify-center gap-1">
           <Button size="sm" variant="ghost" onClick={() => handleView(row)}>
             <Eye className="w-4 h-4" />
           </Button>
@@ -87,47 +108,39 @@ export default function BarangList() {
     fetchData();
   }, [currentPage, searchQuery, kategoriFilter]);
 
+  // Mapping kategori_id ke nama kategori
+  const kategoriMap = {
+    'KAT001': 'Bearing & Filter',
+    'KAT002': 'Body & Kabel',
+    'KAT003': 'Transmisi',
+    'KAT004': 'Oli & Pelumas',
+    'KAT005': 'Elektrikal',
+    'KAT006': 'Ban & Velg',
+  };
+
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Simulate API call
       setTimeout(() => {
-        const dummyData = [
-          {
-            kode_barang: 'BRG001',
-            nama_barang: 'Sparepart A',
-            kategori: 'Elektronik',
-            satuan: 'pcs',
-            stok: 100,
-            stok_minimal: 10,
-            harga_beli: 50000,
-            harga_jual: 75000,
-          },
-          {
-            kode_barang: 'BRG002',
-            nama_barang: 'Sparepart B',
-            kategori: 'Mekanik',
-            satuan: 'pcs',
-            stok: 5,
-            stok_minimal: 15,
-            harga_beli: 120000,
-            harga_jual: 180000,
-          },
-          {
-            kode_barang: 'BRG003',
-            nama_barang: 'Sparepart C',
-            kategori: 'Elektronik',
-            satuan: 'box',
-            stok: 50,
-            stok_minimal: 20,
-            harga_beli: 35000,
-            harga_jual: 52500,
-          },
-        ];
-        setData(dummyData);
-        setTotalItems(dummyData.length);
+        // Map data from JSON file - pastikan semua field ter-include
+        const mappedData = barangData.map((item) => ({
+          kode_barang: item.kode_barang,
+          nama_barang: item.nama_barang,
+          kategori_id: item.kategori_id,
+          kategori: kategoriMap[item.kategori_id] || item.kategori_id,
+          satuan: item.satuan,
+          stok: item.stok,
+          stok_minimal: item.stok_minimal,
+          harga_beli: item.harga_beli,
+          harga_jual: item.harga_jual,
+          lokasi_rak: item.lokasi_rak,
+          created_at: item.created_at,
+        }));
+        console.log('Mapped data:', mappedData); // Debug log
+        setData(mappedData);
+        setTotalItems(mappedData.length);
         setLoading(false);
-      }, 500);
+      }, 300);
     } catch (error) {
       toast.error('Gagal memuat data');
       setLoading(false);
@@ -181,9 +194,9 @@ export default function BarangList() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-4 h-[calc(100vh-120px)]">
       {/* Filters */}
-      <Card className="shadow-sm ring-1 ring-gray-100">
+      <Card className="shadow-sm ring-1 ring-gray-100 flex-shrink-0">
         <div className="grid grid-cols-[1fr_220px_auto] items-center gap-3">
           <Input
             placeholder="Cari nama barang"
@@ -197,9 +210,12 @@ export default function BarangList() {
             value={kategoriFilter}
             onChange={(e) => setKategoriFilter(e.target.value)}
             options={[
-              { value: 'elektronik', label: 'Elektronik' },
-              { value: 'mekanik', label: 'Mekanik' },
-              { value: 'aksesoris', label: 'Aksesoris' },
+              { value: 'KAT001', label: 'Bearing & Filter' },
+              { value: 'KAT002', label: 'Body & Kabel' },
+              { value: 'KAT003', label: 'Transmisi' },
+              { value: 'KAT004', label: 'Oli & Pelumas' },
+              { value: 'KAT005', label: 'Elektrikal' },
+              { value: 'KAT006', label: 'Ban & Velg' },
             ]}
             className="rounded-lg"
           />
@@ -226,16 +242,14 @@ export default function BarangList() {
       </Card>
 
       {/* Table */}
-      <Card padding={false}>
+      <Card padding={false} className="flex-1 overflow-hidden">
         <DataTable
           columns={columns}
           data={data}
           loading={loading}
-          pagination
-          currentPage={currentPage}
-          pageSize={pageSize}
-          totalItems={totalItems}
-          onPageChange={setCurrentPage}
+          pagination={false}
+          stickyHeader
+          maxHeight="100%"
         />
       </Card>
 

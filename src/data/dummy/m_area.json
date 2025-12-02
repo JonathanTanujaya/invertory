@@ -1,0 +1,22 @@
+[
+  { "kode_area": "AREA001", "nama_area": "Jakarta Pusat" },
+  { "kode_area": "AREA002", "nama_area": "Jakarta Selatan" },
+  { "kode_area": "AREA003", "nama_area": "Jakarta Barat" },
+  { "kode_area": "AREA004", "nama_area": "Jakarta Timur" },
+  { "kode_area": "AREA005", "nama_area": "Jakarta Utara" },
+  { "kode_area": "AREA006", "nama_area": "Tangerang" },
+  { "kode_area": "AREA007", "nama_area": "Tangerang Selatan" },
+  { "kode_area": "AREA008", "nama_area": "Bekasi" },
+  { "kode_area": "AREA009", "nama_area": "Depok" },
+  { "kode_area": "AREA010", "nama_area": "Bogor" },
+  { "kode_area": "AREA011", "nama_area": "Bandung" },
+  { "kode_area": "AREA012", "nama_area": "Surabaya" },
+  { "kode_area": "AREA013", "nama_area": "Semarang" },
+  { "kode_area": "AREA014", "nama_area": "Yogyakarta" },
+  { "kode_area": "AREA015", "nama_area": "Malang" },
+  { "kode_area": "AREA016", "nama_area": "Medan" },
+  { "kode_area": "AREA017", "nama_area": "Makassar" },
+  { "kode_area": "AREA018", "nama_area": "Palembang" },
+  { "kode_area": "AREA019", "nama_area": "Denpasar" },
+  { "kode_area": "AREA020", "nama_area": "Cirebon" }
+]

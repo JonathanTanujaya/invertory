@@ -4,6 +4,8 @@ import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { toast } from 'react-toastify';
+import supplierData from '@/data/dummy/m_supplier.json';
+import barangData from '@/data/dummy/m_barang.json';
 
 export default function PurchaseForm() {
   const {
@@ -30,35 +32,34 @@ export default function PurchaseForm() {
   const [showSupplierSuggestions, setShowSupplierSuggestions] = useState(false);
   const [supplierHighlightIndex, setSupplierHighlightIndex] = useState(-1);
 
-  // Dummy suppliers (replace with API later)
-  const supplierOptions = [
-    { value: 'SUP001', label: 'PT Supplier Jaya' },
-    { value: 'SUP002', label: 'CV Maju Jaya' },
-    { value: 'SUP003', label: 'PT Berkah Selalu' },
-  ];
+  // Supplier options dari data dummy
+  const supplierOptions = supplierData.map(s => ({
+    value: s.kode_supplier,
+    label: s.nama_supplier
+  }));
 
-  // Dummy items dataset (replace with API later)
-  const allItems = [
-    { kode_barang: 'BRG001', nama_barang: 'Sparepart A', kategori: 'Elektronik', satuan: 'pcs', stok: 100 },
-    { kode_barang: 'BRG002', nama_barang: 'Sparepart B', kategori: 'Mekanik', satuan: 'pcs', stok: 5 },
-    { kode_barang: 'BRG003', nama_barang: 'Sparepart C', kategori: 'Elektronik', satuan: 'box', stok: 50 },
-  ];
+  // Items dari data dummy
+  const allItems = barangData;
 
   const filteredItems = searchQuery
-    ? allItems.filter(
-      (it) =>
-        it.nama_barang.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        it.kode_barang.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-    : allItems.slice(0, 10);
+    ? allItems
+      .filter(
+        (it) =>
+          it.nama_barang.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          it.kode_barang.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+      .slice(0, 5)
+    : [];
 
   const filteredSuppliers = supplierQuery
-    ? supplierOptions.filter(
-      (s) =>
-        s.label.toLowerCase().includes(supplierQuery.toLowerCase()) ||
-        s.value.toLowerCase().includes(supplierQuery.toLowerCase())
-    )
-    : supplierOptions;
+    ? supplierOptions
+      .filter(
+        (s) =>
+          s.label.toLowerCase().includes(supplierQuery.toLowerCase()) ||
+          s.value.toLowerCase().includes(supplierQuery.toLowerCase())
+      )
+      .slice(0, 5)
+    : [];
 
   const handleAddItem = (item, qtyOverride) => {
     const exists = items.find((i) => i.kode_barang === item.kode_barang);

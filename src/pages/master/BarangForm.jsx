@@ -80,7 +80,7 @@ export default function BarangForm({ initialData, mode, onSubmit, onCancel }) {
         <Input
           label="Stok Minimal"
           type="number"
-          {...register('stok_minimal', { 
+          {...register('stok_minimal', {
             required: 'Stok minimal wajib diisi',
             min: { value: 0, message: 'Stok minimal 0' }
           })}

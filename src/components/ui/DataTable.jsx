@@ -18,6 +18,8 @@ export default function DataTable({
   selectable = false,
   onSelectionChange,
   actions,
+  stickyHeader = false,
+  maxHeight = '500px',
 }) {
   const [selectedRows, setSelectedRows] = useState(new Set());
 
@@ -58,10 +60,10 @@ export default function DataTable({
   }
 
   return (
-    <div className="w-full">
+    <div className={clsx("w-full", stickyHeader && "h-full flex flex-col")}>
       {/* Actions */}
       {actions && selectedRows.size > 0 && (
-        <div className="mb-4 p-3 bg-primary-50 rounded-md flex items-center justify-between">
+        <div className="mb-4 p-3 bg-primary-50 rounded-md flex items-center justify-between flex-shrink-0">
           <span className="text-sm text-primary-700">
             {selectedRows.size} item dipilih
           </span>
@@ -70,9 +72,17 @@ export default function DataTable({
       )}
 
       {/* Table */}
-      <div className="overflow-x-auto border border-gray-200 rounded-lg">
+      <div
+        className={clsx(
+          "overflow-x-auto border border-gray-200 rounded-lg",
+          stickyHeader && "overflow-y-auto flex-1"
+        )}
+      >
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+          <thead className={clsx(
+            "bg-gray-50",
+            stickyHeader && "sticky top-0 z-10 shadow-sm"
+          )}>
             <tr>
               {selectable && (
                 <th className="w-12 px-4 py-3">
@@ -88,19 +98,24 @@ export default function DataTable({
                 <th
                   key={column.key}
                   className={clsx(
-                    'px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider',
+                    'px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider',
                     column.sortable && 'cursor-pointer hover:bg-gray-100',
-                    column.align === 'center' && 'text-center',
-                    column.align === 'right' && 'text-right'
+                    column.align === 'center' ? 'text-center' : column.align === 'right' ? 'text-right' : 'text-left',
+                    column.width && `w-[${column.width}]`
                   )}
+                  style={column.width ? { width: column.width } : undefined}
                   onClick={() => handleSort(column)}
                 >
-                  <div className="flex items-center gap-2">
-                    {column.label}
-                    {column.sortable && sortBy === column.key && (
-                      <span>{sortOrder === 'asc' ? '↑' : '↓'}</span>
-                    )}
-                  </div>
+                  {column.align === 'center' ? (
+                    <span>{column.label}</span>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      {column.label}
+                      {column.sortable && sortBy === column.key && (
+                        <span>{sortOrder === 'asc' ? '↑' : '↓'}</span>
+                      )}
+                    </div>
+                  )}
                 </th>
               ))}
             </tr>
@@ -161,7 +176,7 @@ export default function DataTable({
           <div className="text-sm text-gray-700">
             Menampilkan {(currentPage - 1) * pageSize + 1} - {Math.min(currentPage * pageSize, totalItems)} dari {totalItems} data
           </div>
-          
+
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
@@ -179,11 +194,11 @@ export default function DataTable({
             >
               <ChevronLeft className="w-4 h-4" />
             </Button>
-            
+
             <span className="text-sm text-gray-700 px-3">
               Halaman {currentPage} dari {totalPages}
             </span>
-            
+
             <Button
               variant="outline"
               size="sm"

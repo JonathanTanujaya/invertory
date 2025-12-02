@@ -1,29 +1,182 @@
 [
   {
     "kode_customer": "CST001",
-    "nama_customer": "Toko ABC",
-    "alamat": "Jl. Customer No. 111, Jakarta",
+    "nama_customer": "Toko ABC Motor",
+    "alamat": "Jl. Raya Bogor No. 111, Jakarta Timur",
     "telepon": "021-1111111",
+    "kontak_person": "Budi Santoso",
     "kode_area": "AREA001",
-    "kode_sales": "SLS001",
     "created_at": "2024-01-15T08:00:00Z"
   },
   {
     "kode_customer": "CST002",
-    "nama_customer": "Toko XYZ",
-    "alamat": "Jl. Customer No. 222, Bandung",
+    "nama_customer": "Bengkel XYZ",
+    "alamat": "Jl. Cihampelas No. 222, Bandung",
     "telepon": "022-2222222",
+    "kontak_person": "Andi Wijaya",
     "kode_area": "AREA002",
-    "kode_sales": "SLS001",
     "created_at": "2024-01-15T08:00:00Z"
   },
   {
     "kode_customer": "CST003",
-    "nama_customer": "Toko 123",
-    "alamat": "Jl. Customer No. 333, Surabaya",
+    "nama_customer": "Toko Sparepart Jaya",
+    "alamat": "Jl. Basuki Rahmat No. 333, Surabaya",
     "telepon": "031-3333333",
+    "kontak_person": "Siti Rahayu",
     "kode_area": "AREA003",
-    "kode_sales": "SLS002",
     "created_at": "2024-01-15T08:00:00Z"
+  },
+  {
+    "kode_customer": "CST004",
+    "nama_customer": "CV Maju Bersama",
+    "alamat": "Jl. Sudirman No. 45, Jakarta Pusat",
+    "telepon": "021-4444444",
+    "kontak_person": "Rudi Hartono",
+    "kode_area": "AREA001",
+    "created_at": "2024-01-16T08:00:00Z"
+  },
+  {
+    "kode_customer": "CST005",
+    "nama_customer": "Toko Onderdil Makmur",
+    "alamat": "Jl. Ahmad Yani No. 88, Semarang",
+    "telepon": "024-5555555",
+    "kontak_person": "Dewi Kusuma",
+    "kode_area": "AREA004",
+    "created_at": "2024-01-16T08:00:00Z"
+  },
+  {
+    "kode_customer": "CST006",
+    "nama_customer": "Bengkel Motor Sejahtera",
+    "alamat": "Jl. Malioboro No. 12, Yogyakarta",
+    "telepon": "0274-666666",
+    "kontak_person": "Agus Prasetyo",
+    "kode_area": "AREA005",
+    "created_at": "2024-01-17T08:00:00Z"
+  },
+  {
+    "kode_customer": "CST007",
+    "nama_customer": "UD Berkah Motor",
+    "alamat": "Jl. Diponegoro No. 77, Medan",
+    "telepon": "061-7777777",
+    "kontak_person": "Hendra Gunawan",
+    "kode_area": "AREA006",
+    "created_at": "2024-01-17T08:00:00Z"
+  },
+  {
+    "kode_customer": "CST008",
+    "nama_customer": "Toko Suku Cadang Abadi",
+    "alamat": "Jl. Gatot Subroto No. 99, Denpasar",
+    "telepon": "0361-888888",
+    "kontak_person": "Wayan Sudirman",
+    "kode_area": "AREA007",
+    "created_at": "2024-01-18T08:00:00Z"
+  },
+  {
+    "kode_customer": "CST009",
+    "nama_customer": "PT Otomotif Nusantara",
+    "alamat": "Jl. Pemuda No. 55, Makassar",
+    "telepon": "0411-999999",
+    "kontak_person": "Eko Prabowo",
+    "kode_area": "AREA008",
+    "created_at": "2024-01-18T08:00:00Z"
+  },
+  {
+    "kode_customer": "CST010",
+    "nama_customer": "Bengkel Sentral Motor",
+    "alamat": "Jl. Asia Afrika No. 123, Bandung",
+    "telepon": "022-1010101",
+    "kontak_person": "Yudi Setiawan",
+    "kode_area": "AREA002",
+    "created_at": "2024-01-19T08:00:00Z"
+  },
+  {
+    "kode_customer": "CST011",
+    "nama_customer": "Toko Prima Sparepart",
+    "alamat": "Jl. Panglima Sudirman No. 200, Surabaya",
+    "telepon": "031-1111222",
+    "kontak_person": "Bambang Sutrisno",
+    "kode_area": "AREA003",
+    "created_at": "2024-01-19T08:00:00Z"
+  },
+  {
+    "kode_customer": "CST012",
+    "nama_customer": "CV Mandiri Otomotif",
+    "alamat": "Jl. Gajah Mada No. 78, Jakarta Barat",
+    "telepon": "021-1212121",
+    "kontak_person": "Teguh Wibowo",
+    "kode_area": "AREA001",
+    "created_at": "2024-01-20T08:00:00Z"
+  },
+  {
+    "kode_customer": "CST013",
+    "nama_customer": "Toko Bintang Motor",
+    "alamat": "Jl. MT Haryono No. 150, Balikpapan",
+    "telepon": "0542-131313",
+    "kontak_person": "Doni Kusuma",
+    "kode_area": "AREA009",
+    "created_at": "2024-01-20T08:00:00Z"
+  },
+  {
+    "kode_customer": "CST014",
+    "nama_customer": "Bengkel Cahaya",
+    "alamat": "Jl. Veteran No. 33, Palembang",
+    "telepon": "0711-141414",
+    "kontak_person": "Rina Marlina",
+    "kode_area": "AREA010",
+    "created_at": "2024-01-21T08:00:00Z"
+  },
+  {
+    "kode_customer": "CST015",
+    "nama_customer": "UD Jaya Abadi",
+    "alamat": "Jl. Teuku Umar No. 66, Bandar Lampung",
+    "telepon": "0721-151515",
+    "kontak_person": "Fajar Hidayat",
+    "kode_area": "AREA011",
+    "created_at": "2024-01-21T08:00:00Z"
+  },
+  {
+    "kode_customer": "CST016",
+    "nama_customer": "Toko Gemilang Motor",
+    "alamat": "Jl. Imam Bonjol No. 90, Pontianak",
+    "telepon": "0561-161616",
+    "kontak_person": "Ahmad Fauzi",
+    "kode_area": "AREA012",
+    "created_at": "2024-01-22T08:00:00Z"
+  },
+  {
+    "kode_customer": "CST017",
+    "nama_customer": "CV Sukses Bersama",
+    "alamat": "Jl. Jendral Sudirman No. 180, Pekanbaru",
+    "telepon": "0761-171717",
+    "kontak_person": "Irwan Saputra",
+    "kode_area": "AREA013",
+    "created_at": "2024-01-22T08:00:00Z"
+  },
+  {
+    "kode_customer": "CST018",
+    "nama_customer": "Bengkel Mitra Sejati",
+    "alamat": "Jl. Raya Darmo No. 55, Surabaya",
+    "telepon": "031-1818181",
+    "kontak_person": "Joko Widodo",
+    "kode_area": "AREA003",
+    "created_at": "2024-01-23T08:00:00Z"
+  },
+  {
+    "kode_customer": "CST019",
+    "nama_customer": "Toko Mega Sparepart",
+    "alamat": "Jl. Buah Batu No. 100, Bandung",
+    "telepon": "022-1919191",
+    "kontak_person": "Nina Wulandari",
+    "kode_area": "AREA002",
+    "created_at": "2024-01-23T08:00:00Z"
+  },
+  {
+    "kode_customer": "CST020",
+    "nama_customer": "PT Motor Jaya Indonesia",
+    "alamat": "Jl. Hayam Wuruk No. 250, Jakarta Pusat",
+    "telepon": "021-2020202",
+    "kontak_person": "Surya Dharma",
+    "kode_area": "AREA001",
+    "created_at": "2024-01-24T08:00:00Z"
   }
 ]

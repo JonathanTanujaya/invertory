@@ -7,6 +7,8 @@ import DataTable from '@/components/ui/DataTable';
 import Modal from '@/components/ui/Modal';
 import CustomerForm from './CustomerForm';
 import { toast } from 'react-toastify';
+import customerData from '@/data/dummy/m_customer.json';
+import areaData from '@/data/dummy/m_area.json';
 
 export default function CustomerList() {
   const [data, setData] = useState([]);
@@ -16,10 +18,18 @@ export default function CustomerList() {
   const [mode, setMode] = useState('create');
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Buat mapping kode_area ke nama_area
+  const areaMap = areaData.reduce((acc, area) => {
+    acc[area.kode_area] = area.nama_area;
+    return acc;
+  }, {});
+
   const columns = [
     { key: 'kode', label: 'Kode', sortable: true },
     { key: 'nama', label: 'Nama Customer', sortable: true },
-    { key: 'kontak', label: 'Kontak' },
+    { key: 'telepon', label: 'No Telp' },
+    { key: 'kontak_person', label: 'Kontak Person' },
+    { key: 'area', label: 'Area', sortable: true },
     {
       key: 'actions',
       label: 'Aksi',
@@ -39,11 +49,17 @@ export default function CustomerList() {
   const fetchData = () => {
     setLoading(true);
     setTimeout(() => {
-      const dummy = [
-        { kode: 'CUST001', nama: 'Toko Jaya', kontak: '081255556666' },
-        { kode: 'CUST002', nama: 'Bengkel Motor Sejahtera', kontak: '081233344455' }
-      ];
-      setData(dummy);
+      // Map data from JSON file dan konversi kode_area ke nama_area
+      const mappedData = customerData.map((item) => ({
+        kode: item.kode_customer,
+        nama: item.nama_customer,
+        alamat: item.alamat,
+        telepon: item.telepon,
+        kontak_person: item.kontak_person,
+        kode_area: item.kode_area,
+        area: areaMap[item.kode_area] || item.kode_area,
+      }));
+      setData(mappedData);
       setLoading(false);
     }, 300);
   };
@@ -64,24 +80,25 @@ export default function CustomerList() {
     fetchData();
   };
 
-  // Filter sederhana berdasarkan kode, nama, kontak
+  // Filter sederhana berdasarkan kode, nama, telepon, area
   const filteredData = data.filter((item) => {
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return (
       item.kode?.toLowerCase().includes(q) ||
       item.nama?.toLowerCase().includes(q) ||
-      item.kontak?.toLowerCase().includes(q)
+      item.telepon?.toLowerCase().includes(q) ||
+      item.area?.toLowerCase().includes(q)
     );
   });
 
   return (
-    <div className="space-y-6">
-      <Card>
+    <div className="flex flex-col gap-4 h-[calc(100vh-120px)]">
+      <Card className="flex-shrink-0">
         <div className="flex items-center gap-3">
           <div className="flex-1">
             <Input
-              placeholder="Cari customer (kode, nama, kontak)..."
+              placeholder="Cari customer (kode, nama, telepon, area)..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               startIcon={<Search className="w-4 h-4" />}
@@ -90,8 +107,15 @@ export default function CustomerList() {
           <Button onClick={handleCreate} startIcon={<Plus className="w-4 h-4" />}>Tambah Customer</Button>
         </div>
       </Card>
-      <Card padding={false}>
-        <DataTable columns={columns} data={filteredData} loading={loading} pagination={false} />
+      <Card padding={false} className="flex-1 overflow-hidden">
+        <DataTable
+          columns={columns}
+          data={filteredData}
+          loading={loading}
+          pagination={false}
+          stickyHeader
+          maxHeight="100%"
+        />
       </Card>
       <Modal
         open={showModal}

@@ -1,20 +1,27 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import Input from '@/components/ui/Input';
+import Select from '@/components/ui/Select';
 import Button from '@/components/ui/Button';
+import areaData from '@/data/dummy/m_area.json';
 
 export default function CustomerForm({ initialData, mode = 'create', onSubmit, onCancel }) {
   const { register, handleSubmit, formState: { errors }, setValue } = useForm({
-    defaultValues: initialData || { kode: '', nama: '', kontak: '' }
+    defaultValues: initialData || { kode: '', nama: '', alamat: '', telepon: '', kontak_person: '', kode_area: '' }
   });
+
+  // Siapkan options area dari data
+  const areaOptions = areaData.map((area) => ({
+    value: area.kode_area,
+    label: area.nama_area,
+  }));
 
   useEffect(() => {
     if (mode === 'create' && !initialData) {
       // Auto-generate kode customer
-      // TODO: Replace with actual API call to get last kode
       const generateKode = () => {
         const random = Math.floor(Math.random() * 1000);
-        return `CUST${String(random).padStart(3, '0')}`;
+        return `CST${String(random).padStart(3, '0')}`;
       };
       setValue('kode', generateKode());
     }
@@ -27,7 +34,7 @@ export default function CustomerForm({ initialData, mode = 'create', onSubmit, o
     <form onSubmit={handleSubmit(submitHandler)} className="space-y-4">
       <Input
         label="Kode Customer"
-        placeholder="CUST001"
+        placeholder="CST001"
         disabled={readOnly || mode === 'edit'}
         readOnly={mode === 'create' || mode === 'edit'}
         className={mode === 'create' || mode === 'edit' ? 'bg-gray-50' : ''}
@@ -42,10 +49,32 @@ export default function CustomerForm({ initialData, mode = 'create', onSubmit, o
         error={errors.nama?.message}
       />
       <Input
-        label="Kontak"
-        placeholder="0812xxxx"
+        label="Alamat"
+        placeholder="Alamat lengkap"
         disabled={readOnly}
-        {...register('kontak')}
+        {...register('alamat', { required: 'Alamat wajib diisi' })}
+        error={errors.alamat?.message}
+      />
+      <Input
+        label="No Telp"
+        placeholder="021-xxxxxxx"
+        disabled={readOnly}
+        {...register('telepon', { required: 'No Telp wajib diisi' })}
+        error={errors.telepon?.message}
+      />
+      <Input
+        label="Kontak Person"
+        placeholder="Nama kontak person"
+        disabled={readOnly}
+        {...register('kontak_person')}
+      />
+      <Select
+        label="Area"
+        placeholder="Pilih Area"
+        disabled={readOnly}
+        options={areaOptions}
+        {...register('kode_area', { required: 'Area wajib dipilih' })}
+        error={errors.kode_area?.message}
       />
       {!readOnly && (
         <div className="flex justify-end gap-2 pt-2">

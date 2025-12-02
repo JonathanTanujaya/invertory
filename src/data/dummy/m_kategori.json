@@ -1,20 +1,22 @@
 [
-  {
-    "id": "KAT001",
-    "nama_kategori": "Elektronik",
-    "deskripsi": "Komponen dan peralatan elektronik",
-    "created_at": "2024-01-15T08:00:00Z"
-  },
-  {
-    "id": "KAT002",
-    "nama_kategori": "Mekanik",
-    "deskripsi": "Komponen mekanik dan spare part",
-    "created_at": "2024-01-15T08:00:00Z"
-  },
-  {
-    "id": "KAT003",
-    "nama_kategori": "Aksesoris",
-    "deskripsi": "Aksesoris dan pelengkap",
-    "created_at": "2024-01-15T08:00:00Z"
-  }
+  { "kode_kategori": "KAT001", "nama_kategori": "Bearing & Filter" },
+  { "kode_kategori": "KAT002", "nama_kategori": "Body & Kabel" },
+  { "kode_kategori": "KAT003", "nama_kategori": "Transmisi" },
+  { "kode_kategori": "KAT004", "nama_kategori": "Oli & Pelumas" },
+  { "kode_kategori": "KAT005", "nama_kategori": "Elektrikal" },
+  { "kode_kategori": "KAT006", "nama_kategori": "Ban & Velg" },
+  { "kode_kategori": "KAT007", "nama_kategori": "Rem" },
+  { "kode_kategori": "KAT008", "nama_kategori": "Suspensi" },
+  { "kode_kategori": "KAT009", "nama_kategori": "Mesin" },
+  { "kode_kategori": "KAT010", "nama_kategori": "Knalpot" },
+  { "kode_kategori": "KAT011", "nama_kategori": "Aki & Baterai" },
+  { "kode_kategori": "KAT012", "nama_kategori": "Busi" },
+  { "kode_kategori": "KAT013", "nama_kategori": "Rantai & Gear" },
+  { "kode_kategori": "KAT014", "nama_kategori": "Kopling" },
+  { "kode_kategori": "KAT015", "nama_kategori": "Karburator" },
+  { "kode_kategori": "KAT016", "nama_kategori": "Radiator & Pendingin" },
+  { "kode_kategori": "KAT017", "nama_kategori": "Lampu & Sein" },
+  { "kode_kategori": "KAT018", "nama_kategori": "Spion & Kaca" },
+  { "kode_kategori": "KAT019", "nama_kategori": "Gasket & Seal" },
+  { "kode_kategori": "KAT020", "nama_kategori": "Aksesoris" }
 ]

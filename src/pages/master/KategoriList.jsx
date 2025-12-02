@@ -7,6 +7,8 @@ import Modal from '@/components/ui/Modal';
 import KategoriForm from './KategoriForm';
 import AreaForm from './AreaForm';
 import { toast } from 'react-toastify';
+import kategoriJson from '@/data/dummy/m_kategori.json';
+import areaJson from '@/data/dummy/m_area.json';
 
 export default function KategoriList() {
   const [kategoriData, setKategoriData] = useState([]);
@@ -21,22 +23,21 @@ export default function KategoriList() {
   const [areaMode, setAreaMode] = useState('create');
 
   const kategoriColumns = [
-    { 
-      key: 'kode', 
-      label: 'Kode', 
+    {
+      key: 'kode_kategori',
+      label: 'Kode',
       sortable: true,
       render: (value) => (
         <span className="font-mono font-semibold text-primary-600">{value}</span>
       ),
     },
-    { key: 'nama', label: 'Nama Kategori', sortable: true },
+    { key: 'nama_kategori', label: 'Nama Kategori', sortable: true },
     {
       key: 'actions',
       label: 'Aksi',
       align: 'center',
       render: (_, row) => (
         <div className="flex items-center justify-center gap-2">
-          <Button size="sm" variant="ghost" onClick={() => handleViewKategori(row)}><Eye className="w-4 h-4" /></Button>
           <Button size="sm" variant="ghost" onClick={() => handleEditKategori(row)}><Edit className="w-4 h-4" /></Button>
           <Button size="sm" variant="ghost" onClick={() => handleDeleteKategori(row)}><Trash2 className="w-4 h-4 text-error-500" /></Button>
         </div>
@@ -45,9 +46,9 @@ export default function KategoriList() {
   ];
 
   const areaColumns = [
-    { 
-      key: 'kode_area', 
-      label: 'Kode', 
+    {
+      key: 'kode_area',
+      label: 'Kode',
       sortable: true,
       render: (value) => (
         <span className="font-mono font-semibold text-primary-600">{value}</span>
@@ -60,7 +61,6 @@ export default function KategoriList() {
       align: 'center',
       render: (_, row) => (
         <div className="flex items-center justify-center gap-2">
-          <Button size="sm" variant="ghost" onClick={() => handleViewArea(row)}><Eye className="w-4 h-4" /></Button>
           <Button size="sm" variant="ghost" onClick={() => handleEditArea(row)}><Edit className="w-4 h-4" /></Button>
           <Button size="sm" variant="ghost" onClick={() => handleDeleteArea(row)}><Trash2 className="w-4 h-4 text-error-500" /></Button>
         </div>
@@ -76,12 +76,7 @@ export default function KategoriList() {
   const fetchKategoriData = () => {
     setKategoriLoading(true);
     setTimeout(() => {
-      const dummy = [
-        { kode: 'KTG001', nama: 'Elektronik' },
-        { kode: 'KTG002', nama: 'Mekanik' },
-        { kode: 'KTG003', nama: 'Aksesoris' }
-      ];
-      setKategoriData(dummy);
+      setKategoriData(kategoriJson);
       setKategoriLoading(false);
     }, 300);
   };
@@ -89,14 +84,7 @@ export default function KategoriList() {
   const fetchAreaData = () => {
     setAreaLoading(true);
     setTimeout(() => {
-      const dummy = [
-        { kode_area: 'JKT', nama_area: 'Jakarta' },
-        { kode_area: 'BDG', nama_area: 'Bandung' },
-        { kode_area: 'SBY', nama_area: 'Surabaya' },
-        { kode_area: 'YGY', nama_area: 'Yogyakarta' },
-        { kode_area: 'SMG', nama_area: 'Semarang' }
-      ];
-      setAreaData(dummy);
+      setAreaData(areaJson);
       setAreaLoading(false);
     }, 300);
   };
@@ -104,9 +92,8 @@ export default function KategoriList() {
   // Kategori handlers
   const handleCreateKategori = () => { setKategoriMode('create'); setSelectedKategori(null); setShowKategoriModal(true); };
   const handleEditKategori = (item) => { setKategoriMode('edit'); setSelectedKategori(item); setShowKategoriModal(true); };
-  const handleViewKategori = (item) => { setKategoriMode('view'); setSelectedKategori(item); setShowKategoriModal(true); };
   const handleDeleteKategori = (item) => {
-    if (window.confirm(`Hapus kategori ${item.nama}?\n\nPerhatian: Pastikan tidak ada barang yang menggunakan kategori ini.`)) {
+    if (window.confirm(`Hapus kategori ${item.nama_kategori}?\n\nPerhatian: Pastikan tidak ada barang yang menggunakan kategori ini.`)) {
       toast.success('Kategori berhasil dihapus');
       fetchKategoriData();
     }
@@ -121,7 +108,6 @@ export default function KategoriList() {
   // Area handlers
   const handleCreateArea = () => { setAreaMode('create'); setSelectedArea(null); setShowAreaModal(true); };
   const handleEditArea = (item) => { setAreaMode('edit'); setSelectedArea(item); setShowAreaModal(true); };
-  const handleViewArea = (item) => { setAreaMode('view'); setSelectedArea(item); setShowAreaModal(true); };
   const handleDeleteArea = (item) => {
     if (window.confirm(`Hapus area ${item.nama_area}?\n\nPerhatian: Pastikan tidak ada customer yang menggunakan area ini.`)) {
       toast.success('Area berhasil dihapus');
@@ -136,29 +122,81 @@ export default function KategoriList() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-6">
+    <div className="h-[calc(100vh-120px)] pb-4">
+      <div className="grid grid-cols-2 gap-6 h-full">
         {/* Kategori Section */}
-        <Card>
-          <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col h-full overflow-hidden bg-white rounded-lg shadow-soft border border-gray-200">
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
             <h2 className="text-xl font-semibold text-gray-900">Kategori Barang</h2>
             <Button onClick={handleCreateKategori} startIcon={<Plus className="w-4 h-4" />}>
               Tambah Kategori
             </Button>
           </div>
-          <DataTable columns={kategoriColumns} data={kategoriData} loading={kategoriLoading} pagination={false} />
-        </Card>
+          <div className="flex-1 overflow-y-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50 sticky top-0 z-10">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kode</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Kategori</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {kategoriData.map((row, idx) => (
+                  <tr key={idx} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-sm">
+                      <span className="font-mono font-semibold text-primary-600">{row.kode_kategori}</span>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-900">{row.nama_kategori}</td>
+                    <td className="px-4 py-3 text-center">
+                      <div className="flex items-center justify-center gap-2">
+                        <Button size="sm" variant="ghost" onClick={() => handleEditKategori(row)}><Edit className="w-4 h-4" /></Button>
+                        <Button size="sm" variant="ghost" onClick={() => handleDeleteKategori(row)}><Trash2 className="w-4 h-4 text-error-500" /></Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
 
         {/* Area Section */}
-        <Card>
-          <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col h-full overflow-hidden bg-white rounded-lg shadow-soft border border-gray-200">
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
             <h2 className="text-xl font-semibold text-gray-900">Area Customer</h2>
             <Button onClick={handleCreateArea} startIcon={<Plus className="w-4 h-4" />}>
               Tambah Area
             </Button>
           </div>
-          <DataTable columns={areaColumns} data={areaData} loading={areaLoading} pagination={false} />
-        </Card>
+          <div className="flex-1 overflow-y-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50 sticky top-0 z-10">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kode</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Area</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {areaData.map((row, idx) => (
+                  <tr key={idx} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-sm">
+                      <span className="font-mono font-semibold text-primary-600">{row.kode_area}</span>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-900">{row.nama_area}</td>
+                    <td className="px-4 py-3 text-center">
+                      <div className="flex items-center justify-center gap-2">
+                        <Button size="sm" variant="ghost" onClick={() => handleEditArea(row)}><Edit className="w-4 h-4" /></Button>
+                        <Button size="sm" variant="ghost" onClick={() => handleDeleteArea(row)}><Trash2 className="w-4 h-4 text-error-500" /></Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       {/* Kategori Modal */}

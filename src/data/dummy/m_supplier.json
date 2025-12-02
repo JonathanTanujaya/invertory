@@ -2,17 +2,17 @@
   {
     "kode_supplier": "SUP001",
     "nama_supplier": "PT Supplier Jaya",
-    "alamat": "Jl. Supplier No. 123, Jakarta",
+    "alamat": "Jl. Industri No. 123, Jakarta Utara",
     "telepon": "021-1234567",
-    "email": "supplier@example.com",
+    "email": "supplier.jaya@example.com",
     "created_at": "2024-01-15T08:00:00Z"
   },
   {
     "kode_supplier": "SUP002",
-    "nama_supplier": "CV Maju Jaya",
+    "nama_supplier": "CV Maju Bersama",
     "alamat": "Jl. Maju No. 456, Bandung",
     "telepon": "022-7654321",
-    "email": "maju@example.com",
+    "email": "maju.bersama@example.com",
     "created_at": "2024-01-15T08:00:00Z"
   },
   {
@@ -22,5 +22,141 @@
     "telepon": "031-9876543",
     "email": "berkah@example.com",
     "created_at": "2024-01-15T08:00:00Z"
+  },
+  {
+    "kode_supplier": "SUP004",
+    "nama_supplier": "PT Honda Genuine Parts",
+    "alamat": "Jl. Sunter Permai No. 10, Jakarta Utara",
+    "telepon": "021-6501234",
+    "email": "honda.parts@example.com",
+    "created_at": "2024-01-16T08:00:00Z"
+  },
+  {
+    "kode_supplier": "SUP005",
+    "nama_supplier": "PT Yamaha Indonesia Motor",
+    "alamat": "Jl. Pulo Gadung No. 55, Jakarta Timur",
+    "telepon": "021-4601234",
+    "email": "yamaha.motor@example.com",
+    "created_at": "2024-01-16T08:00:00Z"
+  },
+  {
+    "kode_supplier": "SUP006",
+    "nama_supplier": "CV Sumber Bearing",
+    "alamat": "Jl. Mangga Dua Raya No. 88, Jakarta Pusat",
+    "telepon": "021-6123456",
+    "email": "sumber.bearing@example.com",
+    "created_at": "2024-01-17T08:00:00Z"
+  },
+  {
+    "kode_supplier": "SUP007",
+    "nama_supplier": "PT NGK Busi Indonesia",
+    "alamat": "Jl. Cikarang Industrial Estate, Bekasi",
+    "telepon": "021-8901234",
+    "email": "ngk.busi@example.com",
+    "created_at": "2024-01-17T08:00:00Z"
+  },
+  {
+    "kode_supplier": "SUP008",
+    "nama_supplier": "PT Federal Oil",
+    "alamat": "Jl. Raya Narogong KM 12, Bekasi",
+    "telepon": "021-8234567",
+    "email": "federal.oil@example.com",
+    "created_at": "2024-01-18T08:00:00Z"
+  },
+  {
+    "kode_supplier": "SUP009",
+    "nama_supplier": "CV Aneka Ban Motor",
+    "alamat": "Jl. Otista Raya No. 200, Jakarta Timur",
+    "telepon": "021-8567890",
+    "email": "aneka.ban@example.com",
+    "created_at": "2024-01-18T08:00:00Z"
+  },
+  {
+    "kode_supplier": "SUP010",
+    "nama_supplier": "PT IRC Indonesia",
+    "alamat": "Jl. Industri Raya III, Tangerang",
+    "telepon": "021-5901234",
+    "email": "irc.indonesia@example.com",
+    "created_at": "2024-01-19T08:00:00Z"
+  },
+  {
+    "kode_supplier": "SUP011",
+    "nama_supplier": "PT Denso Indonesia",
+    "alamat": "Jl. Gaya Motor I No. 6, Jakarta Utara",
+    "telepon": "021-6512345",
+    "email": "denso.id@example.com",
+    "created_at": "2024-01-19T08:00:00Z"
+  },
+  {
+    "kode_supplier": "SUP012",
+    "nama_supplier": "CV Sinar Aki",
+    "alamat": "Jl. KH Mas Mansyur No. 45, Jakarta Pusat",
+    "telepon": "021-3901234",
+    "email": "sinar.aki@example.com",
+    "created_at": "2024-01-20T08:00:00Z"
+  },
+  {
+    "kode_supplier": "SUP013",
+    "nama_supplier": "PT Aspira Prima",
+    "alamat": "Jl. Raya Bekasi KM 28, Bekasi",
+    "telepon": "021-8812345",
+    "email": "aspira.prima@example.com",
+    "created_at": "2024-01-20T08:00:00Z"
+  },
+  {
+    "kode_supplier": "SUP014",
+    "nama_supplier": "CV Kabel Motor Jaya",
+    "alamat": "Jl. Pasar Minggu No. 100, Jakarta Selatan",
+    "telepon": "021-7812345",
+    "email": "kabel.jaya@example.com",
+    "created_at": "2024-01-21T08:00:00Z"
+  },
+  {
+    "kode_supplier": "SUP015",
+    "nama_supplier": "PT Indoparts",
+    "alamat": "Jl. Gatot Subroto No. 177, Bandung",
+    "telepon": "022-7312345",
+    "email": "indoparts@example.com",
+    "created_at": "2024-01-21T08:00:00Z"
+  },
+  {
+    "kode_supplier": "SUP016",
+    "nama_supplier": "CV Sentral Sparepart",
+    "alamat": "Jl. Wonokromo No. 88, Surabaya",
+    "telepon": "031-5612345",
+    "email": "sentral.spare@example.com",
+    "created_at": "2024-01-22T08:00:00Z"
+  },
+  {
+    "kode_supplier": "SUP017",
+    "nama_supplier": "PT Global Motor Parts",
+    "alamat": "Jl. Raya Cibitung No. 50, Bekasi",
+    "telepon": "021-8912345",
+    "email": "global.motor@example.com",
+    "created_at": "2024-01-22T08:00:00Z"
+  },
+  {
+    "kode_supplier": "SUP018",
+    "nama_supplier": "CV Mega Bearing",
+    "alamat": "Jl. ABC No. 33, Semarang",
+    "telepon": "024-8412345",
+    "email": "mega.bearing@example.com",
+    "created_at": "2024-01-23T08:00:00Z"
+  },
+  {
+    "kode_supplier": "SUP019",
+    "nama_supplier": "PT Suzuki Genuine Parts",
+    "alamat": "Jl. Raya Tambun KM 38, Bekasi",
+    "telepon": "021-8812346",
+    "email": "suzuki.parts@example.com",
+    "created_at": "2024-01-23T08:00:00Z"
+  },
+  {
+    "kode_supplier": "SUP020",
+    "nama_supplier": "CV Prima Oli",
+    "alamat": "Jl. Pemuda No. 150, Surabaya",
+    "telepon": "031-5312345",
+    "email": "prima.oli@example.com",
+    "created_at": "2024-01-24T08:00:00Z"
   }
 ]
