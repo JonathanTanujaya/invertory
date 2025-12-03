@@ -17,6 +17,13 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
+  RotateCcw,
+  Undo2,
+  ClipboardCheck,
+  MessageSquareWarning,
+  Boxes,
+  AlertTriangle,
+  FileBarChart,
 } from 'lucide-react';
 
 // Inventory-only navigation (finance & non-inventory masters removed)
@@ -42,19 +49,19 @@ const menuItems = [
     submenu: [
       { title: 'Stok Masuk', path: '/transactions/pembelian', icon: TrendingUp },
       { title: 'Stok Keluar', path: '/transactions/penjualan', icon: TrendingDown },
-      { title: 'Retur Pembelian', path: '/transactions/retur-pembelian' },
-      { title: 'Retur Penjualan', path: '/transactions/retur-penjualan' },
-      { title: 'Stok Opname', path: '/transactions/stok-opname' },
-      { title: 'Customer Claim', path: '/transactions/customer-claim' },
+      { title: 'Retur Pembelian', path: '/transactions/retur-pembelian', icon: Undo2 },
+      { title: 'Retur Penjualan', path: '/transactions/retur-penjualan', icon: RotateCcw },
+      { title: 'Stok Opname', path: '/transactions/stok-opname', icon: ClipboardCheck },
+      { title: 'Customer Claim', path: '/transactions/customer-claim', icon: MessageSquareWarning },
     ],
   },
   {
     title: 'Laporan',
     icon: FileText,
     submenu: [
-      { title: 'Stok Barang', path: '/reports/stok-barang' },
-      { title: 'Stok Alert', path: '/reports/stok-alert' },
-      { title: 'Kartu Stok', path: '/reports/kartu-stok' },
+      { title: 'Stok Barang', path: '/reports/stok-barang', icon: Boxes },
+      { title: 'Stok Alert', path: '/reports/stok-alert', icon: AlertTriangle },
+      { title: 'Kartu Stok', path: '/reports/kartu-stok', icon: FileBarChart },
     ],
   },
   {

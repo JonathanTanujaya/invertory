@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trash2, Save, X, Search, Package } from 'lucide-react';
+import { Trash2, Save, Search, Package, RotateCcw, FileText } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -48,7 +48,7 @@ export default function ReturPembelianForm() {
   const filteredFaktur = useMemo(() => {
     if (!searchFaktur) return stokMasukData.slice(0, 10);
     const query = searchFaktur.toLowerCase();
-    return stokMasukData.filter(faktur => 
+    return stokMasukData.filter(faktur =>
       faktur.no_faktur.toLowerCase().includes(query) ||
       supplierMap[faktur.kode_supplier]?.toLowerCase().includes(query)
     ).slice(0, 10);
@@ -56,7 +56,7 @@ export default function ReturPembelianForm() {
 
   // Handle pilih faktur
   const handleSelectFaktur = (faktur) => {
-    setSelectedFaktur(faktur);
+    setSelectedFaktur(faktur); // Set faktur yang dipilih agar card barang muncul
     setValue('no_faktur_pembelian', faktur.no_faktur);
     setSearchFaktur(faktur.no_faktur);
     setShowFakturDropdown(false);
@@ -76,8 +76,8 @@ export default function ReturPembelianForm() {
       nama_barang: item.nama_barang,
       jumlah_pembelian: item.jumlah,
       harga: item.harga,
-      jumlah_retur: 1,
-      subtotal: item.harga
+      jumlah_retur: item.jumlah,
+      subtotal: item.jumlah * item.harga
     }]);
     toast.success('Barang ditambahkan ke daftar retur');
   };
@@ -92,8 +92,8 @@ export default function ReturPembelianForm() {
     setReturItems(returItems.map(item => {
       if (item.kode_barang === kode_barang) {
         const jumlah = parseInt(value) || 0;
-        return { 
-          ...item, 
+        return {
+          ...item,
           jumlah_retur: jumlah,
           subtotal: jumlah * item.harga
         };
@@ -115,7 +115,7 @@ export default function ReturPembelianForm() {
     }
 
     // Validasi jumlah retur
-    const invalidItems = returItems.filter(item => 
+    const invalidItems = returItems.filter(item =>
       item.jumlah_retur <= 0 || item.jumlah_retur > item.jumlah_pembelian
     );
     if (invalidItems.length > 0) {
@@ -141,7 +141,7 @@ export default function ReturPembelianForm() {
     try {
       console.log('Submitting retur pembelian:', payload);
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       toast.success('Retur pembelian berhasil disimpan!');
       navigate('/transactions/retur-pembelian');
     } catch (error) {
@@ -153,11 +153,11 @@ export default function ReturPembelianForm() {
   };
 
   return (
-    <div className="space-y-6">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <div className="flex flex-col h-[calc(100vh-9rem)]">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 space-y-4 h-full">
         {/* Informasi Retur */}
-        <Card>
-          <div className="px-4 py-3 space-y-3">
+        <Card className="px-1.5 py-0">
+          <div className="space-y-3">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* No Retur */}
               <Input
@@ -177,8 +177,8 @@ export default function ReturPembelianForm() {
               />
 
               {/* Pilih Faktur Pembelian */}
-              <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+              <div className="relative w-full">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   No. Faktur Pembelian <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
@@ -220,20 +220,20 @@ export default function ReturPembelianForm() {
                                 {new Date(faktur.tanggal).toLocaleDateString('id-ID', {
                                   day: 'numeric',
                                   month: 'long',
-                                year: 'numeric'
-                              })}
+                                  year: 'numeric'
+                                })}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-sm font-medium text-gray-900">{formatCurrency(faktur.total)}</div>
+                              <div className="text-xs text-gray-500">{faktur.items.length} item</div>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <div className="text-sm font-medium text-gray-900">{formatCurrency(faktur.total)}</div>
-                            <div className="text-xs text-gray-500">{faktur.items.length} item</div>
-                          </div>
                         </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              )}
+                      ))
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -275,13 +275,8 @@ export default function ReturPembelianForm() {
 
         {/* Barang dari Faktur */}
         {selectedFaktur && (
-          <Card>
-            <div className="p-6 space-y-4">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                <Package className="w-5 h-5 inline-block mr-2" />
-                Barang dalam Faktur {selectedFaktur.no_faktur}
-              </h2>
-              
+          <Card padding={false}>
+            <div className="p-3 space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {selectedFaktur.items.map(item => {
                   const isAdded = returItems.find(r => r.kode_barang === item.kode_barang);
@@ -320,16 +315,26 @@ export default function ReturPembelianForm() {
         )}
 
         {/* Daftar Barang Retur */}
-        <Card>
-          <div className="p-6 space-y-4">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Daftar Barang Retur</h2>
-
-            {returItems.length === 0 ? (
-              <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                <Package className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                <p className="text-gray-600">Belum ada barang untuk diretur</p>
-                <p className="text-sm text-gray-500 mt-1">
-                  Pilih faktur pembelian dan tambahkan barang yang akan diretur
+        <Card className="flex-1 flex flex-col px-1.5 py-1.5">
+          <div className="flex-1 flex flex-col">
+            {!selectedFaktur ? (
+              <div className="flex-1 min-h-[280px] flex flex-col items-center justify-center text-center bg-gray-50/50 border border-dashed border-gray-200 rounded-lg">
+                <div className="w-14 h-14 bg-primary-50 rounded-xl flex items-center justify-center mb-4">
+                  <FileText className="w-7 h-7 text-primary-500" />
+                </div>
+                <p className="text-gray-700 font-medium text-base mb-1">Pilih Faktur Pembelian</p>
+                <p className="text-sm text-gray-400">
+                  Cari faktur pada field di atas untuk memulai proses retur
+                </p>
+              </div>
+            ) : returItems.length === 0 ? (
+              <div className="flex-1 min-h-[280px] flex flex-col items-center justify-center text-center bg-amber-50/50 border border-dashed border-amber-200 rounded-lg">
+                <div className="w-14 h-14 bg-amber-100 rounded-xl flex items-center justify-center mb-4">
+                  <Package className="w-7 h-7 text-amber-500" />
+                </div>
+                <p className="text-amber-700 font-medium text-base mb-1">Pilih Barang untuk Retur</p>
+                <p className="text-sm text-amber-500">
+                  Klik "Tambah ke Retur" pada card barang di atas
                 </p>
               </div>
             ) : (
@@ -420,28 +425,44 @@ export default function ReturPembelianForm() {
         </Card>
 
         {/* Actions */}
-        <div className="flex justify-end space-x-3">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => navigate('/transactions/retur-pembelian')}
-          >
-            Batal
-          </Button>
-          <Button
-            type="submit"
-            disabled={loading || returItems.length === 0}
-          >
-            <Save className="w-4 h-4 mr-2" />
-            {loading ? 'Menyimpan...' : 'Simpan Retur'}
-          </Button>
+        <div className="px-5 py-2.5 bg-white border border-gray-200 rounded-lg shadow-sm flex-shrink-0">
+          <div className="flex items-center justify-end gap-2 h-12">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                // Clear semua form dan state
+                setSearchFaktur('');
+                setSelectedFaktur(null);
+                setReturItems([]);
+                setValue('no_faktur_pembelian', '');
+                setValue('alasan', '');
+                setValue('tanggal_retur', new Date().toISOString().split('T')[0]);
+                // Generate nomor retur baru
+                const today = new Date();
+                const returNo = `RP-${today.getFullYear()}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`;
+                setValue('no_retur', returNo);
+                toast.info('Form telah direset');
+              }}
+            >
+              <RotateCcw className="w-4 h-4 mr-2" />
+              Clear
+            </Button>
+            <Button
+              type="submit"
+              disabled={loading || returItems.length === 0}
+            >
+              <Save className="w-4 h-4 mr-2" />
+              {loading ? 'Menyimpan...' : 'Simpan Retur'}
+            </Button>
+          </div>
         </div>
       </form>
 
       {/* Click outside to close dropdown */}
       {showFakturDropdown && (
-        <div 
-          className="fixed inset-0 z-0" 
+        <div
+          className="fixed inset-0 z-0"
           onClick={() => setShowFakturDropdown(false)}
         />
       )}

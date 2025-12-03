@@ -274,15 +274,15 @@ export default function SalesForm() {
               />
             </div>
           </div>
-
           {/* Baris 2: Catatan full */}
-          <div className="mt-4 relative z-0">
+          <div className="relative z-0">
             <Input
               label="Catatan"
               {...register('catatan')}
               placeholder="Catatan (opsional)"
             />
           </div>
+
         </Card>
 
         <Card padding={false} className="flex-1 overflow-hidden">
@@ -298,14 +298,10 @@ export default function SalesForm() {
                     <th className="p-0 text-center w-16">Aksi</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200/60">
+                <tbody>
                   {items.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="py-16 text-center">
-                        <div className="text-gray-500 text-base">
-                          Belum ada item. Ketik pada pencarian di atas untuk menambahkan.
-                        </div>
-                      </td>
+                      <td colSpan={5} className="p-0 h-12 text-center text-gray-400">Belum ada item</td>
                     </tr>
                   ) : (
                     items.map((item, index) => (
@@ -315,6 +311,7 @@ export default function SalesForm() {
                         <td className="p-0 align-middle text-gray-900 truncate max-w-[180px]">{item.nama_barang}</td>
                         <td className="p-0 text-center align-middle">
                           <input
+                            id={`qty-${index}`}
                             type="number"
                             min="1"
                             max={item.stok}
@@ -334,7 +331,6 @@ export default function SalesForm() {
                               }}
                               className="text-gray-400 hover:text-primary-600 transition-colors"
                             >
-                              {/* Pencil icon */}
                               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
                                 <path d="M15.586 2.586a2 2 0 0 0-2.828 0L4.414 10.93a2 2 0 0 0-.586 1.414V15a1 1 0 0 0 1 1h2.657a2 2 0 0 0 1.414-.586l8.344-8.344a2 2 0 0 0 0-2.828l-1.657-1.656Zm-3.172.828 3.172 3.172-1.172 1.172-3.172-3.172 1.172-1.172ZM11 7.414l-5 5V13h.586l5-5L11 7.414Z" />
                               </svg>
@@ -345,7 +341,6 @@ export default function SalesForm() {
                               onClick={() => handleDeleteItem(index)}
                               className="text-gray-400 hover:text-red-600 transition-colors"
                             >
-                              {/* Trash icon */}
                               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
                                 <path d="M8.5 3a1 1 0 0 0-.94.658L7.11 5H4a1 1 0 1 0 0 2h.278l.805 8.053A2 2 0 0 0 7.07 17h5.86a2 2 0 0 0 1.988-1.947L15.722 7H16a1 1 0 1 0 0-2h-3.11l-.45-1.342A1 1 0 0 0 11.5 3h-3ZM9 9a1 1 0 0 1 2 0v5a1 1 0 1 1-2 0V9Z" />
                               </svg>
