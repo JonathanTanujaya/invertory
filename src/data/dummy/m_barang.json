@@ -8,7 +8,6 @@
     "stok_minimal": 10,
     "harga_beli": 25000,
     "harga_jual": 35000,
-    "lokasi_rak": "A1-01",
     "created_at": "2024-01-15T08:00:00Z"
   },
   {
@@ -20,7 +19,6 @@
     "stok_minimal": 15,
     "harga_beli": 150000,
     "harga_jual": 195000,
-    "lokasi_rak": "B2-05",
     "created_at": "2024-01-15T08:00:00Z"
   },
   {
@@ -32,7 +30,6 @@
     "stok_minimal": 20,
     "harga_beli": 18000,
     "harga_jual": 28000,
-    "lokasi_rak": "A1-02",
     "created_at": "2024-01-15T08:00:00Z"
   },
   {
@@ -44,7 +41,6 @@
     "stok_minimal": 15,
     "harga_beli": 35000,
     "harga_jual": 50000,
-    "lokasi_rak": "B1-01",
     "created_at": "2024-01-16T08:00:00Z"
   },
   {
@@ -56,7 +52,6 @@
     "stok_minimal": 12,
     "harga_beli": 30000,
     "harga_jual": 45000,
-    "lokasi_rak": "B1-02",
     "created_at": "2024-01-16T08:00:00Z"
   },
   {
@@ -68,7 +63,6 @@
     "stok_minimal": 30,
     "harga_beli": 85000,
     "harga_jual": 120000,
-    "lokasi_rak": "A2-01",
     "created_at": "2024-01-17T08:00:00Z"
   },
   {
@@ -80,7 +74,6 @@
     "stok_minimal": 25,
     "harga_beli": 45000,
     "harga_jual": 65000,
-    "lokasi_rak": "A2-02",
     "created_at": "2024-01-17T08:00:00Z"
   },
   {
@@ -92,7 +85,6 @@
     "stok_minimal": 8,
     "harga_beli": 95000,
     "harga_jual": 135000,
-    "lokasi_rak": "C1-01",
     "created_at": "2024-01-18T08:00:00Z"
   },
   {
@@ -104,7 +96,6 @@
     "stok_minimal": 10,
     "harga_beli": 85000,
     "harga_jual": 120000,
-    "lokasi_rak": "C1-02",
     "created_at": "2024-01-18T08:00:00Z"
   },
   {
@@ -116,7 +107,6 @@
     "stok_minimal": 5,
     "harga_beli": 45000,
     "harga_jual": 65000,
-    "lokasi_rak": "C1-03",
     "created_at": "2024-01-19T08:00:00Z"
   },
   {
@@ -128,7 +118,6 @@
     "stok_minimal": 20,
     "harga_beli": 38000,
     "harga_jual": 55000,
-    "lokasi_rak": "D1-01",
     "created_at": "2024-01-20T08:00:00Z"
   },
   {
@@ -140,7 +129,6 @@
     "stok_minimal": 15,
     "harga_beli": 42000,
     "harga_jual": 60000,
-    "lokasi_rak": "D1-02",
     "created_at": "2024-01-20T08:00:00Z"
   },
   {
@@ -152,7 +140,6 @@
     "stok_minimal": 10,
     "harga_beli": 22000,
     "harga_jual": 35000,
-    "lokasi_rak": "D1-03",
     "created_at": "2024-01-21T08:00:00Z"
   },
   {
@@ -164,7 +151,6 @@
     "stok_minimal": 8,
     "harga_beli": 75000,
     "harga_jual": 110000,
-    "lokasi_rak": "C2-01",
     "created_at": "2024-01-22T08:00:00Z"
   },
   {
@@ -176,7 +162,6 @@
     "stok_minimal": 5,
     "harga_beli": 185000,
     "harga_jual": 250000,
-    "lokasi_rak": "C2-02",
     "created_at": "2024-01-22T08:00:00Z"
   },
   {
@@ -188,7 +173,6 @@
     "stok_minimal": 10,
     "harga_beli": 65000,
     "harga_jual": 95000,
-    "lokasi_rak": "E1-01",
     "created_at": "2024-01-23T08:00:00Z"
   },
   {
@@ -200,7 +184,6 @@
     "stok_minimal": 20,
     "harga_beli": 25000,
     "harga_jual": 40000,
-    "lokasi_rak": "E1-02",
     "created_at": "2024-01-23T08:00:00Z"
   },
   {
@@ -212,7 +195,6 @@
     "stok_minimal": 8,
     "harga_beli": 165000,
     "harga_jual": 220000,
-    "lokasi_rak": "E2-01",
     "created_at": "2024-01-24T08:00:00Z"
   },
   {
@@ -224,7 +206,6 @@
     "stok_minimal": 6,
     "harga_beli": 195000,
     "harga_jual": 265000,
-    "lokasi_rak": "E2-02",
     "created_at": "2024-01-24T08:00:00Z"
   },
   {
@@ -236,7 +217,6 @@
     "stok_minimal": 5,
     "harga_beli": 125000,
     "harga_jual": 175000,
-    "lokasi_rak": "F1-01",
     "created_at": "2024-01-25T08:00:00Z"
   },
   {
@@ -248,7 +228,6 @@
     "stok_minimal": 4,
     "harga_beli": 145000,
     "harga_jual": 195000,
-    "lokasi_rak": "F1-02",
     "created_at": "2024-01-25T08:00:00Z"
   },
   {
@@ -260,7 +239,6 @@
     "stok_minimal": 12,
     "harga_beli": 28000,
     "harga_jual": 45000,
-    "lokasi_rak": "F2-01",
     "created_at": "2024-01-26T08:00:00Z"
   },
   {
@@ -272,7 +250,6 @@
     "stok_minimal": 10,
     "harga_beli": 18000,
     "harga_jual": 30000,
-    "lokasi_rak": "B2-01",
     "created_at": "2024-01-27T08:00:00Z"
   },
   {
@@ -284,7 +261,6 @@
     "stok_minimal": 8,
     "harga_beli": 22000,
     "harga_jual": 35000,
-    "lokasi_rak": "B2-02",
     "created_at": "2024-01-27T08:00:00Z"
   },
   {
@@ -296,7 +272,6 @@
     "stok_minimal": 6,
     "harga_beli": 25000,
     "harga_jual": 40000,
-    "lokasi_rak": "B2-03",
     "created_at": "2024-01-28T08:00:00Z"
   }
 ]
