@@ -4,6 +4,7 @@ import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { toast } from 'react-toastify';
+import { RotateCcw } from 'lucide-react';
 
 export default function SalesForm() {
   const {
@@ -275,7 +276,7 @@ export default function SalesForm() {
             </div>
           </div>
           {/* Baris 2: Catatan full */}
-          <div className="relative z-0">
+          <div className="relative z-0 mt-3">
             <Input
               label="Catatan"
               {...register('catatan')}
@@ -298,10 +299,14 @@ export default function SalesForm() {
                     <th className="p-0 text-center w-16">Aksi</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-gray-200/60">
                   {items.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="p-0 h-12 text-center text-gray-400">Belum ada item</td>
+                      <td colSpan={5} className="py-16 text-center">
+                        <div className="text-gray-500 text-base">
+                          Belum ada item. Ketik pada pencarian di atas untuk menambahkan.
+                        </div>
+                      </td>
                     </tr>
                   ) : (
                     items.map((item, index) => (
@@ -374,8 +379,24 @@ export default function SalesForm() {
               <div className="text-sm text-gray-400 font-medium">Belum ada item</div>
             )}
             <div className="flex items-center gap-2 ml-auto">
-              <Button type="button" variant="outline" className="px-4 py-1.5 text-sm h-9">
-                Batal
+              <Button
+                type="button"
+                variant="outline"
+                className="px-4 py-1.5 text-sm h-9"
+                onClick={() => {
+                  setItems([]);
+                  setSearchQuery('');
+                  setCustomerQuery('');
+                  setPendingQty(1);
+                  setValue('no_faktur', '');
+                  setValue('tanggal', new Date().toISOString().split('T')[0]);
+                  setValue('kode_customer', '');
+                  setValue('catatan', '');
+                  toast.info('Form telah direset');
+                }}
+              >
+                <RotateCcw className="w-4 h-4 mr-2" />
+                Clear
               </Button>
               <Button type="submit" loading={isSubmitting} className="px-4 py-1.5 text-sm h-9">
                 Simpan Penjualan

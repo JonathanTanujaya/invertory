@@ -4,6 +4,7 @@ import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { toast } from 'react-toastify';
+import { RotateCcw } from 'lucide-react';
 import supplierData from '@/data/dummy/m_supplier.json';
 import barangData from '@/data/dummy/m_barang.json';
 
@@ -267,7 +268,7 @@ export default function PurchaseForm() {
           </div>
 
           {/* Baris 2: Catatan full */}
-          <div className="mt-4 relative z-0">
+          <div className="mt-3 relative z-0">
             <Input
               label="Catatan"
               {...register('catatan')}
@@ -369,8 +370,24 @@ export default function PurchaseForm() {
               <div className="text-sm text-gray-400 font-medium">Belum ada item</div>
             )}
             <div className="flex items-center gap-2 ml-auto">
-              <Button type="button" variant="outline" className="px-4 py-1.5 text-sm h-9">
-                Batal
+              <Button
+                type="button"
+                variant="outline"
+                className="px-4 py-1.5 text-sm h-9"
+                onClick={() => {
+                  setItems([]);
+                  setSearchQuery('');
+                  setSupplierQuery('');
+                  setPendingQty(1);
+                  setValue('no_faktur', '');
+                  setValue('tanggal', new Date().toISOString().split('T')[0]);
+                  setValue('kode_supplier', '');
+                  setValue('catatan', '');
+                  toast.info('Form telah direset');
+                }}
+              >
+                <RotateCcw className="w-4 h-4 mr-2" />
+                Clear
               </Button>
               <Button type="submit" loading={isSubmitting} className="px-4 py-1.5 text-sm h-9">
                 Simpan Pembelian

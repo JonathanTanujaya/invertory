@@ -1,165 +1,279 @@
 import { useEffect, useState } from 'react';
-import { Package, TrendingUp, TrendingDown, AlertTriangle, DollarSign } from 'lucide-react';
+import {
+  Package,
+  TrendingUp,
+  TrendingDown,
+  AlertTriangle,
+  Clock,
+  Trophy,
+  ArrowUpRight,
+  ArrowDownRight,
+  Activity
+} from 'lucide-react';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer
+} from 'recharts';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
-import { formatCurrency, formatNumber } from '@/utils/helpers';
+import { formatNumber } from '@/utils/helpers';
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
     totalSKU: 0,
-    totalStockValue: 0,
-    lowStockCount: 0,
-    todayPurchases: 0,
-    todaySales: 0,
+    stokMasukHariIni: 0,
+    stokKeluarHariIni: 0,
+    stokAlertCount: 0,
   });
 
-  const [lowStockItems, setLowStockItems] = useState([]);
+  const [chartData, setChartData] = useState([]);
+  const [comparison, setComparison] = useState({
+    stokMasuk: { value: 0, percent: 0 },
+    stokKeluar: { value: 0, percent: 0 },
+    totalTransaksi: { value: 0, percent: 0 },
+  });
+  const [topItems, setTopItems] = useState([]);
+  const [recentActivity, setRecentActivity] = useState([]);
 
   useEffect(() => {
-    // Fetch dashboard data
-    // This will be replaced with actual API call
+    // Fetch dashboard data - akan diganti dengan API call
     setStats({
       totalSKU: 1250,
-      totalStockValue: 450000000,
-      lowStockCount: 15,
-      todayPurchases: 8,
-      todaySales: 23,
+      stokMasukHariIni: 45,
+      stokKeluarHariIni: 32,
+      stokAlertCount: 12,
     });
 
-    setLowStockItems([
-      { kode: 'BRG001', nama: 'Sparepart A', stok: 5, stok_minimal: 10, kategori: 'Elektronik' },
-      { kode: 'BRG002', nama: 'Sparepart B', stok: 2, stok_minimal: 15, kategori: 'Mekanik' },
-      { kode: 'BRG003', nama: 'Sparepart C', stok: 8, stok_minimal: 20, kategori: 'Elektronik' },
-      { kode: 'BRG004', nama: 'Sparepart D', stok: 3, stok_minimal: 10, kategori: 'Aksesoris' },
-      { kode: 'BRG005', nama: 'Sparepart E', stok: 1, stok_minimal: 5, kategori: 'Mekanik' },
+    // Data chart 7 hari terakhir
+    setChartData([
+      { name: 'Sen', masuk: 24, keluar: 18 },
+      { name: 'Sel', masuk: 32, keluar: 28 },
+      { name: 'Rab', masuk: 18, keluar: 22 },
+      { name: 'Kam', masuk: 45, keluar: 35 },
+      { name: 'Jum', masuk: 38, keluar: 30 },
+      { name: 'Sab', masuk: 28, keluar: 25 },
+      { name: 'Min', masuk: 15, keluar: 12 },
+    ]);
+
+    // Perbandingan bulan ini vs bulan lalu
+    setComparison({
+      stokMasuk: { value: 342, percent: 15.2 },
+      stokKeluar: { value: 285, percent: 8.5 },
+      totalTransaksi: { value: 627, percent: 12.1 },
+    });
+
+    // Top 5 barang terlaris
+    setTopItems([
+      { rank: 1, kode: 'BRG001', nama: 'Bearing 6205', qty: 156, satuan: 'pcs' },
+      { rank: 2, kode: 'BRG015', nama: 'Oil Filter Universal', qty: 142, satuan: 'pcs' },
+      { rank: 3, kode: 'BRG008', nama: 'Seal Kit Honda', qty: 128, satuan: 'set' },
+      { rank: 4, kode: 'BRG022', nama: 'Kampas Rem Depan', qty: 115, satuan: 'set' },
+      { rank: 5, kode: 'BRG003', nama: 'Busi NGK Iridium', qty: 98, satuan: 'pcs' },
+    ]);
+
+    // Aktivitas terakhir
+    setRecentActivity([
+      { id: 1, type: 'masuk', desc: 'Stok Masuk BRG001 - Bearing 6205', qty: '+50', time: '2 menit lalu' },
+      { id: 2, type: 'keluar', desc: 'Stok Keluar BRG015 - Oil Filter', qty: '-20', time: '5 menit lalu' },
+      { id: 3, type: 'opname', desc: 'Stok Opname selesai - Gudang A', qty: '', time: '10 menit lalu' },
+      { id: 4, type: 'masuk', desc: 'Stok Masuk BRG022 - Kampas Rem', qty: '+30', time: '15 menit lalu' },
+      { id: 5, type: 'claim', desc: 'Customer Claim CC-2024-001', qty: '', time: '20 menit lalu' },
     ]);
   }, []);
 
+  const getActivityIcon = (type) => {
+    switch (type) {
+      case 'masuk': return <TrendingUp className="w-4 h-4 text-green-500" />;
+      case 'keluar': return <TrendingDown className="w-4 h-4 text-red-500" />;
+      case 'opname': return <Package className="w-4 h-4 text-blue-500" />;
+      case 'claim': return <AlertTriangle className="w-4 h-4 text-amber-500" />;
+      default: return <Activity className="w-4 h-4 text-gray-500" />;
+    }
+  };
+
   return (
     <div className="space-y-6">
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* BARIS 1: Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          title="Total SKU"
+          title="Total Barang"
           value={formatNumber(stats.totalSKU)}
+          subtitle="SKU terdaftar"
           icon={Package}
           color="primary"
         />
         <StatCard
-          title="Nilai Stok Total"
-          value={formatCurrency(stats.totalStockValue)}
-          icon={DollarSign}
+          title="Stok Masuk"
+          value={stats.stokMasukHariIni}
+          subtitle="Hari ini"
+          icon={TrendingUp}
           color="success"
         />
         <StatCard
-          title="Pembelian Hari Ini"
-          value={stats.todayPurchases}
-          icon={TrendingUp}
+          title="Stok Keluar"
+          value={stats.stokKeluarHariIni}
+          subtitle="Hari ini"
+          icon={TrendingDown}
           color="info"
         />
         <StatCard
-          title="Penjualan Hari Ini"
-          value={stats.todaySales}
-          icon={TrendingDown}
+          title="Stok Alert"
+          value={stats.stokAlertCount}
+          subtitle="Perlu restock"
+          icon={AlertTriangle}
           color="warning"
+          isAlert={stats.stokAlertCount > 0}
         />
       </div>
 
-      {/* Low Stock Alert */}
-      {stats.lowStockCount > 0 && (
-        <Card
-          title="Peringatan Stok Rendah"
-          actions={
-            <Badge variant="error">
-              {stats.lowStockCount} Item
-            </Badge>
-          }
-        >
+      {/* BARIS 2: Chart + Comparison + Top 5 */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:items-stretch">
+        {/* Grafik Pergerakan Stok */}
+        <div className="lg:col-span-2 flex">
+          <Card title="Pergerakan Stok" subtitle="7 hari terakhir" className="flex-1">
+            <div className="h-[260px] -mx-2">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData} barGap={2} barSize={18}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+                  <XAxis
+                    dataKey="name"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 11, fill: '#9ca3af' }}
+                  />
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 11, fill: '#9ca3af' }}
+                    width={30}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#fff',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '6px',
+                      boxShadow: '0 2px 4px rgb(0 0 0 / 0.1)',
+                      fontSize: '12px',
+                      padding: '8px 12px'
+                    }}
+                  />
+                  <Legend
+                    wrapperStyle={{ paddingTop: '8px', fontSize: '12px' }}
+                    iconSize={10}
+                  />
+                  <Bar
+                    dataKey="masuk"
+                    name="Masuk"
+                    fill="#10b981"
+                    radius={[3, 3, 0, 0]}
+                  />
+                  <Bar
+                    dataKey="keluar"
+                    name="Keluar"
+                    fill="#6366f1"
+                    radius={[3, 3, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+        </div>
+
+        {/* Perbandingan Bulan */}
+        <Card title="Perbandingan" subtitle="vs Bulan Lalu" className="h-full">
           <div className="space-y-3">
-            {lowStockItems.map((item) => (
+            <ComparisonItem
+              label="Stok Masuk"
+              value={comparison.stokMasuk.value}
+              percent={comparison.stokMasuk.percent}
+              isPositive={comparison.stokMasuk.percent >= 0}
+            />
+            <ComparisonItem
+              label="Stok Keluar"
+              value={comparison.stokKeluar.value}
+              percent={comparison.stokKeluar.percent}
+              isPositive={comparison.stokKeluar.percent >= 0}
+            />
+            <ComparisonItem
+              label="Transaksi"
+              value={comparison.totalTransaksi.value}
+              percent={comparison.totalTransaksi.percent}
+              isPositive={comparison.totalTransaksi.percent >= 0}
+            />
+          </div>
+        </Card>
+
+        {/* Top 5 Barang Terlaris */}
+        <Card
+          title="Top 5 Terlaris"
+          subtitle="Bulan ini"
+          actions={<Trophy className="w-4 h-4 text-amber-500" />}
+          className="h-full"
+        >
+          <div className="space-y-2">
+            {topItems.map((item) => (
               <div
                 key={item.kode}
-                className="flex items-center justify-between p-3 bg-error-50 rounded-md border border-error-200"
+                className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
               >
-                <div className="flex items-center gap-3">
-                  <AlertTriangle className="w-5 h-5 text-error-500" />
-                  <div>
-                    <div className="font-medium text-gray-900">{item.nama}</div>
-                    <div className="text-sm text-gray-500">
-                      Kode: {item.kode} • {item.kategori}
-                    </div>
-                  </div>
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${item.rank === 1 ? 'bg-amber-100 text-amber-700' :
+                    item.rank === 2 ? 'bg-gray-200 text-gray-700' :
+                      item.rank === 3 ? 'bg-orange-100 text-orange-700' :
+                        'bg-gray-100 text-gray-600'
+                  }`}>
+                  {item.rank}
                 </div>
-                <div className="text-right">
-                  <div className="text-sm font-semibold text-error-600">
-                    Stok: {item.stok}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    Min: {item.stok_minimal}
-                  </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium text-gray-900 truncate">{item.nama}</div>
                 </div>
+                <div className="text-sm font-semibold text-gray-900">{item.qty}</div>
               </div>
             ))}
           </div>
         </Card>
-      )}
+      </div>
 
-      {/* Recent Activity Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card title="Pembelian Terbaru">
-          <div className="space-y-3">
-            <ActivityItem
-              title="PO-2024-001"
-              subtitle="PT Supplier Jaya"
-              date="21 Nov 2024"
-              amount={formatCurrency(15000000)}
-              status="selesai"
-            />
-            <ActivityItem
-              title="PO-2024-002"
-              subtitle="CV Maju Jaya"
-              date="21 Nov 2024"
-              amount={formatCurrency(8500000)}
-              status="pending"
-            />
-            <ActivityItem
-              title="PO-2024-003"
-              subtitle="PT Berkah Selalu"
-              date="20 Nov 2024"
-              amount={formatCurrency(22000000)}
-              status="selesai"
-            />
-          </div>
-        </Card>
+      {/* BARIS 3: Activity */}
+      <div className="grid grid-cols-1 gap-4">
 
-        <Card title="Penjualan Terbaru">
+        {/* Aktivitas Terakhir */}
+        <Card
+          title="Aktivitas Terakhir"
+          subtitle="Real-time"
+          actions={<Clock className="w-5 h-5 text-gray-400" />}
+        >
           <div className="space-y-3">
-            <ActivityItem
-              title="SO-2024-045"
-              subtitle="Toko ABC"
-              date="21 Nov 2024"
-              amount={formatCurrency(5000000)}
-              status="selesai"
-            />
-            <ActivityItem
-              title="SO-2024-046"
-              subtitle="Toko XYZ"
-              date="21 Nov 2024"
-              amount={formatCurrency(3200000)}
-              status="pending"
-            />
-            <ActivityItem
-              title="SO-2024-047"
-              subtitle="Toko 123"
-              date="20 Nov 2024"
-              amount={formatCurrency(7800000)}
-              status="selesai"
-            />
+            {recentActivity.map((activity) => (
+              <div
+                key={activity.id}
+                className="flex items-start gap-3 p-3 border-l-2 border-gray-200 hover:border-primary-500 hover:bg-gray-50 transition-colors"
+              >
+                <div className="mt-0.5">
+                  {getActivityIcon(activity.type)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm text-gray-900 truncate">{activity.desc}</div>
+                  <div className="text-xs text-gray-500 mt-0.5">{activity.time}</div>
+                </div>
+                {activity.qty && (
+                  <div className={`text-sm font-medium ${activity.qty.startsWith('+') ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                    {activity.qty}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </Card>
       </div>
 
-      {/* Quick Actions */}
+      {/* BARIS 4: Aksi Cepat */}
       <Card title="Aksi Cepat">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <QuickAction
@@ -188,25 +302,26 @@ export default function Dashboard() {
   );
 }
 
-function StatCard({ title, value, icon: Icon, color = 'primary' }) {
+function StatCard({ title, value, subtitle, icon: Icon, color = 'primary', isAlert = false }) {
   const colors = {
     primary: 'bg-primary-50 text-primary-500',
-    success: 'bg-success-50 text-success-500',
-    warning: 'bg-warning-50 text-warning-500',
-    error: 'bg-error-50 text-error-500',
-    info: 'bg-info-50 text-info-500',
+    success: 'bg-green-50 text-green-500',
+    warning: 'bg-amber-50 text-amber-500',
+    error: 'bg-red-50 text-red-500',
+    info: 'bg-indigo-50 text-indigo-500',
   };
 
   return (
     <Card padding={false}>
-      <div className="p-6">
-        <div className="flex items-center justify-between">
+      <div className="p-5">
+        <div className="flex items-start justify-between">
           <div>
             <p className="text-sm text-gray-500 mb-1">{title}</p>
             <p className="text-2xl font-bold text-gray-900">{value}</p>
+            <p className="text-xs text-gray-400 mt-1">{subtitle}</p>
           </div>
-          <div className={`p-3 rounded-lg ${colors[color]}`}>
-            <Icon className="w-6 h-6" />
+          <div className={`p-3 rounded-xl ${colors[color]} ${isAlert ? 'animate-pulse' : ''}`}>
+            <Icon className="w-5 h-5" />
           </div>
         </div>
       </div>
@@ -214,21 +329,23 @@ function StatCard({ title, value, icon: Icon, color = 'primary' }) {
   );
 }
 
-function ActivityItem({ title, subtitle, date, amount, status }) {
+function ComparisonItem({ label, value, percent, isPositive }) {
   return (
-    <div className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-md transition-colors">
+    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
       <div>
-        <div className="font-medium text-gray-900">{title}</div>
-        <div className="text-sm text-gray-500">{subtitle}</div>
+        <div className="text-sm text-gray-600">{label}</div>
+        <div className="text-lg font-bold text-gray-900">{formatNumber(value)}</div>
       </div>
-      <div className="text-right">
-        <div className="font-semibold text-gray-900">{amount}</div>
-        <div className="flex items-center gap-2 justify-end">
-          <Badge variant={status === 'selesai' ? 'success' : 'warning'} size="sm">
-            {status}
-          </Badge>
-          <span className="text-xs text-gray-500">{date}</span>
-        </div>
+      <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-sm font-medium ${isPositive
+          ? 'bg-green-100 text-green-700'
+          : 'bg-red-100 text-red-700'
+        }`}>
+        {isPositive ? (
+          <ArrowUpRight className="w-4 h-4" />
+        ) : (
+          <ArrowDownRight className="w-4 h-4" />
+        )}
+        {Math.abs(percent)}%
       </div>
     </div>
   );

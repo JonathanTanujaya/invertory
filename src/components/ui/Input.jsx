@@ -19,14 +19,14 @@ const Input = forwardRef(({
           {props.required && <span className="text-error-500 ml-1">*</span>}
         </label>
       )}
-      
+
       <div className="relative">
         {startIcon && (
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
             {startIcon}
           </div>
         )}
-        
+
         <input
           ref={ref}
           className={clsx(
@@ -40,14 +40,14 @@ const Input = forwardRef(({
           )}
           {...props}
         />
-        
+
         {endIcon && (
           <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
             {endIcon}
           </div>
         )}
       </div>
-      
+
       {(error || helperText) && (
         <p className={clsx(
           'mt-1 text-sm',

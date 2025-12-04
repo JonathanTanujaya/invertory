@@ -77,12 +77,12 @@ export default function Sidebar() {
   return (
     <aside
       className={clsx(
-        'fixed left-0 top-0 h-screen bg-white border-r border-gray-200 transition-all duration-300 z-40',
+        'fixed left-0 top-0 h-screen bg-white border-r border-gray-200 transition-all duration-300 z-40 flex flex-col',
         sidebarCollapsed ? 'w-20' : 'w-64'
       )}
     >
       {/* Header */}
-      <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
+      <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 flex-shrink-0">
         {!sidebarCollapsed && (
           <h1 className="text-xl font-bold text-primary-600">STOIR</h1>
         )}
@@ -98,8 +98,8 @@ export default function Sidebar() {
         </button>
       </div>
 
-      {/* Menu */}
-      <nav className="flex-1 overflow-y-auto py-4 scrollbar-thin">
+      {/* Menu - Scrollable */}
+      <nav className="flex-1 overflow-y-auto py-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400">
         {menuItems.map((item, index) => (
           <MenuItem
             key={index}
