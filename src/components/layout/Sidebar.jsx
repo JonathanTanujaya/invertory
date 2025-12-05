@@ -10,11 +10,7 @@ import {
   FileText,
   Users,
   Building2,
-  MapPin,
-  UserCircle,
-  CreditCard,
   Tags,
-  Settings,
   ChevronLeft,
   ChevronRight,
   RotateCcw,
@@ -24,6 +20,7 @@ import {
   Boxes,
   AlertTriangle,
   FileBarChart,
+  Settings,
 } from 'lucide-react';
 
 // Inventory-only navigation (finance & non-inventory masters removed)
@@ -64,11 +61,6 @@ const menuItems = [
       { title: 'Kartu Stok', path: '/reports/kartu-stok', icon: FileBarChart },
     ],
   },
-  {
-    title: 'Pengaturan',
-    path: '/settings',
-    icon: Settings,
-  },
 ];
 
 export default function Sidebar() {
@@ -108,6 +100,35 @@ export default function Sidebar() {
           />
         ))}
       </nav>
+
+      {/* User Panel Footer */}
+      <div className="flex-shrink-0 border-t border-gray-200 p-3">
+        <NavLink
+          to="/settings"
+          className={({ isActive }) =>
+            clsx(
+              'flex items-center gap-3 p-2 rounded-lg transition-colors',
+              isActive
+                ? 'bg-primary-50 text-primary-600'
+                : 'hover:bg-gray-100',
+              sidebarCollapsed && 'justify-center'
+            )
+          }
+        >
+          <div className="w-9 h-9 bg-primary-500 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0">
+            A
+          </div>
+          {!sidebarCollapsed && (
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-medium text-gray-900">Admin</div>
+              <div className="text-xs text-gray-500">Administrator</div>
+            </div>
+          )}
+          {!sidebarCollapsed && (
+            <Settings className="w-4 h-4 text-gray-400" />
+          )}
+        </NavLink>
+      </div>
     </aside>
   );
 }
