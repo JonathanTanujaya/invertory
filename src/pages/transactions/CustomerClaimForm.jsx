@@ -338,7 +338,7 @@ export default function CustomerClaimForm() {
         <Card className="flex-1 flex flex-col px-1.5 py-1.5">
           <div className="flex-1 flex flex-col">
             {claimItems.length === 0 ? (
-              <div className="flex-1 min-h-[280px] flex flex-col items-center justify-center text-center bg-gray-50/50 border border-dashed border-gray-200 rounded-lg">
+              <div className="flex-1 min-h-[calc(65vh-100px)] flex flex-col items-center justify-center text-center bg-gray-50/50 border border-dashed border-gray-200 rounded-lg">
                 <div className="w-14 h-14 bg-primary-50 rounded-xl flex items-center justify-center mb-4">
                   <MessageSquareWarning className="w-7 h-7 text-primary-500" />
                 </div>

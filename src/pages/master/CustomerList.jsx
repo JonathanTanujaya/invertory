@@ -93,7 +93,7 @@ export default function CustomerList() {
   });
 
   return (
-    <div className="flex flex-col gap-4 h-[calc(100vh-120px)]">
+    <div className="flex flex-col gap-4 h-[calc(100vh-40px)]">
       <Card className="flex-shrink-0">
         <div className="flex items-center gap-3">
           <div className="flex-1">

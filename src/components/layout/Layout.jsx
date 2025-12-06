@@ -7,16 +7,16 @@ export default function Layout() {
   const { sidebarCollapsed } = useThemeStore();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       <Sidebar />
-      
+
       <main
         className={clsx(
-          'transition-all duration-300',
+          'flex-1 transition-all duration-300 flex flex-col overflow-hidden',
           sidebarCollapsed ? 'ml-20' : 'ml-64'
         )}
       >
-        <div className="p-6">
+        <div className="flex-1 p-6 overflow-y-auto">
           <Outlet />
         </div>
       </main>

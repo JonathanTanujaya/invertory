@@ -122,7 +122,7 @@ export default function KategoriList() {
   };
 
   return (
-    <div className="h-[calc(100vh-120px)] pb-4">
+    <div className="h-[calc(100vh-30px)] pb-4">
       <div className="grid grid-cols-2 gap-6 h-full">
         {/* Kategori Section */}
         <div className="flex flex-col h-full overflow-hidden bg-white rounded-lg shadow-soft border border-gray-200">

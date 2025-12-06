@@ -194,7 +194,7 @@ export default function BarangList() {
   };
 
   return (
-    <div className="flex flex-col gap-4 h-[calc(100vh-120px)]">
+    <div className="flex flex-col gap-4 h-[calc(100vh-42px)]">
       {/* Filters */}
       <Card className="shadow-sm ring-1 ring-gray-100 flex-shrink-0">
         <div className="grid grid-cols-[1fr_220px_auto] items-center gap-3">
