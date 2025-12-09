@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import Card from '@/components/ui/Card';
 import DataTable from '@/components/ui/DataTable';
 import Input from '@/components/ui/Input';
@@ -6,23 +6,58 @@ import Select from '@/components/ui/Select';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import { fetchItemMovements, formatMovementType } from '@/api/movements';
-import { Search, RefreshCcw, Download } from 'lucide-react';
+import {
+  Search,
+  RefreshCcw,
+  Download,
+  TrendingUp,
+  TrendingDown,
+  Package,
+  Calendar,
+  X,
+  Filter,
+  FileDown,
+  FileText
+} from 'lucide-react';
 import { formatNumber } from '@/utils/helpers';
 import { toast } from 'react-toastify';
+import barangData from '@/data/dummy/m_barang.json';
 
 export default function KartuStok() {
-  const [kodeBarang, setKodeBarang] = useState('BRG-001');
+  const [kodeBarang, setKodeBarang] = useState('BRG001');
+  const [searchItem, setSearchItem] = useState('');
+  const [showItemList, setShowItemList] = useState(false);
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const [tipe, setTipe] = useState('');
   const [loading, setLoading] = useState(false);
   const [header, setHeader] = useState(null);
   const [rows, setRows] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 15;
+
+  // Filter barang berdasarkan pencarian
+  const filteredBarang = useMemo(() => {
+    if (!searchItem) return barangData;
+    const search = searchItem.toLowerCase();
+    return barangData.filter(item =>
+      item.kode_barang.toLowerCase().includes(search) ||
+      item.nama_barang.toLowerCase().includes(search)
+    );
+  }, [searchItem]);
+
+  // Hitung statistik
+  const stats = useMemo(() => {
+    const totalMasuk = rows.reduce((sum, r) => sum + (r.masuk || 0), 0);
+    const totalKeluar = rows.reduce((sum, r) => sum + (r.keluar || 0), 0);
+    const totalTransaksi = rows.length;
+    return { totalMasuk, totalKeluar, totalTransaksi };
+  }, [rows]);
 
   useEffect(() => {
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [kodeBarang]);
 
   const loadData = async () => {
     setLoading(true);
@@ -36,6 +71,7 @@ export default function KartuStok() {
         stok_akhir: res.stok_akhir,
       });
       setRows(res.movements);
+      setCurrentPage(1);
     } catch (err) {
       toast.error('Gagal memuat kartu stok');
     } finally {
@@ -43,110 +79,434 @@ export default function KartuStok() {
     }
   };
 
-  const handleRefresh = () => loadData();
-  const handleExport = () => {
-    // Simple CSV export placeholder
+  const handleRefresh = () => {
+    setFrom('');
+    setTo('');
+    setTipe('');
+    loadData();
+  };
+
+  const handleSelectItem = (item) => {
+    setKodeBarang(item.kode_barang);
+    setSearchItem('');
+    setShowItemList(false);
+  };
+
+  const setDateRange = (days) => {
+    const today = new Date();
+    const past = new Date();
+    past.setDate(today.getDate() - days);
+    setFrom(past.toISOString().split('T')[0]);
+    setTo(today.toISOString().split('T')[0]);
+  };
+
+  const handleExportCSV = () => {
     const headerLine = 'Waktu,Ref,Tipe,Masuk,Keluar,Saldo,User,Catatan';
-    const dataLines = rows.map(r => [r.waktu, r.ref, r.tipe, r.masuk, r.keluar, r.saldo, r.user, r.catatan || ''].join(','));
+    const dataLines = rows.map(r => [
+      r.waktu,
+      r.ref,
+      formatMovementType(r.tipe),
+      r.masuk || 0,
+      r.keluar || 0,
+      r.saldo,
+      r.user,
+      r.catatan || ''
+    ].join(','));
     const csv = [headerLine, ...dataLines].join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url; a.download = `kartu-stok-${kodeBarang}.csv`; a.click();
+    a.href = url;
+    a.download = `kartu-stok-${kodeBarang}-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
     URL.revokeObjectURL(url);
+    toast.success('Data berhasil di-export');
   };
 
   const columns = [
-    { key: 'waktu', label: 'Waktu', sortable: true },
-    { key: 'ref', label: 'Referensi', sortable: true },
-    { key: 'tipe', label: 'Tipe', sortable: true, render: (val) => <Badge>{formatMovementType(val)}</Badge> },
-    { key: 'masuk', label: 'Masuk', align: 'right', render: (val, row) => val ? formatNumber(val) + ' ' + header?.satuan : '-' },
-    { key: 'keluar', label: 'Keluar', align: 'right', render: (val, row) => val ? formatNumber(val) + ' ' + header?.satuan : '-' },
-    { key: 'saldo', label: 'Saldo', align: 'right', render: (val) => <span className="font-mono">{formatNumber(val)}</span> },
-    { key: 'user', label: 'User', align: 'center' },
-    { key: 'catatan', label: 'Catatan' },
+    {
+      key: 'waktu',
+      label: 'Waktu',
+      sortable: true,
+      className: 'px-3 py-2.5',
+      render: (val) => (
+        <div className="text-sm">
+          <div className="font-medium text-gray-900">{val.split(' ')[0]}</div>
+          <div className="text-xs text-gray-500">{val.split(' ')[1]}</div>
+        </div>
+      )
+    },
+    {
+      key: 'ref',
+      label: 'Referensi',
+      sortable: true,
+      className: 'px-3 py-2.5',
+      render: (val) => <span className="font-mono text-sm text-blue-600">{val}</span>
+    },
+    {
+      key: 'tipe',
+      label: 'Tipe',
+      sortable: true,
+      className: 'px-3 py-2.5',
+      render: (val) => {
+        const types = {
+          'IN': 'success',
+          'OUT': 'error',
+          'RET_IN': 'warning',
+          'RET_OUT': 'warning',
+          'BONUS_IN': 'info',
+          'BONUS_OUT': 'info',
+          'CLAIM_OUT': 'error',
+          'ADJ': 'default'
+        };
+        return <Badge variant={types[val] || 'default'}>{formatMovementType(val)}</Badge>;
+      }
+    },
+    {
+      key: 'masuk',
+      label: 'Masuk',
+      align: 'right',
+      className: 'px-3 py-2.5',
+      render: (val, row) => val ? (
+        <span className="text-sm font-medium text-green-600">
+          +{formatNumber(val)} {header?.satuan}
+        </span>
+      ) : <span className="text-gray-400 text-sm">-</span>
+    },
+    {
+      key: 'keluar',
+      label: 'Keluar',
+      align: 'right',
+      className: 'px-3 py-2.5',
+      render: (val, row) => val ? (
+        <span className="text-sm font-medium text-red-600">
+          -{formatNumber(val)} {header?.satuan}
+        </span>
+      ) : <span className="text-gray-400 text-sm">-</span>
+    },
+    {
+      key: 'saldo',
+      label: 'Saldo',
+      align: 'right',
+      className: 'px-3 py-2.5',
+      render: (val) => (
+        <span className="font-mono text-sm font-semibold text-gray-900">
+          {formatNumber(val)}
+        </span>
+      )
+    },
+    {
+      key: 'user',
+      label: 'User',
+      align: 'center',
+      className: 'px-3 py-2.5',
+      render: (val) => (
+        <div className="flex items-center justify-center">
+          <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 text-xs font-medium">
+            {val.substring(0, 2).toUpperCase()}
+          </span>
+        </div>
+      )
+    },
+    {
+      key: 'catatan',
+      label: 'Catatan',
+      className: 'px-3 py-2.5',
+      render: (val) => (
+        <span className="text-sm text-gray-600 line-clamp-1">
+          {val || <span className="text-gray-400">-</span>}
+        </span>
+      )
+    },
   ];
+
+  // Badge untuk tipe filter aktif
+  const activeFilters = [];
+  if (from) activeFilters.push({ label: `Dari: ${from}`, clear: () => setFrom('') });
+  if (to) activeFilters.push({ label: `Sampai: ${to}`, clear: () => setTo('') });
+  if (tipe) activeFilters.push({
+    label: `Tipe: ${formatMovementType(tipe)}`,
+    clear: () => setTipe('')
+  });
 
   return (
     <div className="space-y-6">
-      {/* Filter Panel */}
+      {/* Item Selector & Quick Actions */}
       <Card>
-        <div className="grid md:grid-cols-6 gap-4">
-          <Input
-            label="Kode Barang"
-            placeholder="BRG-001"
-            value={kodeBarang}
-            onChange={(e) => setKodeBarang(e.target.value)}
-          />
-          <Input
-            type="date"
-            label="Dari"
-            value={from}
-            onChange={(e) => setFrom(e.target.value)}
-          />
-            <Input
-            type="date"
-            label="Sampai"
-            value={to}
-            onChange={(e) => setTo(e.target.value)}
-          />
-          <Select
-            label="Tipe"
-            value={tipe}
-            onChange={(e) => setTipe(e.target.value)}
-            options={[
-              { value: '', label: 'Semua' },
-              { value: 'IN', label: 'Stok Masuk' },
-              { value: 'OUT', label: 'Stok Keluar' },
-              { value: 'RET_IN', label: 'Retur Pembelian' },
-              { value: 'RET_OUT', label: 'Retur Penjualan' },
-              { value: 'BONUS_IN', label: 'Bonus Pembelian' },
-              { value: 'BONUS_OUT', label: 'Bonus Penjualan' },
-              { value: 'CLAIM_OUT', label: 'Customer Claim' },
-              { value: 'ADJ', label: 'Adjustment' },
-            ]}
-          />
-          <div className="flex items-end gap-2">
-            <Button variant="outline" startIcon={<Search className="w-4 h-4" />} onClick={loadData}>Cari</Button>
-            <Button variant="outline" startIcon={<RefreshCcw className="w-4 h-4" />} onClick={handleRefresh}>Reset</Button>
+        <div className="space-y-4">
+          <div className="grid md:grid-cols-12 gap-4">
+            {/* Item Search/Select */}
+            <div className="md:col-span-6 relative">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Pilih Barang
+              </label>
+              <div className="relative">
+                <Input
+                  placeholder="Cari kode atau nama barang..."
+                  value={searchItem}
+                  onChange={(e) => {
+                    setSearchItem(e.target.value);
+                    setShowItemList(true);
+                  }}
+                  onFocus={() => setShowItemList(true)}
+                  startIcon={<Search className="w-4 h-4" />}
+                />
+                {showItemList && filteredBarang.length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
+                    {filteredBarang.slice(0, 10).map((item) => (
+                      <button
+                        key={item.kode_barang}
+                        className="w-full px-4 py-2 text-left hover:bg-gray-50 border-b border-gray-100 last:border-0"
+                        onClick={() => handleSelectItem(item)}
+                      >
+                        <div className="font-medium text-sm text-gray-900">{item.kode_barang}</div>
+                        <div className="text-xs text-gray-500">{item.nama_barang}</div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Date Range Presets */}
+            <div className="md:col-span-6">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Periode Cepat
+              </label>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setDateRange(0)}
+                >
+                  Hari Ini
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setDateRange(7)}
+                >
+                  7 Hari
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setDateRange(30)}
+                >
+                  30 Hari
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setDateRange(90)}
+                >
+                  90 Hari
+                </Button>
+              </div>
+            </div>
           </div>
-          <div className="flex items-end">
-            <Button startIcon={<Download className="w-4 h-4" />} onClick={handleExport}>Export CSV</Button>
+
+          {/* Advanced Filters */}
+          <div className="grid md:grid-cols-12 gap-4">
+            <div className="md:col-span-3">
+              <Input
+                type="date"
+                label="Dari Tanggal"
+                value={from}
+                onChange={(e) => setFrom(e.target.value)}
+                startIcon={<Calendar className="w-4 h-4" />}
+              />
+            </div>
+            <div className="md:col-span-3">
+              <Input
+                type="date"
+                label="Sampai Tanggal"
+                value={to}
+                onChange={(e) => setTo(e.target.value)}
+                startIcon={<Calendar className="w-4 h-4" />}
+              />
+            </div>
+            <div className="md:col-span-3">
+              <Select
+                label="Tipe Transaksi"
+                value={tipe}
+                onChange={(e) => setTipe(e.target.value)}
+                options={[
+                  { value: '', label: 'Semua Tipe' },
+                  { value: 'IN', label: 'Stok Masuk' },
+                  { value: 'OUT', label: 'Stok Keluar' },
+                  { value: 'RET_IN', label: 'Retur Pembelian' },
+                  { value: 'RET_OUT', label: 'Retur Penjualan' },
+                  { value: 'BONUS_IN', label: 'Bonus Pembelian' },
+                  { value: 'BONUS_OUT', label: 'Bonus Penjualan' },
+                  { value: 'CLAIM_OUT', label: 'Customer Claim' },
+                  { value: 'ADJ', label: 'Adjustment' },
+                ]}
+              />
+            </div>
+            <div className="md:col-span-3 flex items-end gap-2">
+              <Button
+                className="flex-1"
+                startIcon={<Search className="w-4 h-4" />}
+                onClick={loadData}
+              >
+                Cari
+              </Button>
+              <Button
+                variant="outline"
+                startIcon={<RefreshCcw className="w-4 h-4" />}
+                onClick={handleRefresh}
+              >
+                Reset
+              </Button>
+            </div>
           </div>
+
+          {/* Active Filters */}
+          {activeFilters.length > 0 && (
+            <div className="flex items-center gap-2 flex-wrap">
+              <Filter className="w-4 h-4 text-gray-400" />
+              <span className="text-sm text-gray-500">Filter aktif:</span>
+              {activeFilters.map((filter, idx) => (
+                <Badge
+                  key={idx}
+                  variant="default"
+                  className="cursor-pointer hover:bg-gray-200"
+                  onClick={filter.clear}
+                >
+                  {filter.label}
+                  <X className="w-3 h-3 ml-1" />
+                </Badge>
+              ))}
+              <button
+                className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                onClick={() => {
+                  setFrom('');
+                  setTo('');
+                  setTipe('');
+                }}
+              >
+                Hapus Semua
+              </button>
+            </div>
+          )}
         </div>
       </Card>
 
-      {/* Header Info */}
+      {/* Header Info & Stats */}
       {header && (
-        <Card>
-          <div className="grid md:grid-cols-5 gap-4 text-sm">
-            <div>
-              <div className="text-gray-500">Kode Barang</div>
-              <div className="font-medium">{header.kode_barang}</div>
+        <div className="grid md:grid-cols-12 gap-6">
+          {/* Item Info */}
+          <Card className="md:col-span-5">
+            <div className="space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="p-3 bg-blue-100 rounded-lg">
+                  <Package className="w-6 h-6 text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <div className="text-xs text-gray-500 mb-1">Informasi Barang</div>
+                  <div className="font-semibold text-gray-900">{header.nama_barang}</div>
+                  <div className="text-sm text-gray-600 mt-1">
+                    <span className="font-mono">{header.kode_barang}</span>
+                    <span className="mx-2">•</span>
+                    <span>{header.satuan}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 pt-3 border-t border-gray-200">
+                <div>
+                  <div className="text-xs text-gray-500">Stok Awal</div>
+                  <div className="text-lg font-bold text-gray-900">
+                    {formatNumber(header.stok_awal)}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs text-gray-500">Stok Akhir</div>
+                  <div className="text-lg font-bold text-blue-600">
+                    {formatNumber(header.stok_akhir)}
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="md:col-span-2">
-              <div className="text-gray-500">Nama Barang</div>
-              <div className="font-medium">{header.nama_barang}</div>
-            </div>
-            <div>
-              <div className="text-gray-500">Stok Awal</div>
-              <div className="font-medium">{formatNumber(header.stok_awal)} {header.satuan}</div>
-            </div>
-            <div>
-              <div className="text-gray-500">Stok Akhir</div>
-              <div className="font-medium">{formatNumber(header.stok_akhir)} {header.satuan}</div>
-            </div>
+          </Card>
+
+          {/* Statistics Cards */}
+          <div className="md:col-span-7 grid md:grid-cols-3 gap-4">
+            <Card>
+              <div className="flex items-start justify-between">
+                <div>
+                  <div className="text-xs text-gray-500 mb-1">Total Masuk</div>
+                  <div className="text-2xl font-bold text-green-600">
+                    {formatNumber(stats.totalMasuk)}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">{header.satuan}</div>
+                </div>
+                <div className="p-2 bg-green-100 rounded-lg">
+                  <TrendingUp className="w-5 h-5 text-green-600" />
+                </div>
+              </div>
+            </Card>
+
+            <Card>
+              <div className="flex items-start justify-between">
+                <div>
+                  <div className="text-xs text-gray-500 mb-1">Total Keluar</div>
+                  <div className="text-2xl font-bold text-red-600">
+                    {formatNumber(stats.totalKeluar)}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">{header.satuan}</div>
+                </div>
+                <div className="p-2 bg-red-100 rounded-lg">
+                  <TrendingDown className="w-5 h-5 text-red-600" />
+                </div>
+              </div>
+            </Card>
+
+            <Card>
+              <div className="flex items-start justify-between">
+                <div>
+                  <div className="text-xs text-gray-500 mb-1">Total Transaksi</div>
+                  <div className="text-2xl font-bold text-gray-900">
+                    {formatNumber(stats.totalTransaksi)}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">transaksi</div>
+                </div>
+                <div className="p-2 bg-gray-100 rounded-lg">
+                  <FileText className="w-5 h-5 text-gray-600" />
+                </div>
+              </div>
+            </Card>
           </div>
-        </Card>
+        </div>
       )}
 
-      {/* Table */}
+      {/* Table with Export */}
       <Card padding={false}>
+        <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+          <div>
+            <h2 className="font-semibold text-gray-900">Riwayat Transaksi</h2>
+            <p className="text-xs text-gray-500 mt-0.5">
+              Menampilkan {rows.length} transaksi
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            startIcon={<FileDown className="w-4 h-4" />}
+            onClick={handleExportCSV}
+            disabled={rows.length === 0}
+          >
+            Export CSV
+          </Button>
+        </div>
         <DataTable
           columns={columns}
           data={rows}
           loading={loading}
-          pagination={false}
+          currentPage={currentPage}
+          onPageChange={setCurrentPage}
+          pageSize={pageSize}
         />
       </Card>
     </div>

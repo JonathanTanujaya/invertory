@@ -9,7 +9,7 @@ import Modal from '@/components/ui/Modal';
 import {
   Search, RefreshCcw, Download, Eye, X, Loader2, FileText,
   Package, AlertTriangle, CheckCircle, XCircle,
-  LayoutGrid, List, Filter
+  LayoutGrid, List, Filter, MapPin
 } from 'lucide-react';
 import { formatNumber, formatCurrency } from '@/utils/helpers';
 import BarangForm from '@/pages/master/BarangForm';
@@ -43,12 +43,17 @@ export default function StokBarang() {
   const [showModal, setShowModal] = useState(false);
   const [selected, setSelected] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 10;
+  const pageSize = viewMode === 'grid' ? 8 : 10;
 
   // Export dropdown
   const [showExportMenu, setShowExportMenu] = useState(false);
 
   useEffect(() => { load(); }, []);
+
+  // Reset to page 1 when view mode changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [viewMode]);
 
   const load = async () => {
     setLoading(true);
@@ -139,17 +144,19 @@ export default function StokBarang() {
       key: 'kode_barang',
       label: 'Kode',
       sortable: true,
+      className: 'px-3 py-2.5',
       render: val => (
-        <span className="font-mono font-semibold text-primary-600">{val}</span>
+        <span className="font-mono text-sm font-semibold text-primary-600">{val}</span>
       )
     },
     {
       key: 'nama_barang',
       label: 'Nama Barang',
       sortable: true,
+      className: 'px-3 py-2.5',
       render: (val, row) => (
         <div>
-          <div className="font-medium text-gray-900">{val}</div>
+          <div className="font-medium text-sm text-gray-900">{val}</div>
           <div className="text-xs text-gray-500">{row.kategori_nama}</div>
         </div>
       )
@@ -159,6 +166,7 @@ export default function StokBarang() {
       label: 'Stok',
       align: 'center',
       sortable: true,
+      className: 'px-3 py-2.5',
       render: (val, row) => {
         let bgColor = 'bg-success-100';
         let barColor = 'bg-success-500';
@@ -171,10 +179,10 @@ export default function StokBarang() {
         }
 
         return (
-          <div className="w-24">
-            <div className="flex items-center justify-between text-sm mb-1">
+          <div className="w-24 mx-auto">
+            <div className="flex items-center justify-between text-xs mb-1">
               <span className="font-semibold">{formatNumber(val)}</span>
-              <span className="text-gray-400 text-xs">/ {row.stok_minimal}</span>
+              <span className="text-gray-400 text-[11px]">/ {row.stok_minimal}</span>
             </div>
             <div className={`h-1.5 rounded-full ${bgColor}`}>
               <div
@@ -190,15 +198,17 @@ export default function StokBarang() {
       key: 'satuan',
       label: 'Satuan',
       align: 'center',
-      render: val => <span className="text-sm text-gray-600">{val}</span>
+      className: 'px-3 py-2.5 text-center',
+      render: val => <span className="text-xs text-gray-600">{val}</span>
     },
     {
       key: 'nilai_stok',
       label: 'Nilai Stok',
       align: 'right',
       sortable: true,
+      className: 'px-3 py-2.5 text-right',
       render: val => (
-        <span className="text-sm font-medium text-gray-900">
+        <span className="text-xs font-medium text-gray-900">
           {formatCurrency(val)}
         </span>
       )
@@ -207,16 +217,18 @@ export default function StokBarang() {
       key: 'status',
       label: 'Status',
       align: 'center',
+      className: 'px-3 py-2.5',
       render: (_, row) => {
-        if (row.habis) return <Badge variant="error">Habis</Badge>;
-        if (row.rendah) return <Badge variant="warning">Rendah</Badge>;
-        return <Badge variant="success">Normal</Badge>;
+        if (row.habis) return <Badge variant="error" className="text-xs">Habis</Badge>;
+        if (row.rendah) return <Badge variant="warning" className="text-xs">Rendah</Badge>;
+        return <Badge variant="success" className="text-xs">Normal</Badge>;
       }
     },
     {
       key: 'actions',
       label: '',
       align: 'center',
+      className: 'px-3 py-2.5',
       render: (_, row) => (
         <Button
           size="sm"
