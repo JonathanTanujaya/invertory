@@ -236,7 +236,7 @@ export default function KartuStok() {
       <Card>
         <div className="grid grid-cols-12 gap-3 items-end">
           {/* Item Search/Select */}
-          <div className="col-span-5 relative">
+          <div className="col-span-4 relative">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Pilih Barang
             </label>
@@ -315,9 +315,9 @@ export default function KartuStok() {
           </div>
 
           {/* Action Buttons */}
-          <div className="col-span-1 flex justify-end">
+          <div className="col-span-2 flex items-end">
             <Button
-              className="h-[42px]"
+              className="h-[42px] w-full"
               variant="outline"
               onClick={handleRefresh}
               title="Reset"

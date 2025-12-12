@@ -20,6 +20,7 @@ export default function DataTable({
   actions,
   stickyHeader = false,
   maxHeight = '500px',
+  onRowClick,
 }) {
   const [selectedRows, setSelectedRows] = useState(new Set());
 
@@ -136,8 +137,10 @@ export default function DataTable({
                   key={rowIndex}
                   className={clsx(
                     'hover:bg-gray-50 transition-colors',
-                    selectedRows.has(rowIndex) && 'bg-primary-50'
+                    selectedRows.has(rowIndex) && 'bg-primary-50',
+                    onRowClick && 'cursor-pointer'
                   )}
+                  onClick={() => onRowClick?.(row, rowIndex)}
                 >
                   {selectable && (
                     <td className="px-4 py-1.5">

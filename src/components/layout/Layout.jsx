@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import { clsx } from 'clsx';
 import Sidebar from './Sidebar';
+import FullscreenButton from '../ui/FullscreenButton';
 import { useThemeStore } from '@/store/themeStore';
 
 export default function Layout() {
@@ -20,6 +21,9 @@ export default function Layout() {
           <Outlet />
         </div>
       </main>
+
+      {/* Floating Fullscreen Button */}
+      <FullscreenButton />
     </div>
   );
 }

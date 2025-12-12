@@ -359,10 +359,9 @@ export default function StokAlert() {
 
   return (
     <div className="space-y-6">
-      {/* Filter + Table Container */}
-      <div className="bg-white rounded-lg shadow-soft border border-gray-200 overflow-hidden">
-        {/* Filter Section */}
-        <div className="px-6 py-3 space-y-3 border-b border-gray-200">
+      {/* Filter Section - Separate Card */}
+      <Card>
+        <div className="space-y-3">
           {/* Search Bar + Toggle */}
           <div className="flex items-center gap-3">
             <div className="relative flex-1">
@@ -372,12 +371,12 @@ export default function StokAlert() {
                 placeholder="Cari kode/nama barang..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
+                className="w-full pl-9 pr-3 py-2 h-[42px] border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
               />
             </div>
             <Button
               variant={showAdvancedFilters ? 'primary' : 'outline'}
-              size="sm"
+              className="h-[42px]"
               startIcon={<Filter className="w-4 h-4" />}
               onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
             >
@@ -385,7 +384,7 @@ export default function StokAlert() {
             </Button>
             <Button
               variant="outline"
-              size="sm"
+              className="h-[42px]"
               startIcon={<RefreshCcw className="w-4 h-4" />}
               onClick={load}
               disabled={loading}
@@ -397,7 +396,7 @@ export default function StokAlert() {
             <div className="relative">
               <Button
                 variant="outline"
-                size="sm"
+                className="h-[42px]"
                 startIcon={<Download className="w-4 h-4" />}
                 onClick={() => setShowExportMenu(!showExportMenu)}
                 disabled={loading || filtered.length === 0}
@@ -425,16 +424,16 @@ export default function StokAlert() {
             </div>
 
             {/* View Toggle */}
-            <div className="flex items-center gap-1 border border-gray-200 rounded-lg p-1">
+            <div className="flex items-center gap-1 border border-gray-200 rounded-lg p-1 h-[42px]">
               <button
-                className={`p-1.5 rounded ${viewMode === 'table' ? 'bg-primary-100 text-primary-600' : 'text-gray-400 hover:text-gray-600'}`}
+                className={`p-2 rounded ${viewMode === 'table' ? 'bg-primary-100 text-primary-600' : 'text-gray-400 hover:text-gray-600'}`}
                 onClick={() => setViewMode('table')}
                 title="Table View"
               >
                 <List className="w-4 h-4" />
               </button>
               <button
-                className={`p-1.5 rounded ${viewMode === 'grid' ? 'bg-primary-100 text-primary-600' : 'text-gray-400 hover:text-gray-600'}`}
+                className={`p-2 rounded ${viewMode === 'grid' ? 'bg-primary-100 text-primary-600' : 'text-gray-400 hover:text-gray-600'}`}
                 onClick={() => setViewMode('grid')}
                 title="Grid View"
               >
@@ -446,43 +445,56 @@ export default function StokAlert() {
           {/* Advanced Filters - Collapsible */}
           {showAdvancedFilters && (
             <div className="pt-4 border-t border-gray-100">
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                <Select
-                  value={kategori}
-                  onChange={(e) => setKategori(e.target.value)}
-                  options={[
-                    { value: '', label: 'Semua Kategori' },
-                    ...kategoriData.map(k => ({
-                      value: k.kode_kategori,
-                      label: k.nama_kategori
-                    }))
-                  ]}
-                />
-                <Select
-                  value={urgencyFilter}
-                  onChange={(e) => setUrgencyFilter(e.target.value)}
-                  options={[
-                    { value: 'all', label: 'Semua Status' },
-                    { value: 'habis', label: 'Stok Habis' },
-                    { value: 'rendah', label: 'Stok Rendah' }
-                  ]}
-                />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  startIcon={<X className="w-4 h-4" />}
-                  onClick={resetFilters}
-                  className="text-gray-500"
-                >
-                  Reset
-                </Button>
+              <div className="grid grid-cols-12 gap-3 items-end">
+                <div className="col-span-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Kategori
+                  </label>
+                  <Select
+                    value={kategori}
+                    onChange={(e) => setKategori(e.target.value)}
+                    options={[
+                      { value: '', label: 'Semua Kategori' },
+                      ...kategoriData.map(k => ({
+                        value: k.kode_kategori,
+                        label: k.nama_kategori
+                      }))
+                    ]}
+                  />
+                </div>
+                <div className="col-span-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Status
+                  </label>
+                  <Select
+                    value={urgencyFilter}
+                    onChange={(e) => setUrgencyFilter(e.target.value)}
+                    options={[
+                      { value: 'all', label: 'Semua Status' },
+                      { value: 'habis', label: 'Stok Habis' },
+                      { value: 'rendah', label: 'Stok Rendah' }
+                    ]}
+                  />
+                </div>
+                <div className="col-span-4 flex justify-end">
+                  <Button
+                    variant="outline"
+                    className="h-[42px]"
+                    startIcon={<X className="w-4 h-4" />}
+                    onClick={resetFilters}
+                  >
+                    Reset Filter
+                  </Button>
+                </div>
               </div>
             </div>
           )}
         </div>
+      </Card>
 
-        {/* Table Content */}
-        {viewMode === 'table' ? (
+      {/* Table Section - Separate Card */}
+      {viewMode === 'table' && (
+        <Card padding={false}>
           <DataTable
             columns={columns}
             data={paginatedData}
@@ -493,8 +505,8 @@ export default function StokAlert() {
             totalItems={filtered.length}
             onPageChange={setCurrentPage}
           />
-        ) : null}
-      </div>
+        </Card>
+      )}
 
       {/* Grid View - Outside Container */}
       {viewMode === 'grid' && (

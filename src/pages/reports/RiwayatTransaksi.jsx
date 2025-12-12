@@ -124,7 +124,7 @@ export default function RiwayatTransaksi() {
       if (search) {
         const query = search.toLowerCase();
         if (!trx.no_faktur.toLowerCase().includes(query) &&
-            !trx.partner.toLowerCase().includes(query)) {
+          !trx.partner.toLowerCase().includes(query)) {
           return false;
         }
       }
@@ -171,13 +171,10 @@ export default function RiwayatTransaksi() {
       label: 'No. Faktur',
       sortable: true,
       className: 'px-3 py-2.5',
-      render: (val, row) => (
-        <button
-          onClick={() => handleViewDetail(row)}
-          className="font-mono text-sm font-semibold text-primary-600 hover:text-primary-800 hover:underline"
-        >
+      render: (val) => (
+        <span className="font-mono text-sm font-semibold text-primary-600">
           {val}
-        </button>
+        </span>
       )
     },
     {
@@ -249,21 +246,6 @@ export default function RiwayatTransaksi() {
           {val}
         </Badge>
       )
-    },
-    {
-      key: 'actions',
-      label: 'Aksi',
-      align: 'center',
-      className: 'px-3 py-2.5',
-      render: (val, row) => (
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => handleViewDetail(row)}
-        >
-          <Eye className="w-4 h-4" />
-        </Button>
-      )
     }
   ];
 
@@ -310,7 +292,7 @@ export default function RiwayatTransaksi() {
           </div>
 
           {/* Tipe Filter */}
-          <div className="col-span-3">
+          <div className="col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Tipe Transaksi
             </label>
@@ -328,9 +310,9 @@ export default function RiwayatTransaksi() {
           </div>
 
           {/* Reset Button */}
-          <div className="col-span-1 flex justify-end">
+          <div className="col-span-2 flex items-end">
             <Button
-              className="h-[42px]"
+              className="h-[42px] w-full"
               variant="outline"
               onClick={handleReset}
               title="Reset Filter"
@@ -352,13 +334,14 @@ export default function RiwayatTransaksi() {
           onPageChange={setCurrentPage}
           pageSize={pageSize}
           pagination
+          onRowClick={(row) => handleViewDetail(row)}
         />
       </Card>
 
       {/* Modal Detail */}
       {showModal && selectedTransaction && (
         <Modal
-          isOpen={showModal}
+          open={showModal}
           onClose={() => setShowModal(false)}
           title="Detail Transaksi"
           size="xl"
@@ -388,7 +371,7 @@ export default function RiwayatTransaksi() {
                 <div className="text-xs text-gray-500 mb-1">Tipe Transaksi</div>
                 <Badge variant={
                   selectedTransaction.tipe === 'pembelian' ? 'success' :
-                  selectedTransaction.tipe === 'penjualan' ? 'error' : 'warning'
+                    selectedTransaction.tipe === 'penjualan' ? 'error' : 'warning'
                 }>
                   {selectedTransaction.tipe_label}
                 </Badge>
