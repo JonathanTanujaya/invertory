@@ -28,10 +28,42 @@ export default function SupplierList() {
         <span className="font-mono font-semibold text-primary-600">{value}</span>
       ),
     },
-    { key: 'nama_supplier', label: 'Nama', sortable: true },
-    { key: 'alamat', label: 'Alamat' },
-    { key: 'telepon', label: 'No Telp' },
-    { key: 'kontak', label: 'Kontak' },
+    {
+      key: 'nama_supplier',
+      label: 'Nama Supplier',
+      sortable: true,
+      render: (value, row) => (
+        <div>
+          <div className="font-medium text-gray-900">{value}</div>
+          <div className="text-xs text-gray-500">{row.alamat}</div>
+        </div>
+      )
+    },
+    {
+      key: 'telepon',
+      label: 'Kontak',
+      render: (value, row) => (
+        <div className="space-y-1">
+          {value && (
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-gray-500">Telp:</span>
+              <a
+                href={`tel:${value}`}
+                className="font-medium text-blue-600 hover:text-blue-700"
+              >
+                {value}
+              </a>
+            </div>
+          )}
+          {row.kontak && (
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-gray-500">CP:</span>
+              <span className="font-medium text-gray-900">{row.kontak}</span>
+            </div>
+          )}
+        </div>
+      )
+    },
     {
       key: 'actions',
       label: 'Aksi',

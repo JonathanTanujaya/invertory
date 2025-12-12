@@ -24,11 +24,12 @@ import { toast } from 'react-toastify';
 import barangData from '@/data/dummy/m_barang.json';
 
 export default function KartuStok() {
+  const today = new Date().toISOString().split('T')[0];
   const [kodeBarang, setKodeBarang] = useState('BRG001');
   const [searchItem, setSearchItem] = useState('');
   const [showItemList, setShowItemList] = useState(false);
-  const [from, setFrom] = useState('');
-  const [to, setTo] = useState('');
+  const [from, setFrom] = useState(today);
+  const [to, setTo] = useState(today);
   const [tipe, setTipe] = useState('');
   const [loading, setLoading] = useState(false);
   const [header, setHeader] = useState(null);
@@ -231,165 +232,100 @@ export default function KartuStok() {
 
   return (
     <div className="space-y-6">
-      {/* Item Selector & Quick Actions */}
+      {/* Compact Filter - Single Row */}
       <Card>
-        <div className="space-y-4">
-          <div className="grid md:grid-cols-12 gap-4">
-            {/* Item Search/Select */}
-            <div className="md:col-span-6 relative">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Pilih Barang
-              </label>
-              <div className="relative">
-                <Input
-                  placeholder="Cari kode atau nama barang..."
-                  value={searchItem}
-                  onChange={(e) => {
-                    setSearchItem(e.target.value);
-                    setShowItemList(true);
-                  }}
-                  onFocus={() => setShowItemList(true)}
-                  startIcon={<Search className="w-4 h-4" />}
-                />
-                {showItemList && filteredBarang.length > 0 && (
-                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
-                    {filteredBarang.slice(0, 10).map((item) => (
-                      <button
-                        key={item.kode_barang}
-                        className="w-full px-4 py-2 text-left hover:bg-gray-50 border-b border-gray-100 last:border-0"
-                        onClick={() => handleSelectItem(item)}
-                      >
-                        <div className="font-medium text-sm text-gray-900">{item.kode_barang}</div>
-                        <div className="text-xs text-gray-500">{item.nama_barang}</div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Date Range Presets */}
-            <div className="md:col-span-6">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Periode Cepat
-              </label>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setDateRange(0)}
-                >
-                  Hari Ini
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setDateRange(7)}
-                >
-                  7 Hari
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setDateRange(30)}
-                >
-                  30 Hari
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setDateRange(90)}
-                >
-                  90 Hari
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          {/* Advanced Filters */}
-          <div className="grid md:grid-cols-12 gap-4">
-            <div className="md:col-span-3">
+        <div className="grid grid-cols-12 gap-3 items-end">
+          {/* Item Search/Select */}
+          <div className="col-span-5 relative">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Pilih Barang
+            </label>
+            <div className="relative">
               <Input
-                type="date"
-                label="Dari Tanggal"
-                value={from}
-                onChange={(e) => setFrom(e.target.value)}
-                startIcon={<Calendar className="w-4 h-4" />}
-              />
-            </div>
-            <div className="md:col-span-3">
-              <Input
-                type="date"
-                label="Sampai Tanggal"
-                value={to}
-                onChange={(e) => setTo(e.target.value)}
-                startIcon={<Calendar className="w-4 h-4" />}
-              />
-            </div>
-            <div className="md:col-span-3">
-              <Select
-                label="Tipe Transaksi"
-                value={tipe}
-                onChange={(e) => setTipe(e.target.value)}
-                options={[
-                  { value: '', label: 'Semua Tipe' },
-                  { value: 'IN', label: 'Stok Masuk' },
-                  { value: 'OUT', label: 'Stok Keluar' },
-                  { value: 'RET_IN', label: 'Retur Pembelian' },
-                  { value: 'RET_OUT', label: 'Retur Penjualan' },
-                  { value: 'BONUS_IN', label: 'Bonus Pembelian' },
-                  { value: 'BONUS_OUT', label: 'Bonus Penjualan' },
-                  { value: 'CLAIM_OUT', label: 'Customer Claim' },
-                  { value: 'ADJ', label: 'Adjustment' },
-                ]}
-              />
-            </div>
-            <div className="md:col-span-3 flex items-end gap-2">
-              <Button
-                className="flex-1"
-                startIcon={<Search className="w-4 h-4" />}
-                onClick={loadData}
-              >
-                Cari
-              </Button>
-              <Button
-                variant="outline"
-                startIcon={<RefreshCcw className="w-4 h-4" />}
-                onClick={handleRefresh}
-              >
-                Reset
-              </Button>
-            </div>
-          </div>
-
-          {/* Active Filters */}
-          {activeFilters.length > 0 && (
-            <div className="flex items-center gap-2 flex-wrap">
-              <Filter className="w-4 h-4 text-gray-400" />
-              <span className="text-sm text-gray-500">Filter aktif:</span>
-              {activeFilters.map((filter, idx) => (
-                <Badge
-                  key={idx}
-                  variant="default"
-                  className="cursor-pointer hover:bg-gray-200"
-                  onClick={filter.clear}
-                >
-                  {filter.label}
-                  <X className="w-3 h-3 ml-1" />
-                </Badge>
-              ))}
-              <button
-                className="text-xs text-blue-600 hover:text-blue-700 font-medium"
-                onClick={() => {
-                  setFrom('');
-                  setTo('');
-                  setTipe('');
+                placeholder="Cari kode atau nama barang..."
+                value={searchItem}
+                onChange={(e) => {
+                  setSearchItem(e.target.value);
+                  setShowItemList(true);
                 }}
-              >
-                Hapus Semua
-              </button>
+                onFocus={() => setShowItemList(true)}
+                startIcon={<Search className="w-4 h-4" />}
+              />
+              {showItemList && filteredBarang.length > 0 && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
+                  {filteredBarang.slice(0, 10).map((item) => (
+                    <button
+                      key={item.kode_barang}
+                      className="w-full px-4 py-2 text-left hover:bg-gray-50 border-b border-gray-100 last:border-0"
+                      onClick={() => handleSelectItem(item)}
+                    >
+                      <div className="font-medium text-sm text-gray-900">{item.kode_barang}</div>
+                      <div className="text-xs text-gray-500">{item.nama_barang}</div>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
-          )}
+          </div>
+
+          {/* From Date */}
+          <div className="col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Dari Tanggal
+            </label>
+            <Input
+              type="date"
+              value={from}
+              onChange={(e) => setFrom(e.target.value)}
+            />
+          </div>
+
+          {/* To Date */}
+          <div className="col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Sampai Tanggal
+            </label>
+            <Input
+              type="date"
+              value={to}
+              onChange={(e) => setTo(e.target.value)}
+            />
+          </div>
+
+          {/* Type */}
+          <div className="col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Tipe
+            </label>
+            <Select
+              value={tipe}
+              onChange={(e) => setTipe(e.target.value)}
+              options={[
+                { value: '', label: 'Semua' },
+                { value: 'IN', label: 'Masuk' },
+                { value: 'OUT', label: 'Keluar' },
+                { value: 'RET_IN', label: 'Retur Beli' },
+                { value: 'RET_OUT', label: 'Retur Jual' },
+                { value: 'BONUS_IN', label: 'Bonus Beli' },
+                { value: 'BONUS_OUT', label: 'Bonus Jual' },
+                { value: 'CLAIM_OUT', label: 'Claim' },
+                { value: 'ADJ', label: 'Adjustment' },
+              ]}
+            />
+          </div>
+
+          {/* Action Buttons */}
+          <div className="col-span-1 flex justify-end">
+            <Button
+              className="h-[42px]"
+              variant="outline"
+              onClick={handleRefresh}
+              title="Reset"
+            >
+              <RefreshCcw className="w-4 h-4 mr-2" />
+              Reset
+            </Button>
+          </div>
         </div>
       </Card>
 
@@ -398,32 +334,29 @@ export default function KartuStok() {
         <div className="grid md:grid-cols-12 gap-6">
           {/* Item Info */}
           <Card className="md:col-span-5">
-            <div className="space-y-3">
-              <div className="flex items-start gap-3">
-                <div className="p-3 bg-blue-100 rounded-lg">
-                  <Package className="w-6 h-6 text-blue-600" />
-                </div>
-                <div className="flex-1">
-                  <div className="text-xs text-gray-500 mb-1">Informasi Barang</div>
-                  <div className="font-semibold text-gray-900">{header.nama_barang}</div>
-                  <div className="text-sm text-gray-600 mt-1">
-                    <span className="font-mono">{header.kode_barang}</span>
-                    <span className="mx-2">•</span>
-                    <span>{header.satuan}</span>
-                  </div>
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-blue-100 rounded-lg flex-shrink-0">
+                <Package className="w-6 h-6 text-blue-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-xs text-gray-500 mb-1">Informasi Barang</div>
+                <div className="font-semibold text-gray-900">{header.nama_barang}</div>
+                <div className="text-sm text-gray-600 mt-1">
+                  <span className="font-mono">{header.kode_barang}</span>
+                  <span className="mx-2">•</span>
+                  <span>{header.satuan}</span>
                 </div>
               </div>
-
-              <div className="grid grid-cols-2 gap-4 pt-3 border-t border-gray-200">
-                <div>
-                  <div className="text-xs text-gray-500">Stok Awal</div>
-                  <div className="text-lg font-bold text-gray-900">
+              <div className="flex gap-6 flex-shrink-0">
+                <div className="text-center">
+                  <div className="text-xs text-gray-500 mb-1">Stok Awal</div>
+                  <div className="text-xl font-bold text-gray-900">
                     {formatNumber(header.stok_awal)}
                   </div>
                 </div>
-                <div>
-                  <div className="text-xs text-gray-500">Stok Akhir</div>
-                  <div className="text-lg font-bold text-blue-600">
+                <div className="text-center">
+                  <div className="text-xs text-gray-500 mb-1">Stok Akhir</div>
+                  <div className="text-xl font-bold text-blue-600">
                     {formatNumber(header.stok_akhir)}
                   </div>
                 </div>

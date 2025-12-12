@@ -12,6 +12,7 @@ import CustomerList from './pages/master/CustomerList';
 import KartuStok from './pages/reports/KartuStok';
 import StokAlert from './pages/reports/StokAlert';
 import StokBarang from './pages/reports/StokBarang';
+import RiwayatTransaksi from './pages/reports/RiwayatTransaksi';
 import PurchaseForm from './pages/transactions/PurchaseForm';
 import SalesForm from './pages/transactions/SalesForm';
 import ReturPembelianForm from './pages/transactions/ReturPembelianForm';
@@ -59,6 +60,7 @@ function App() {
               <Route path="stok-barang" element={<StokBarang />} />
               <Route path="stok-alert" element={<StokAlert />} />
               <Route path="kartu-stok" element={<KartuStok />} />
+              <Route path="riwayat-transaksi" element={<RiwayatTransaksi />} />
             </Route>
 
             {/* Catch all */}

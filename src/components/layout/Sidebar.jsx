@@ -20,6 +20,7 @@ import {
   Boxes,
   AlertTriangle,
   FileBarChart,
+  History,
   Settings,
 } from 'lucide-react';
 
@@ -59,6 +60,7 @@ const menuItems = [
       { title: 'Stok Barang', path: '/reports/stok-barang', icon: Boxes },
       { title: 'Stok Alert', path: '/reports/stok-alert', icon: AlertTriangle },
       { title: 'Kartu Stok', path: '/reports/kartu-stok', icon: FileBarChart },
+      { title: 'Riwayat Transaksi', path: '/reports/riwayat-transaksi', icon: History },
     ],
   },
 ];

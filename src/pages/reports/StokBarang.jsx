@@ -9,7 +9,7 @@ import Modal from '@/components/ui/Modal';
 import {
   Search, RefreshCcw, Download, Eye, X, Loader2, FileText,
   Package, AlertTriangle, CheckCircle, XCircle,
-  LayoutGrid, List, Filter, MapPin
+  LayoutGrid, List, Filter, MapPin, Clock
 } from 'lucide-react';
 import { formatNumber, formatCurrency } from '@/utils/helpers';
 import BarangForm from '@/pages/master/BarangForm';
@@ -35,6 +35,7 @@ export default function StokBarang() {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [tidakLakuPeriod, setTidakLakuPeriod] = useState(3); // dalam bulan, default 3 bulan
 
   // View mode
   const [viewMode, setViewMode] = useState('table'); // table | grid
@@ -60,12 +61,24 @@ export default function StokBarang() {
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 300));
 
-    // Enrich data with kategori name
-    const enrichedData = barangData.map(item => ({
-      ...item,
-      kategori_nama: getKategoriNama(item.kategori_id),
-      nilai_stok: item.stok * item.harga_beli,
-    }));
+    // Enrich data with kategori name and simulate last_movement
+    const enrichedData = barangData.map((item, index) => {
+      // Simulasi last_movement: beberapa barang tidak laku dalam periode tertentu
+      const today = new Date();
+      let lastMovement;
+
+      // Buat distribusi random untuk simulasi
+      const randomMonths = Math.floor(Math.random() * 15); // 0-14 bulan
+      lastMovement = new Date(today);
+      lastMovement.setMonth(today.getMonth() - randomMonths);
+
+      return {
+        ...item,
+        kategori_nama: getKategoriNama(item.kategori_id),
+        nilai_stok: item.stok * item.harga_beli,
+        last_movement: lastMovement.toISOString().split('T')[0], // Format: YYYY-MM-DD
+      };
+    });
 
     setData(enrichedData);
     setLoading(false);
@@ -77,6 +90,7 @@ export default function StokBarang() {
     setStatusFilter('all');
     setDateFrom('');
     setDateTo('');
+    setTidakLakuPeriod(3);
     setCurrentPage(1);
   };
 
@@ -112,9 +126,18 @@ export default function StokBarang() {
       const habis = item.stok === 0;
       const rendah = !habis && item.stok < item.stok_minimal;
 
+      // Cek barang tidak laku (last_movement lebih dari tidakLakuPeriod bulan yang lalu)
+      const tidakLaku = item.last_movement ? (() => {
+        const lastMove = new Date(item.last_movement);
+        const cutoffDate = new Date();
+        cutoffDate.setMonth(cutoffDate.getMonth() - tidakLakuPeriod);
+        return lastMove < cutoffDate;
+      })() : false;
+
       if (statusFilter === 'habis' && !habis) return false;
       if (statusFilter === 'rendah' && !rendah) return false;
       if (statusFilter === 'normal' && (habis || rendah)) return false;
+      if (statusFilter === 'tidak-laku' && !tidakLaku) return false;
 
       return true;
     }).map(item => ({
@@ -133,10 +156,23 @@ export default function StokBarang() {
     const total = data.length;
     const habis = data.filter(i => i.stok === 0).length;
     const rendah = data.filter(i => i.stok > 0 && i.stok < i.stok_minimal).length;
-    const normal = total - habis - rendah;
+
+    // Hitung barang tidak laku
+    const cutoffDate = new Date();
+    cutoffDate.setMonth(cutoffDate.getMonth() - tidakLakuPeriod);
+    const tidakLaku = data.filter(i => {
+      if (!i.last_movement) return false;
+      const lastMove = new Date(i.last_movement);
+      return lastMove < cutoffDate;
+    }).length;
+
+    // Normal: barang yang stoknya >= stok_minimal (tidak termasuk habis dan rendah)
+    // Tidak laku adalah kategori terpisah yang tidak mempengaruhi perhitungan normal
+    const normal = data.filter(i => i.stok >= i.stok_minimal).length;
+
     const totalNilai = data.reduce((sum, i) => sum + (i.stok * i.harga_beli), 0);
-    return { total, habis, rendah, normal, totalNilai };
-  }, [data]);
+    return { total, habis, rendah, normal, tidakLaku, totalNilai };
+  }, [data, tidakLakuPeriod]);
 
   // Table columns
   const columns = [
@@ -366,7 +402,7 @@ export default function StokBarang() {
   return (
     <div className="space-y-6">
       {/* Quick Stats - Clickable */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <StatCard
           title="Total Item"
           value={stats.total}
@@ -398,6 +434,14 @@ export default function StokBarang() {
           color="error"
           isActive={statusFilter === 'habis'}
           onClick={() => handleQuickFilter('habis')}
+        />
+        <StatCard
+          title="Tidak Laku"
+          value={stats.tidakLaku}
+          icon={Clock}
+          color="primary"
+          isActive={statusFilter === 'tidak-laku'}
+          onClick={() => handleQuickFilter('tidak-laku')}
         />
       </div>
 
@@ -435,36 +479,69 @@ export default function StokBarang() {
               Refresh
             </Button>
 
-            {/* Export Dropdown */}
-            <div className="relative">
-              <Button
-                variant="outline"
-                size="sm"
-                startIcon={<Download className="w-4 h-4" />}
-                onClick={() => setShowExportMenu(!showExportMenu)}
-                disabled={loading || filtered.length === 0}
-              >
-                Export
-              </Button>
-              {showExportMenu && (
-                <div className="absolute top-full right-0 mt-1 w-36 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10">
-                  <button
-                    className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
-                    onClick={exportCsv}
-                  >
-                    <Download className="w-4 h-4" />
-                    Export CSV
-                  </button>
-                  <button
-                    className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
-                    onClick={printReport}
-                  >
-                    <FileText className="w-4 h-4" />
-                    Print
-                  </button>
-                </div>
-              )}
-            </div>
+            {/* Export Dropdown / Filter Periode */}
+            {statusFilter === 'tidak-laku' ? (
+              <div className="relative">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  startIcon={<Clock className="w-4 h-4" />}
+                  onClick={() => setShowExportMenu(!showExportMenu)}
+                >
+                  {tidakLakuPeriod === 1 ? '1 Bulan' : tidakLakuPeriod === 12 ? '1 Tahun' : `${tidakLakuPeriod} Bulan`}
+                </Button>
+                {showExportMenu && (
+                  <div className="absolute top-full right-0 mt-1 w-40 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10">
+                    <div className="text-xs font-medium text-gray-700 px-3 py-2">Filter Periode</div>
+                    {[1, 3, 6, 12].map(months => (
+                      <button
+                        key={months}
+                        onClick={() => {
+                          setTidakLakuPeriod(months);
+                          setShowExportMenu(false);
+                        }}
+                        className={`w-full px-3 py-2 text-left text-sm transition-colors ${tidakLakuPeriod === months
+                          ? 'bg-gray-100 text-gray-900 font-medium'
+                          : 'text-gray-600 hover:bg-gray-50'
+                          }`}
+                      >
+                        {months === 1 ? '1 Bulan' : months === 12 ? '1 Tahun' : `${months} Bulan`}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="relative">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  startIcon={<Download className="w-4 h-4" />}
+                  onClick={() => setShowExportMenu(!showExportMenu)}
+                  disabled={loading || filtered.length === 0}
+                >
+                  Export
+                </Button>
+                {showExportMenu && (
+                  <div className="absolute top-full right-0 mt-1 w-36 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10">
+                    <button
+                      className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+                      onClick={exportCsv}
+                    >
+                      <Download className="w-4 h-4" />
+                      Export CSV
+                    </button>
+                    <button
+                      className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+                      onClick={printReport}
+                    >
+                      <FileText className="w-4 h-4" />
+                      Print
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* View Toggle */}
             <div className="flex items-center gap-1 border border-gray-200 rounded-lg p-1">

@@ -623,29 +623,6 @@ export default function StokAlert() {
                         </div>
                       </div>
                     </div>
-                    <div className="mt-3 pt-3 border-t border-gray-100 flex gap-2">
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        startIcon={<ShoppingCart className="w-4 h-4" />}
-                        onClick={() => {
-                          // TODO: Navigate to create PO with supplier pre-selected
-                          alert(`Buat PO ke ${supplier.nama_supplier}`);
-                        }}
-                      >
-                        Buat PO
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        startIcon={<Phone className="w-4 h-4" />}
-                        onClick={() => {
-                          window.location.href = `tel:${supplier.telepon}`;
-                        }}
-                      >
-                        Hubungi
-                      </Button>
-                    </div>
                   </div>
                 ))}
               </div>

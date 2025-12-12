@@ -19,11 +19,11 @@ const Select = forwardRef(({
           {props.required && <span className="text-error-500 ml-1">*</span>}
         </label>
       )}
-      
+
       <select
         ref={ref}
         className={clsx(
-          'w-full px-3 py-2 border rounded-md transition-colors',
+          'w-full px-3 py-2 h-[42px] border rounded-md transition-colors',
           'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent',
           'disabled:bg-gray-100 disabled:cursor-not-allowed',
           error ? 'border-error-500' : 'border-gray-300',
@@ -40,7 +40,7 @@ const Select = forwardRef(({
           </option>
         ))}
       </select>
-      
+
       {(error || helperText) && (
         <p className={clsx(
           'mt-1 text-sm',
