@@ -1,6 +1,8 @@
-import { NavLink } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { clsx } from 'clsx';
 import { useThemeStore } from '@/store/themeStore';
+import { useAuthStore } from '@/store/authStore';
 import {
   LayoutDashboard,
   Package,
@@ -22,18 +24,24 @@ import {
   FileBarChart,
   History,
   Settings,
+  LogOut,
+  ChevronUp,
+  UserCog,
+  ClipboardList,
 } from 'lucide-react';
 
 // Inventory-only navigation (finance & non-inventory masters removed)
-const menuItems = [
+const allMenuItems = [
   {
     title: 'Dashboard',
     path: '/',
     icon: LayoutDashboard,
+    permission: 'dashboard',
   },
   {
     title: 'Master Data',
     icon: Package,
+    permission: 'master-data',
     submenu: [
       { title: 'Kategori & Area', path: '/master/kategori', icon: Tags },
       { title: 'Data Barang', path: '/master/sparepart', icon: Package },
@@ -44,6 +52,7 @@ const menuItems = [
   {
     title: 'Transaksi',
     icon: ShoppingCart,
+    permission: 'transaksi',
     submenu: [
       { title: 'Stok Masuk', path: '/transactions/pembelian', icon: TrendingUp },
       { title: 'Stok Keluar', path: '/transactions/penjualan', icon: TrendingDown },
@@ -56,6 +65,7 @@ const menuItems = [
   {
     title: 'Laporan',
     icon: FileText,
+    permission: 'laporan',
     submenu: [
       { title: 'Stok Barang', path: '/reports/stok-barang', icon: Boxes },
       { title: 'Stok Alert', path: '/reports/stok-alert', icon: AlertTriangle },
@@ -63,10 +73,48 @@ const menuItems = [
       { title: 'Riwayat Transaksi', path: '/reports/riwayat-transaksi', icon: History },
     ],
   },
+  {
+    title: 'Pengaturan',
+    icon: Settings,
+    permission: 'settings',
+    submenu: [
+      { title: 'Manajemen User', path: '/settings/users', icon: UserCog },
+      { title: 'Log Aktivitas', path: '/settings/activity-log', icon: ClipboardList },
+    ],
+  },
 ];
 
 export default function Sidebar() {
   const { sidebarCollapsed, toggleSidebar } = useThemeStore();
+  const { user, logout, hasPermission, getRoleLabel } = useAuthStore();
+  const navigate = useNavigate();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Filter menu items based on user permissions
+  const menuItems = allMenuItems.filter(item => hasPermission(item.permission));
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  // Get user initials for avatar
+  const getInitials = (name) => {
+    if (!name) return 'U';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  };
 
   return (
     <aside
@@ -103,33 +151,66 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* User Panel Footer */}
-      <div className="flex-shrink-0 border-t border-gray-200 p-3">
-        <NavLink
-          to="/settings"
-          className={({ isActive }) =>
-            clsx(
-              'flex items-center gap-3 p-2 rounded-lg transition-colors',
-              isActive
-                ? 'bg-primary-50 text-primary-600'
-                : 'hover:bg-gray-100',
-              sidebarCollapsed && 'justify-center'
-            )
-          }
+      {/* User Panel Footer with Dropdown */}
+      <div className="flex-shrink-0 border-t border-gray-200 p-3 relative" ref={dropdownRef}>
+        {/* Dropdown Menu */}
+        {dropdownOpen && (
+          <div
+            className={clsx(
+              'absolute bottom-full left-3 right-3 mb-2 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden',
+              sidebarCollapsed && 'left-1 right-1'
+            )}
+          >
+            {hasPermission('settings') && (
+              <NavLink
+                to="/settings/users"
+                onClick={() => setDropdownOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 transition-colors text-gray-700"
+              >
+                <UserCog className="w-4 h-4" />
+                {!sidebarCollapsed && <span className="text-sm">Pengaturan</span>}
+              </NavLink>
+            )}
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-3 px-4 py-3 hover:bg-red-50 transition-colors text-red-600 w-full"
+            >
+              <LogOut className="w-4 h-4" />
+              {!sidebarCollapsed && <span className="text-sm">Keluar</span>}
+            </button>
+          </div>
+        )}
+
+        {/* User Button */}
+        <button
+          onClick={() => setDropdownOpen(!dropdownOpen)}
+          className={clsx(
+            'flex items-center gap-3 p-2 rounded-lg transition-colors w-full',
+            dropdownOpen ? 'bg-gray-100' : 'hover:bg-gray-100',
+            sidebarCollapsed && 'justify-center'
+          )}
         >
-          <div className="w-9 h-9 bg-primary-500 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0">
-            A
+          <div
+            className="w-9 h-9 bg-primary-500 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0"
+            style={{ backgroundColor: user?.avatar || '#6366f1' }}
+          >
+            {getInitials(user?.nama)}
           </div>
           {!sidebarCollapsed && (
-            <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium text-gray-900">Admin</div>
-              <div className="text-xs text-gray-500">Administrator</div>
-            </div>
+            <>
+              <div className="flex-1 min-w-0 text-left">
+                <div className="text-sm font-medium text-gray-900 truncate">{user?.nama || 'User'}</div>
+                <div className="text-xs text-gray-500">{getRoleLabel()}</div>
+              </div>
+              <ChevronUp
+                className={clsx(
+                  'w-4 h-4 text-gray-400 transition-transform',
+                  !dropdownOpen && 'rotate-180'
+                )}
+              />
+            </>
           )}
-          {!sidebarCollapsed && (
-            <Settings className="w-4 h-4 text-gray-400" />
-          )}
-        </NavLink>
+        </button>
       </div>
     </aside>
   );

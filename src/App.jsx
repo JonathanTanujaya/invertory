@@ -4,6 +4,8 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import Layout from './components/layout/Layout';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import Login from './pages/auth/Login';
 import Dashboard from './pages/Dashboard';
 import BarangList from './pages/master/BarangList';
 import KategoriList from './pages/master/KategoriList';
@@ -19,6 +21,8 @@ import ReturPembelianForm from './pages/transactions/ReturPembelianForm';
 import ReturPenjualanForm from './pages/transactions/ReturPenjualanForm';
 import StokOpnameForm from './pages/transactions/StokOpnameForm';
 import CustomerClaimForm from './pages/transactions/CustomerClaimForm';
+import ManajemenUser from './pages/settings/ManajemenUser';
+import LogAktivitas from './pages/settings/LogAktivitas';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -34,7 +38,18 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Layout />}>
+          {/* Public Route - Login */}
+          <Route path="/login" element={<Login />} />
+
+          {/* Protected Routes */}
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            }
+          >
             <Route index element={<Dashboard />} />
 
             {/* Master Data */}
@@ -61,6 +76,26 @@ function App() {
               <Route path="stok-alert" element={<StokAlert />} />
               <Route path="kartu-stok" element={<KartuStok />} />
               <Route path="riwayat-transaksi" element={<RiwayatTransaksi />} />
+            </Route>
+
+            {/* Settings - Owner Only */}
+            <Route path="settings">
+              <Route
+                path="users"
+                element={
+                  <ProtectedRoute permission="settings">
+                    <ManajemenUser />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="activity-log"
+                element={
+                  <ProtectedRoute permission="settings">
+                    <LogAktivitas />
+                  </ProtectedRoute>
+                }
+              />
             </Route>
 
             {/* Catch all */}
