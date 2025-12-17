@@ -5,7 +5,7 @@ import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
-import { fetchItemMovements, formatMovementType } from '@/api/movements';
+import { fetchItemMovements, formatMovementType, getAvailableItems } from '@/api/movements';
 import {
   Search,
   RefreshCcw,
@@ -17,19 +17,20 @@ import {
   X,
   Filter,
   FileDown,
-  FileText
+  FileText,
+  ClipboardList,
+  ArrowRight
 } from 'lucide-react';
 import { formatNumber } from '@/utils/helpers';
 import { toast } from 'react-toastify';
-import barangData from '@/data/dummy/m_barang.json';
 
 export default function KartuStok() {
   const today = new Date().toISOString().split('T')[0];
-  const [kodeBarang, setKodeBarang] = useState('BRG001');
+  const [kodeBarang, setKodeBarang] = useState('');
   const [searchItem, setSearchItem] = useState('');
   const [showItemList, setShowItemList] = useState(false);
-  const [from, setFrom] = useState(today);
-  const [to, setTo] = useState(today);
+  const [from, setFrom] = useState('');
+  const [to, setTo] = useState('');
   const [tipe, setTipe] = useState('');
   const [loading, setLoading] = useState(false);
   const [header, setHeader] = useState(null);
@@ -37,15 +38,18 @@ export default function KartuStok() {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 15;
 
+  // Get available items from movements API
+  const availableItems = useMemo(() => getAvailableItems(), []);
+
   // Filter barang berdasarkan pencarian
   const filteredBarang = useMemo(() => {
-    if (!searchItem) return barangData;
+    if (!searchItem) return availableItems;
     const search = searchItem.toLowerCase();
-    return barangData.filter(item =>
-      item.kode_barang.toLowerCase().includes(search) ||
-      item.nama_barang.toLowerCase().includes(search)
+    return availableItems.filter(item =>
+      item.kode.toLowerCase().includes(search) ||
+      item.nama.toLowerCase().includes(search)
     );
-  }, [searchItem]);
+  }, [searchItem, availableItems]);
 
   // Hitung statistik
   const stats = useMemo(() => {
@@ -56,22 +60,31 @@ export default function KartuStok() {
   }, [rows]);
 
   useEffect(() => {
-    loadData();
+    if (kodeBarang) {
+      loadData();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kodeBarang]);
 
   const loadData = async () => {
+    if (!kodeBarang) return;
     setLoading(true);
     try {
-      const res = await fetchItemMovements(kodeBarang, { from, to, type: tipe || undefined });
-      setHeader({
-        kode_barang: res.kode_barang,
-        nama_barang: res.nama_barang,
-        satuan: res.satuan,
-        stok_awal: res.stok_awal,
-        stok_akhir: res.stok_akhir,
-      });
-      setRows(res.movements);
+      const res = await fetchItemMovements(kodeBarang, { from: from || undefined, to: to || undefined, type: tipe || undefined });
+      if (res) {
+        setHeader({
+          kode_barang: res.kode_barang,
+          nama_barang: res.nama_barang,
+          satuan: res.satuan,
+          stok_awal: res.stok_awal,
+          stok_akhir: res.stok_akhir,
+        });
+        setRows(res.movements);
+      } else {
+        setHeader(null);
+        setRows([]);
+        toast.error('Data barang tidak ditemukan');
+      }
       setCurrentPage(1);
     } catch (err) {
       toast.error('Gagal memuat kartu stok');
@@ -81,14 +94,17 @@ export default function KartuStok() {
   };
 
   const handleRefresh = () => {
+    setKodeBarang('');
+    setSearchItem('');
     setFrom('');
     setTo('');
     setTipe('');
-    loadData();
+    setHeader(null);
+    setRows([]);
   };
 
   const handleSelectItem = (item) => {
-    setKodeBarang(item.kode_barang);
+    setKodeBarang(item.kode);
     setSearchItem('');
     setShowItemList(false);
   };
@@ -255,12 +271,12 @@ export default function KartuStok() {
                 <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
                   {filteredBarang.slice(0, 10).map((item) => (
                     <button
-                      key={item.kode_barang}
+                      key={item.kode}
                       className="w-full px-4 py-2 text-left hover:bg-gray-50 border-b border-gray-100 last:border-0"
                       onClick={() => handleSelectItem(item)}
                     >
-                      <div className="font-medium text-sm text-gray-900">{item.kode_barang}</div>
-                      <div className="text-xs text-gray-500">{item.nama_barang}</div>
+                      <div className="font-medium text-sm text-gray-900">{item.kode}</div>
+                      <div className="text-xs text-gray-500">{item.nama}</div>
                     </button>
                   ))}
                 </div>
@@ -329,8 +345,53 @@ export default function KartuStok() {
         </div>
       </Card>
 
+      {/* Empty State - Belum Pilih Barang */}
+      {!kodeBarang && !loading && (
+        <Card className="py-16">
+          <div className="flex flex-col items-center justify-center text-center">
+            {/* Ilustrasi */}
+            <div className="relative mb-6">
+              <div className="w-32 h-32 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center">
+                <ClipboardList className="w-16 h-16 text-blue-500" />
+              </div>
+              <div className="absolute -top-2 -right-2 w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                <Search className="w-5 h-5 text-amber-500" />
+              </div>
+            </div>
+            
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              Pilih Barang untuk Melihat Kartu Stok
+            </h3>
+            <p className="text-gray-500 max-w-md mb-6">
+              Gunakan kolom pencarian di atas untuk memilih barang yang ingin dilihat riwayat transaksinya. 
+              Kartu stok akan menampilkan semua pergerakan stok secara kronologis.
+            </p>
+            
+            {/* Quick Select Buttons */}
+            <div className="flex flex-col items-center">
+              <span className="text-sm text-gray-500 mb-3">Pilih cepat:</span>
+              <div className="flex flex-wrap gap-2 justify-center">
+                {availableItems.slice(0, 5).map((item) => (
+                  <button
+                    key={item.kode}
+                    onClick={() => setKodeBarang(item.kode)}
+                    className="px-4 py-2 bg-white border border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors group"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-sm text-blue-600">{item.kode}</span>
+                      <ArrowRight className="w-3 h-3 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                    </div>
+                    <div className="text-xs text-gray-500 mt-0.5 text-left">{item.nama}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </Card>
+      )}
+
       {/* Header Info & Stats */}
-      {header && (
+      {header && kodeBarang && (
         <div className="grid md:grid-cols-12 gap-6">
           {/* Item Info */}
           <Card className="md:col-span-5">
@@ -415,33 +476,61 @@ export default function KartuStok() {
       )}
 
       {/* Table with Export */}
-      <Card padding={false}>
-        <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-          <div>
-            <h2 className="font-semibold text-gray-900">Riwayat Transaksi</h2>
-            <p className="text-xs text-gray-500 mt-0.5">
-              Menampilkan {rows.length} transaksi
-            </p>
+      {header && (
+        <Card padding={false}>
+          <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+            <div>
+              <h2 className="font-semibold text-gray-900">Riwayat Transaksi</h2>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Menampilkan {rows.length} transaksi
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              startIcon={<FileDown className="w-4 h-4" />}
+              onClick={handleExportCSV}
+              disabled={rows.length === 0}
+            >
+              Export CSV
+            </Button>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            startIcon={<FileDown className="w-4 h-4" />}
-            onClick={handleExportCSV}
-            disabled={rows.length === 0}
-          >
-            Export CSV
-          </Button>
-        </div>
-        <DataTable
-          columns={columns}
-          data={rows}
-          loading={loading}
-          currentPage={currentPage}
-          onPageChange={setCurrentPage}
-          pageSize={pageSize}
-        />
-      </Card>
+          
+          {/* Empty State - Tidak Ada Transaksi */}
+          {rows.length === 0 && !loading ? (
+            <div className="py-16 flex flex-col items-center justify-center text-center">
+              <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <FileText className="w-10 h-10 text-gray-400" />
+              </div>
+              <h4 className="text-lg font-medium text-gray-900 mb-1">
+                Belum Ada Transaksi
+              </h4>
+              <p className="text-gray-500 text-sm max-w-sm">
+                Barang ini belum memiliki riwayat transaksi pada periode yang dipilih.
+                Coba ubah filter tanggal atau tipe transaksi.
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-4"
+                onClick={handleRefresh}
+              >
+                <RefreshCcw className="w-4 h-4 mr-2" />
+                Reset Filter
+              </Button>
+            </div>
+          ) : (
+            <DataTable
+              columns={columns}
+              data={rows}
+              loading={loading}
+              currentPage={currentPage}
+              onPageChange={setCurrentPage}
+              pageSize={pageSize}
+            />
+          )}
+        </Card>
+      )}
     </div>
   );
 }

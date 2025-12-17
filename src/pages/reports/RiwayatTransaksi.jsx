@@ -250,9 +250,9 @@ export default function RiwayatTransaksi() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="h-full flex flex-col gap-4">
       {/* Filter */}
-      <Card>
+      <Card className="flex-shrink-0">
         <div className="grid grid-cols-12 gap-3 items-end">
           {/* Search */}
           <div className="col-span-4">
@@ -325,15 +325,12 @@ export default function RiwayatTransaksi() {
       </Card>
 
       {/* Table */}
-      <Card padding={false}>
+      <Card padding={false} className="flex-1 flex flex-col min-h-0 overflow-hidden">
         <DataTable
           columns={columns}
           data={filteredTransactions}
           loading={loading}
-          currentPage={currentPage}
-          onPageChange={setCurrentPage}
-          pageSize={pageSize}
-          pagination
+          stickyHeader
           onRowClick={(row) => handleViewDetail(row)}
         />
       </Card>

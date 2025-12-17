@@ -25,11 +25,48 @@ export default function CustomerList() {
   }, {});
 
   const columns = [
-    { key: 'kode', label: 'Kode', sortable: true },
-    { key: 'nama', label: 'Nama Customer', sortable: true },
-    { key: 'area', label: 'Area', sortable: true },
-    { key: 'telepon', label: 'No Telp' },
-    { key: 'kontak_person', label: 'Kontak Person' },
+    { 
+      key: 'kode', 
+      label: 'Kode', 
+      sortable: true,
+      render: (val) => (
+        <span className="font-mono text-sm font-semibold text-primary-600">
+          {val}
+        </span>
+      )
+    },
+    { 
+      key: 'nama', 
+      label: 'Nama Customer', 
+      sortable: true,
+      render: (val) => (
+        <span className="font-medium text-gray-900">{val}</span>
+      )
+    },
+    { 
+      key: 'area', 
+      label: 'Area', 
+      sortable: true,
+      render: (val) => (
+        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+          {val}
+        </span>
+      )
+    },
+    { 
+      key: 'telepon', 
+      label: 'No Telp',
+      render: (val) => (
+        <span className="text-sm text-gray-600">{val}</span>
+      )
+    },
+    { 
+      key: 'kontak_person', 
+      label: 'Kontak Person',
+      render: (val) => (
+        <span className="text-sm text-gray-600">{val}</span>
+      )
+    },
     {
       key: 'actions',
       label: 'Aksi',

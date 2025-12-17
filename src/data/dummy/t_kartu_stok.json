@@ -1,0 +1,77 @@
+{
+  "BRG001": {
+    "kode_barang": "BRG001",
+    "nama_barang": "Bearing 6205 2RS",
+    "satuan": "pcs",
+    "stok_awal": 150,
+    "movements": [
+      { "waktu": "2024-03-01 08:30", "ref": "PB-2024-0001", "tipe": "IN", "qty": 50, "user": "admin", "catatan": "Pembelian dari CV Mega Bearing" },
+      { "waktu": "2024-03-05 10:15", "ref": "SL-2024-0012", "tipe": "OUT", "qty": 20, "user": "staf", "catatan": "Penjualan ke Bengkel Cahaya" },
+      { "waktu": "2024-03-08 14:20", "ref": "SL-2024-0018", "tipe": "OUT", "qty": 15, "user": "admin", "catatan": "Penjualan ke Toko ABC Motor" },
+      { "waktu": "2024-03-12 09:00", "ref": "PB-2024-0005", "tipe": "IN", "qty": 100, "user": "admin", "catatan": "Pembelian dari PT Global Motor Parts" },
+      { "waktu": "2024-03-15 11:30", "ref": "RET-SL-0018", "tipe": "RET_OUT", "qty": 3, "user": "staf", "catatan": "Retur dari Toko ABC Motor - barang cacat" },
+      { "waktu": "2024-03-18 16:45", "ref": "SL-2024-0025", "tipe": "OUT", "qty": 30, "user": "admin", "catatan": "Penjualan ke PT Otomotif Nusantara" },
+      { "waktu": "2024-03-22 08:00", "ref": "BONUS-PB-0005", "tipe": "BONUS_IN", "qty": 10, "user": "admin", "catatan": "Bonus dari supplier" },
+      { "waktu": "2024-03-25 13:15", "ref": "CLM-2024-001", "tipe": "CLAIM_OUT", "qty": 2, "user": "staf", "catatan": "Klaim customer - barang rusak" },
+      { "waktu": "2024-03-28 10:30", "ref": "OPN-2024-03", "tipe": "ADJ", "qty": -5, "user": "owner", "catatan": "Opname bulanan - selisih kurang" }
+    ]
+  },
+  "BRG002": {
+    "kode_barang": "BRG002",
+    "nama_barang": "V-Belt A68",
+    "satuan": "pcs",
+    "stok_awal": 80,
+    "movements": [
+      { "waktu": "2024-03-02 09:00", "ref": "PB-2024-0002", "tipe": "IN", "qty": 40, "user": "admin", "catatan": "Pembelian dari CV Prima Oli" },
+      { "waktu": "2024-03-06 11:20", "ref": "SL-2024-0014", "tipe": "OUT", "qty": 12, "user": "staf", "catatan": "Penjualan ke Bengkel Motor Sejahtera" },
+      { "waktu": "2024-03-10 15:00", "ref": "SL-2024-0020", "tipe": "OUT", "qty": 8, "user": "admin", "catatan": "Penjualan ke Toko Prima Sparepart" },
+      { "waktu": "2024-03-14 08:45", "ref": "RET-PB-0002", "tipe": "RET_IN", "qty": 5, "user": "admin", "catatan": "Retur ke supplier - kualitas tidak sesuai" },
+      { "waktu": "2024-03-20 14:30", "ref": "SL-2024-0028", "tipe": "OUT", "qty": 25, "user": "staf", "catatan": "Penjualan ke PT Berkah Selalu" },
+      { "waktu": "2024-03-26 10:00", "ref": "PB-2024-0010", "tipe": "IN", "qty": 60, "user": "admin", "catatan": "Pembelian dari PT Global Motor Parts" }
+    ]
+  },
+  "BRG003": {
+    "kode_barang": "BRG003",
+    "nama_barang": "Oli Mesin 10W-40 1L",
+    "satuan": "liter",
+    "stok_awal": 200,
+    "movements": [
+      { "waktu": "2024-03-03 10:00", "ref": "PB-2024-0003", "tipe": "IN", "qty": 100, "user": "admin", "catatan": "Pembelian dari CV Prima Oli" },
+      { "waktu": "2024-03-07 09:30", "ref": "SL-2024-0015", "tipe": "OUT", "qty": 48, "user": "staf", "catatan": "Penjualan ke Toko Sparepart Jaya" },
+      { "waktu": "2024-03-11 13:15", "ref": "SL-2024-0021", "tipe": "OUT", "qty": 24, "user": "admin", "catatan": "Penjualan ke Bengkel Cahaya" },
+      { "waktu": "2024-03-16 16:00", "ref": "BONUS-PB-0003", "tipe": "BONUS_IN", "qty": 12, "user": "admin", "catatan": "Bonus pembelian dari supplier" },
+      { "waktu": "2024-03-21 11:45", "ref": "SL-2024-0030", "tipe": "OUT", "qty": 36, "user": "staf", "catatan": "Penjualan ke PT Otomotif Nusantara" },
+      { "waktu": "2024-03-24 08:30", "ref": "CLM-2024-002", "tipe": "CLAIM_OUT", "qty": 4, "user": "staf", "catatan": "Klaim customer - bocor" },
+      { "waktu": "2024-03-29 14:00", "ref": "OPN-2024-03", "tipe": "ADJ", "qty": 2, "user": "owner", "catatan": "Opname bulanan - selisih lebih" }
+    ]
+  },
+  "BRG004": {
+    "kode_barang": "BRG004",
+    "nama_barang": "Filter Udara Honda Beat",
+    "satuan": "pcs",
+    "stok_awal": 60,
+    "movements": [
+      { "waktu": "2024-03-04 11:00", "ref": "PB-2024-0004", "tipe": "IN", "qty": 30, "user": "admin", "catatan": "Pembelian dari CV Mega Bearing" },
+      { "waktu": "2024-03-09 10:45", "ref": "SL-2024-0019", "tipe": "OUT", "qty": 10, "user": "staf", "catatan": "Penjualan ke Bengkel Motor Sejahtera" },
+      { "waktu": "2024-03-13 14:30", "ref": "SL-2024-0023", "tipe": "OUT", "qty": 8, "user": "admin", "catatan": "Penjualan ke Toko Prima Sparepart" },
+      { "waktu": "2024-03-17 09:15", "ref": "RET-SL-0019", "tipe": "RET_OUT", "qty": 2, "user": "staf", "catatan": "Retur dari Bengkel Motor Sejahtera" },
+      { "waktu": "2024-03-23 15:30", "ref": "SL-2024-0032", "tipe": "OUT", "qty": 15, "user": "admin", "catatan": "Penjualan ke PT Berkah Selalu" },
+      { "waktu": "2024-03-27 11:00", "ref": "PB-2024-0012", "tipe": "IN", "qty": 50, "user": "admin", "catatan": "Pembelian dari PT Global Motor Parts" }
+    ]
+  },
+  "BRG005": {
+    "kode_barang": "BRG005",
+    "nama_barang": "Kampas Rem Depan Vario",
+    "satuan": "set",
+    "stok_awal": 45,
+    "movements": [
+      { "waktu": "2024-03-05 08:00", "ref": "PB-2024-0006", "tipe": "IN", "qty": 25, "user": "admin", "catatan": "Pembelian dari CV Prima Oli" },
+      { "waktu": "2024-03-08 12:30", "ref": "SL-2024-0017", "tipe": "OUT", "qty": 8, "user": "staf", "catatan": "Penjualan ke Toko Sparepart Jaya" },
+      { "waktu": "2024-03-12 16:15", "ref": "SL-2024-0022", "tipe": "OUT", "qty": 6, "user": "admin", "catatan": "Penjualan ke Bengkel Cahaya" },
+      { "waktu": "2024-03-19 10:00", "ref": "BONUS-PB-0006", "tipe": "BONUS_IN", "qty": 5, "user": "admin", "catatan": "Bonus dari supplier" },
+      { "waktu": "2024-03-22 14:45", "ref": "SL-2024-0031", "tipe": "OUT", "qty": 12, "user": "staf", "catatan": "Penjualan ke PT Otomotif Nusantara" },
+      { "waktu": "2024-03-26 09:30", "ref": "RET-PB-0006", "tipe": "RET_IN", "qty": 3, "user": "admin", "catatan": "Retur ke supplier - tidak sesuai spec" },
+      { "waktu": "2024-03-30 11:15", "ref": "SL-2024-0035", "tipe": "OUT", "qty": 10, "user": "admin", "catatan": "Penjualan ke Toko ABC Motor" }
+    ]
+  }
+}

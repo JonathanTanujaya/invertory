@@ -1,18 +1,28 @@
 // Placeholder movement service for Kartu Stok
 // In real implementation, replace timeouts with axios calls to backend endpoints.
 import axios from './axios';
+import kartuStokData from '../data/dummy/t_kartu_stok.json';
 
 // Map raw movement types to display labels and direction
 export const MOVEMENT_META = {
   IN: { label: 'Stok Masuk', direction: 'in' },
   OUT: { label: 'Stok Keluar', direction: 'out' },
-  RET_IN: { label: 'Retur Pembelian', direction: 'in' },
+  RET_IN: { label: 'Retur Pembelian', direction: 'out' }, // retur ke supplier = keluar
   RET_OUT: { label: 'Retur Penjualan', direction: 'in' }, // barang kembali ke stok
   BONUS_IN: { label: 'Bonus Pembelian', direction: 'in' },
   BONUS_OUT: { label: 'Bonus Penjualan', direction: 'out' },
   CLAIM_OUT: { label: 'Customer Claim', direction: 'out' },
   ADJ: { label: 'Adjustment', direction: 'adj' },
 };
+
+// Get all available items for dropdown
+export function getAvailableItems() {
+  return Object.entries(kartuStokData).map(([kode, data]) => ({
+    kode: data.kode_barang,
+    nama: data.nama_barang,
+    satuan: data.satuan,
+  }));
+}
 
 export async function fetchItemMovements(kodeBarang, { from, to, type } = {}) {
   // Example axios usage (commented until backend ready):
@@ -21,22 +31,24 @@ export async function fetchItemMovements(kodeBarang, { from, to, type } = {}) {
 
   return new Promise((resolve) => {
     setTimeout(() => {
+      // Get data from JSON file
+      const itemData = kartuStokData[kodeBarang];
+      
+      if (!itemData) {
+        resolve(null);
+        return;
+      }
+
       const dummy = {
-        kode_barang: kodeBarang,
-        nama_barang: 'Sparepart A',
-        satuan: 'pcs',
-        stok_awal: 100,
-        movements: [
-          { waktu: '2025-11-22 08:15', ref: 'PO-1101', tipe: 'IN', qty: 20, user: 'admin', catatan: '' },
-          { waktu: '2025-11-22 10:05', ref: 'SO-553', tipe: 'OUT', qty: 15, user: 'admin', catatan: '' },
-          { waktu: '2025-11-22 11:30', ref: 'RET-SO-553', tipe: 'RET_IN', qty: 2, user: 'staff', catatan: 'Retur sebagian' },
-          { waktu: '2025-11-22 13:10', ref: 'CLM-77', tipe: 'CLAIM_OUT', qty: 1, user: 'staff', catatan: 'Klaim rusak' },
-          { waktu: '2025-11-22 14:45', ref: 'OPN-22', tipe: 'ADJ', qty: -2, user: 'admin', catatan: 'Opname selisih kurang' },
-          { waktu: '2025-11-22 15:20', ref: 'BONUS-PO-1120', tipe: 'BONUS_IN', qty: 5, user: 'admin', catatan: 'Bonus supplier' },
-        ],
+        kode_barang: itemData.kode_barang,
+        nama_barang: itemData.nama_barang,
+        satuan: itemData.satuan,
+        stok_awal: itemData.stok_awal,
+        movements: itemData.movements,
       };
+
       // Filter by type if provided
-      let filtered = dummy.movements;
+      let filtered = [...dummy.movements];
       if (type) filtered = filtered.filter(m => m.tipe === type);
       // Filter by date range if provided
       if (from) filtered = filtered.filter(m => new Date(m.waktu) >= new Date(from));
@@ -60,7 +72,7 @@ export async function fetchItemMovements(kodeBarang, { from, to, type } = {}) {
         return {
           ...m,
           masuk,
-            keluar,
+          keluar,
           saldo: balance,
         };
       });
