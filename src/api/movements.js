@@ -7,8 +7,8 @@ import kartuStokData from '../data/dummy/t_kartu_stok.json';
 export const MOVEMENT_META = {
   IN: { label: 'Stok Masuk', direction: 'in' },
   OUT: { label: 'Stok Keluar', direction: 'out' },
-  RET_IN: { label: 'Retur Pembelian', direction: 'out' }, // retur ke supplier = keluar
-  RET_OUT: { label: 'Retur Penjualan', direction: 'in' }, // barang kembali ke stok
+  RET_IN: { label: 'Stok Keluar', direction: 'out' },
+  RET_OUT: { label: 'Stok Masuk', direction: 'in' },
   BONUS_IN: { label: 'Bonus Pembelian', direction: 'in' },
   BONUS_OUT: { label: 'Bonus Penjualan', direction: 'out' },
   CLAIM_OUT: { label: 'Customer Claim', direction: 'out' },

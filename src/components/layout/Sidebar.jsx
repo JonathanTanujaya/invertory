@@ -56,8 +56,6 @@ const allMenuItems = [
     submenu: [
       { title: 'Stok Masuk', path: '/transactions/pembelian', icon: TrendingUp },
       { title: 'Stok Keluar', path: '/transactions/penjualan', icon: TrendingDown },
-      { title: 'Retur Pembelian', path: '/transactions/retur-pembelian', icon: Undo2 },
-      { title: 'Retur Penjualan', path: '/transactions/retur-penjualan', icon: RotateCcw },
       { title: 'Stok Opname', path: '/transactions/stok-opname', icon: ClipboardCheck },
       { title: 'Customer Claim', path: '/transactions/customer-claim', icon: MessageSquareWarning },
     ],

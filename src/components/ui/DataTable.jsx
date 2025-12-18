@@ -35,11 +35,11 @@ export default function DataTable({
           col.render ??
           (typeof col.cell === 'function'
             ? (value, row, rowIndex) =>
-                col.cell({
-                  row: { original: row },
-                  getValue: () => value,
-                  rowIndex,
-                })
+              col.cell({
+                row: { original: row },
+                getValue: () => value,
+                rowIndex,
+              })
             : undefined);
 
         return {

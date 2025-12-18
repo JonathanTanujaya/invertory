@@ -15,10 +15,6 @@ import stokKeluarData from '@/data/dummy/t_stok_keluar.json';
 import supplierData from '@/data/dummy/m_supplier.json';
 import customerData from '@/data/dummy/m_customer.json';
 
-// Dummy data untuk retur (karena file belum ada)
-const returPembelianData = [];
-const returPenjualanData = [];
-
 export default function RiwayatTransaksi() {
   const [search, setSearch] = useState('');
   const [dateFrom, setDateFrom] = useState('');
@@ -77,38 +73,6 @@ export default function RiwayatTransaksi() {
         total: item.total,
         status: item.status || 'Selesai',
         items: item.items,
-        raw_data: item
-      });
-    });
-
-    // Retur Pembelian
-    returPembelianData.forEach(item => {
-      transactions.push({
-        no_faktur: item.no_retur,
-        tanggal: item.tanggal_retur,
-        tipe: 'retur-pembelian',
-        tipe_label: 'Retur Pembelian',
-        partner: supplierMap[item.kode_supplier] || item.kode_supplier,
-        partner_type: 'Supplier',
-        total: item.total,
-        status: 'Selesai',
-        items: item.detail_items,
-        raw_data: item
-      });
-    });
-
-    // Retur Penjualan
-    returPenjualanData.forEach(item => {
-      transactions.push({
-        no_faktur: item.no_retur,
-        tanggal: item.tanggal_retur,
-        tipe: 'retur-penjualan',
-        tipe_label: 'Retur Penjualan',
-        partner: customerMap[item.kode_customer] || item.kode_customer,
-        partner_type: 'Customer',
-        total: item.total,
-        status: 'Selesai',
-        items: item.detail_items,
         raw_data: item
       });
     });
@@ -208,8 +172,6 @@ export default function RiwayatTransaksi() {
         const variants = {
           'pembelian': 'success',
           'penjualan': 'error',
-          'retur-pembelian': 'warning',
-          'retur-penjualan': 'warning'
         };
         return <Badge variant={variants[val] || 'default'}>{row.tipe_label}</Badge>;
       }
@@ -303,8 +265,6 @@ export default function RiwayatTransaksi() {
                 { value: 'all', label: 'Semua Tipe' },
                 { value: 'pembelian', label: 'Pembelian' },
                 { value: 'penjualan', label: 'Penjualan' },
-                { value: 'retur-pembelian', label: 'Retur Pembelian' },
-                { value: 'retur-penjualan', label: 'Retur Penjualan' },
               ]}
             />
           </div>

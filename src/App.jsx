@@ -17,8 +17,6 @@ import StokBarang from './pages/reports/StokBarang';
 import RiwayatTransaksi from './pages/reports/RiwayatTransaksi';
 import PurchaseForm from './pages/transactions/PurchaseForm';
 import SalesForm from './pages/transactions/SalesForm';
-import ReturPembelianForm from './pages/transactions/ReturPembelianForm';
-import ReturPenjualanForm from './pages/transactions/ReturPenjualanForm';
 import StokOpnameForm from './pages/transactions/StokOpnameForm';
 import CustomerClaimForm from './pages/transactions/CustomerClaimForm';
 import ManajemenUser from './pages/settings/ManajemenUser';
@@ -64,8 +62,6 @@ function App() {
             <Route path="transactions">
               <Route path="pembelian" element={<PurchaseForm />} />
               <Route path="penjualan" element={<SalesForm />} />
-              <Route path="retur-pembelian" element={<ReturPembelianForm />} />
-              <Route path="retur-penjualan" element={<ReturPenjualanForm />} />
               <Route path="stok-opname" element={<StokOpnameForm />} />
               <Route path="customer-claim" element={<CustomerClaimForm />} />
             </Route>

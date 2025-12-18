@@ -168,8 +168,6 @@ export default function KartuStok() {
         const types = {
           'IN': 'success',
           'OUT': 'error',
-          'RET_IN': 'warning',
-          'RET_OUT': 'warning',
           'BONUS_IN': 'info',
           'BONUS_OUT': 'info',
           'CLAIM_OUT': 'error',
@@ -319,8 +317,6 @@ export default function KartuStok() {
                 { value: '', label: 'Semua' },
                 { value: 'IN', label: 'Masuk' },
                 { value: 'OUT', label: 'Keluar' },
-                { value: 'RET_IN', label: 'Retur Beli' },
-                { value: 'RET_OUT', label: 'Retur Jual' },
                 { value: 'BONUS_IN', label: 'Bonus Beli' },
                 { value: 'BONUS_OUT', label: 'Bonus Jual' },
                 { value: 'CLAIM_OUT', label: 'Claim' },
