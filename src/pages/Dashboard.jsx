@@ -84,6 +84,11 @@ export default function Dashboard() {
       { id: 3, type: 'opname', desc: 'Stok Opname selesai - Gudang A', qty: '', time: '10 menit lalu' },
       { id: 4, type: 'masuk', desc: 'Stok Masuk BRG022 - Kampas Rem', qty: '+30', time: '15 menit lalu' },
       { id: 5, type: 'claim', desc: 'Customer Claim CC-2024-001', qty: '', time: '20 menit lalu' },
+      { id: 6, type: 'keluar', desc: 'Stok Keluar BRG008 - Seal Kit Honda', qty: '-12', time: '25 menit lalu' },
+      { id: 7, type: 'masuk', desc: 'Stok Masuk BRG003 - Busi NGK Iridium', qty: '+40', time: '32 menit lalu' },
+      { id: 8, type: 'claim', desc: 'Customer Claim CC-2024-002', qty: '', time: '45 menit lalu' },
+      { id: 9, type: 'opname', desc: 'Stok Opname mulai - Gudang B', qty: '', time: '1 jam lalu' },
+      { id: 10, type: 'keluar', desc: 'Stok Keluar BRG001 - Bearing 6205', qty: '-8', time: '1 jam 12 menit lalu' },
     ]);
   }, []);
 
@@ -185,8 +190,8 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Perbandingan Bulan */}
-        <Card title="Perbandingan" subtitle="vs Bulan Lalu" className="h-full">
+        {/* Ringkasan */}
+        <Card title="Ringkasan" subtitle="Bulan ini" className="h-full">
           <div className="space-y-3">
             <ComparisonItem
               label="Stok Masuk"
@@ -248,27 +253,56 @@ export default function Dashboard() {
           subtitle="Real-time"
           actions={<Clock className="w-5 h-5 text-gray-400" />}
         >
-          <div className="space-y-3">
-            {recentActivity.map((activity) => (
-              <div
-                key={activity.id}
-                className="flex items-start gap-3 p-3 border-l-2 border-gray-200 hover:border-primary-500 hover:bg-gray-50 transition-colors"
-              >
-                <div className="mt-0.5">
-                  {getActivityIcon(activity.type)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm text-gray-900 truncate">{activity.desc}</div>
-                  <div className="text-xs text-gray-500 mt-0.5">{activity.time}</div>
-                </div>
-                {activity.qty && (
-                  <div className={`text-sm font-medium ${activity.qty.startsWith('+') ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                    {activity.qty}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="space-y-3">
+              {recentActivity.slice(0, 5).map((activity) => (
+                <div
+                  key={activity.id}
+                  className="flex items-start gap-3 p-3 border-l-2 border-gray-200 hover:border-primary-500 hover:bg-gray-50 transition-colors"
+                >
+                  <div className="mt-0.5">
+                    {getActivityIcon(activity.type)}
                   </div>
-                )}
-              </div>
-            ))}
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm text-gray-900 truncate">{activity.desc}</div>
+                    <div className="text-xs text-gray-500 mt-0.5">{activity.time}</div>
+                  </div>
+                  {activity.qty && (
+                    <div
+                      className={`text-sm font-medium ${activity.qty.startsWith('+') ? 'text-green-600' : 'text-red-600'
+                        }`}
+                    >
+                      {activity.qty}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="space-y-3">
+              {recentActivity.slice(5, 10).map((activity) => (
+                <div
+                  key={activity.id}
+                  className="flex items-start gap-3 p-3 border-l-2 border-gray-200 hover:border-primary-500 hover:bg-gray-50 transition-colors"
+                >
+                  <div className="mt-0.5">
+                    {getActivityIcon(activity.type)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm text-gray-900 truncate">{activity.desc}</div>
+                    <div className="text-xs text-gray-500 mt-0.5">{activity.time}</div>
+                  </div>
+                  {activity.qty && (
+                    <div
+                      className={`text-sm font-medium ${activity.qty.startsWith('+') ? 'text-green-600' : 'text-red-600'
+                        }`}
+                    >
+                      {activity.qty}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         </Card>
       </div>

@@ -18,8 +18,7 @@ import {
   Filter,
   FileDown,
   FileText,
-  ClipboardList,
-  ArrowRight
+  ClipboardList
 } from 'lucide-react';
 import { formatNumber } from '@/utils/helpers';
 import { toast } from 'react-toastify';
@@ -358,34 +357,14 @@ export default function KartuStok() {
                 <Search className="w-5 h-5 text-amber-500" />
               </div>
             </div>
-            
+
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
               Pilih Barang untuk Melihat Kartu Stok
             </h3>
-            <p className="text-gray-500 max-w-md mb-6">
-              Gunakan kolom pencarian di atas untuk memilih barang yang ingin dilihat riwayat transaksinya. 
+            <p className="text-gray-500 max-w-md">
+              Gunakan kolom pencarian di atas untuk memilih barang yang ingin dilihat riwayat transaksinya.
               Kartu stok akan menampilkan semua pergerakan stok secara kronologis.
             </p>
-            
-            {/* Quick Select Buttons */}
-            <div className="flex flex-col items-center">
-              <span className="text-sm text-gray-500 mb-3">Pilih cepat:</span>
-              <div className="flex flex-wrap gap-2 justify-center">
-                {availableItems.slice(0, 5).map((item) => (
-                  <button
-                    key={item.kode}
-                    onClick={() => setKodeBarang(item.kode)}
-                    className="px-4 py-2 bg-white border border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors group"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-sm text-blue-600">{item.kode}</span>
-                      <ArrowRight className="w-3 h-3 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                    </div>
-                    <div className="text-xs text-gray-500 mt-0.5 text-left">{item.nama}</div>
-                  </button>
-                ))}
-              </div>
-            </div>
           </div>
         </Card>
       )}
@@ -495,7 +474,7 @@ export default function KartuStok() {
               Export CSV
             </Button>
           </div>
-          
+
           {/* Empty State - Tidak Ada Transaksi */}
           {rows.length === 0 && !loading ? (
             <div className="py-16 flex flex-col items-center justify-center text-center">

@@ -1,0 +1,29 @@
+[
+  {
+    "id": 1,
+    "username": "owner",
+    "password": "owner",
+    "nama": "Owner",
+    "role": "owner",
+    "avatar": "#8b5cf6",
+    "mustChangePassword": false
+  },
+  {
+    "id": 2,
+    "username": "admin",
+    "password": "admin",
+    "nama": "Administrator",
+    "role": "admin",
+    "avatar": "#6366f1",
+    "mustChangePassword": false
+  },
+  {
+    "id": 3,
+    "username": "staf",
+    "password": "staf",
+    "nama": "Staff",
+    "role": "staff",
+    "avatar": "#22c55e",
+    "mustChangePassword": false
+  }
+]

@@ -7,6 +7,7 @@ const variants = {
   success: 'bg-success-500 hover:bg-success-600 text-white',
   warning: 'bg-warning-500 hover:bg-warning-600 text-white',
   error: 'bg-error-500 hover:bg-error-600 text-white',
+  danger: 'bg-error-500 hover:bg-error-600 text-white',
   outline: 'border-2 border-primary-500 text-primary-500 hover:bg-primary-50',
   ghost: 'hover:bg-gray-100 text-gray-700',
 };

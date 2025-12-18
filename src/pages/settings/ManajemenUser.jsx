@@ -6,14 +6,18 @@ import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
 import { useAuthStore } from '@/store/authStore';
-import { Plus, Pencil, Trash2, Eye, EyeOff, Shield } from 'lucide-react';
+import { Plus, Pencil, Trash2, Eye, EyeOff, Shield, KeyRound } from 'lucide-react';
 
 export default function ManajemenUser() {
-    const { users, addUser, updateUser, deleteUser, user: currentUser } = useAuthStore();
+    const { users, addUser, updateUser, deleteUser, resetUserPassword, user: currentUser } = useAuthStore();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isResetModalOpen, setIsResetModalOpen] = useState(false);
     const [editingUser, setEditingUser] = useState(null);
     const [selectedUser, setSelectedUser] = useState(null);
+    const [resetTargetUser, setResetTargetUser] = useState(null);
+    const [resetTempPassword, setResetTempPassword] = useState('');
+    const [resetStep, setResetStep] = useState('confirm');
     const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({
         username: '',
@@ -87,21 +91,36 @@ export default function ManajemenUser() {
             accessorKey: 'id',
             cell: ({ row }) => {
                 const isCurrentUser = row.original.id === currentUser?.id;
+                const canResetPassword = currentUser?.role === 'owner' && !isCurrentUser;
                 return (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
                         <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => handleEdit(row.original)}
+                            className="!px-2"
                         >
                             <Pencil className="w-4 h-4" />
                         </Button>
+
+                        {canResetPassword && (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleResetPasswordClick(row.original)}
+                                className="!px-2 text-amber-700 hover:text-amber-800 hover:bg-amber-50"
+                                title="Reset password"
+                            >
+                                <KeyRound className="w-4 h-4" />
+                            </Button>
+                        )}
+
                         <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => handleDeleteClick(row.original)}
                             disabled={isCurrentUser}
-                            className={isCurrentUser ? 'opacity-50 cursor-not-allowed' : 'text-red-600 hover:text-red-700 hover:bg-red-50'}
+                            className={isCurrentUser ? 'opacity-50 cursor-not-allowed !px-2' : 'text-red-600 hover:text-red-700 hover:bg-red-50 !px-2'}
                         >
                             <Trash2 className="w-4 h-4" />
                         </Button>
@@ -142,6 +161,22 @@ export default function ManajemenUser() {
         setIsDeleteModalOpen(true);
     };
 
+    const handleResetPasswordClick = (user) => {
+        setResetTargetUser(user);
+        setResetTempPassword('');
+        setResetStep('confirm');
+        setIsResetModalOpen(true);
+    };
+
+    const handleConfirmResetPassword = () => {
+        if (!resetTargetUser) return;
+        const result = resetUserPassword?.(resetTargetUser.id);
+        if (result?.ok) {
+            setResetTempPassword(result.tempPassword || '');
+            setResetStep('result');
+        }
+    };
+
     const handleDelete = () => {
         if (selectedUser) {
             deleteUser(selectedUser.id);
@@ -156,7 +191,6 @@ export default function ManajemenUser() {
         if (editingUser) {
             updateUser(editingUser.id, {
                 ...formData,
-                password: formData.password || editingUser.password,
             });
         } else {
             addUser(formData);
@@ -213,23 +247,37 @@ export default function ManajemenUser() {
                         disabled={editingUser}
                     />
 
-                    <div className="relative">
-                        <Input
-                            label={editingUser ? 'Password Baru (kosongkan jika tidak diubah)' : 'Password'}
-                            type={showPassword ? 'text' : 'password'}
-                            value={formData.password}
-                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                            placeholder="Masukkan password"
-                            required={!editingUser}
-                        />
-                        <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3 top-9 text-gray-500 hover:text-gray-700"
-                        >
-                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                        </button>
-                    </div>
+                    {!editingUser && (
+                        <div className="relative">
+                            <Input
+                                label="Password"
+                                type={showPassword ? 'text' : 'password'}
+                                value={formData.password}
+                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                placeholder="Masukkan password"
+                                required
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3 top-9 text-gray-500 hover:text-gray-700"
+                            >
+                                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                        </div>
+                    )}
+
+                    {editingUser && (
+                        <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+                            <div className="text-sm font-medium text-gray-900">Password</div>
+                            <div className="text-sm text-gray-600">
+                                Demi keamanan, password tidak bisa diubah dari halaman ini. Akun yang sedang login bisa mengubah password lewat menu profil.
+                                {currentUser?.role === 'owner' && (
+                                    <span> Untuk user lain, gunakan aksi <span className="font-medium">Reset Password</span>.</span>
+                                )}
+                            </div>
+                        </div>
+                    )}
 
                     <Select
                         label="Role"
@@ -266,6 +314,52 @@ export default function ManajemenUser() {
                         </Button>
                     </div>
                 </form>
+            </Modal>
+
+            {/* Reset Password Modal */}
+            <Modal
+                open={isResetModalOpen}
+                onClose={() => setIsResetModalOpen(false)}
+                title="Reset Password"
+                closeOnOverlay={resetStep !== 'confirm'}
+            >
+                <div className="space-y-4">
+                    {resetStep === 'confirm' && (
+                        <>
+                            <p className="text-gray-700">
+                                Anda akan mereset password untuk user <strong>{resetTargetUser?.nama}</strong> (@{resetTargetUser?.username}).
+                            </p>
+                            <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                                Setelah di-reset, sistem akan membuat password sementara. User wajib mengganti password setelah login.
+                            </div>
+                            <div className="flex gap-3">
+                                <Button variant="secondary" onClick={() => setIsResetModalOpen(false)} className="flex-1">
+                                    Batal
+                                </Button>
+                                <Button variant="warning" onClick={handleConfirmResetPassword} className="flex-1">
+                                    Reset
+                                </Button>
+                            </div>
+                        </>
+                    )}
+
+                    {resetStep === 'result' && (
+                        <>
+                            <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+                                <div className="text-sm font-medium text-gray-900">Password Sementara</div>
+                                <div className="mt-2 font-mono text-sm bg-white border border-gray-200 rounded-md px-3 py-2">
+                                    {resetTempPassword}
+                                </div>
+                                <div className="mt-2 text-sm text-gray-600">
+                                    Simpan password ini dan berikan ke user terkait.
+                                </div>
+                            </div>
+                            <Button onClick={() => setIsResetModalOpen(false)} className="w-full">
+                                Selesai
+                            </Button>
+                        </>
+                    )}
+                </div>
             </Modal>
 
             {/* Delete Confirmation Modal */}

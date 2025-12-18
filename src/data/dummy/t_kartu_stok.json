@@ -73,5 +73,70 @@
       { "waktu": "2024-03-26 09:30", "ref": "RET-PB-0006", "tipe": "RET_IN", "qty": 3, "user": "admin", "catatan": "Retur ke supplier - tidak sesuai spec" },
       { "waktu": "2024-03-30 11:15", "ref": "SL-2024-0035", "tipe": "OUT", "qty": 10, "user": "admin", "catatan": "Penjualan ke Toko ABC Motor" }
     ]
+  },
+  "BRG006": {
+    "kode_barang": "BRG006",
+    "nama_barang": "Busi NGK C7HSA",
+    "satuan": "pcs",
+    "stok_awal": 100,
+    "movements": [
+      { "waktu": "2024-03-02 08:30", "ref": "PB-2024-0007", "tipe": "IN", "qty": 50, "user": "admin", "catatan": "Pembelian dari CV Mega Bearing" },
+      { "waktu": "2024-03-07 10:00", "ref": "SL-2024-0016", "tipe": "OUT", "qty": 20, "user": "staf", "catatan": "Penjualan ke Bengkel Motor Sejahtera" },
+      { "waktu": "2024-03-14 14:30", "ref": "SL-2024-0024", "tipe": "OUT", "qty": 15, "user": "admin", "catatan": "Penjualan ke Toko Prima Sparepart" },
+      { "waktu": "2024-03-20 09:00", "ref": "BONUS-PB-0007", "tipe": "BONUS_IN", "qty": 10, "user": "admin", "catatan": "Bonus dari supplier" },
+      { "waktu": "2024-03-25 16:00", "ref": "SL-2024-0033", "tipe": "OUT", "qty": 25, "user": "staf", "catatan": "Penjualan ke PT Berkah Selalu" }
+    ]
+  },
+  "BRG007": {
+    "kode_barang": "BRG007",
+    "nama_barang": "Rantai 428H 120L",
+    "satuan": "pcs",
+    "stok_awal": 35,
+    "movements": [
+      { "waktu": "2024-03-03 09:15", "ref": "PB-2024-0008", "tipe": "IN", "qty": 20, "user": "admin", "catatan": "Pembelian dari PT Global Motor Parts" },
+      { "waktu": "2024-03-10 11:30", "ref": "SL-2024-0020", "tipe": "OUT", "qty": 8, "user": "staf", "catatan": "Penjualan ke Bengkel Cahaya" },
+      { "waktu": "2024-03-18 15:45", "ref": "SL-2024-0026", "tipe": "OUT", "qty": 5, "user": "admin", "catatan": "Penjualan ke Toko Sparepart Jaya" },
+      { "waktu": "2024-03-24 10:00", "ref": "RET-SL-0020", "tipe": "RET_OUT", "qty": 1, "user": "staf", "catatan": "Retur dari Bengkel Cahaya - ukuran tidak sesuai" },
+      { "waktu": "2024-03-28 13:30", "ref": "PB-2024-0013", "tipe": "IN", "qty": 15, "user": "admin", "catatan": "Pembelian dari CV Prima Oli" }
+    ]
+  },
+  "BRG008": {
+    "kode_barang": "BRG008",
+    "nama_barang": "Gear Set Supra X",
+    "satuan": "set",
+    "stok_awal": 25,
+    "movements": [
+      { "waktu": "2024-03-04 10:00", "ref": "PB-2024-0009", "tipe": "IN", "qty": 15, "user": "admin", "catatan": "Pembelian dari CV Mega Bearing" },
+      { "waktu": "2024-03-11 14:00", "ref": "SL-2024-0021", "tipe": "OUT", "qty": 6, "user": "staf", "catatan": "Penjualan ke Bengkel Motor Sejahtera" },
+      { "waktu": "2024-03-19 09:30", "ref": "SL-2024-0027", "tipe": "OUT", "qty": 4, "user": "admin", "catatan": "Penjualan ke Toko ABC Motor" },
+      { "waktu": "2024-03-26 16:15", "ref": "CLM-2024-003", "tipe": "CLAIM_OUT", "qty": 1, "user": "staf", "catatan": "Klaim customer - gear aus" },
+      { "waktu": "2024-03-29 11:00", "ref": "PB-2024-0014", "tipe": "IN", "qty": 10, "user": "admin", "catatan": "Pembelian dari PT Global Motor Parts" }
+    ]
+  },
+  "BRG009": {
+    "kode_barang": "BRG009",
+    "nama_barang": "Shock Breaker Belakang",
+    "satuan": "pcs",
+    "stok_awal": 40,
+    "movements": [
+      { "waktu": "2024-03-05 11:30", "ref": "PB-2024-0010", "tipe": "IN", "qty": 20, "user": "admin", "catatan": "Pembelian dari PT Global Motor Parts" },
+      { "waktu": "2024-03-12 13:45", "ref": "SL-2024-0022", "tipe": "OUT", "qty": 10, "user": "staf", "catatan": "Penjualan ke Toko Prima Sparepart" },
+      { "waktu": "2024-03-20 10:15", "ref": "SL-2024-0029", "tipe": "OUT", "qty": 8, "user": "admin", "catatan": "Penjualan ke PT Otomotif Nusantara" },
+      { "waktu": "2024-03-25 15:00", "ref": "RET-PB-0010", "tipe": "RET_IN", "qty": 2, "user": "admin", "catatan": "Retur ke supplier - produk cacat" },
+      { "waktu": "2024-03-30 09:00", "ref": "OPN-2024-03", "tipe": "ADJ", "qty": -1, "user": "owner", "catatan": "Opname bulanan - selisih kurang" }
+    ]
+  },
+  "BRG010": {
+    "kode_barang": "BRG010",
+    "nama_barang": "Lampu Depan LED H4",
+    "satuan": "pcs",
+    "stok_awal": 50,
+    "movements": [
+      { "waktu": "2024-03-06 08:00", "ref": "PB-2024-0011", "tipe": "IN", "qty": 30, "user": "admin", "catatan": "Pembelian dari CV Prima Oli" },
+      { "waktu": "2024-03-13 12:30", "ref": "SL-2024-0023", "tipe": "OUT", "qty": 12, "user": "staf", "catatan": "Penjualan ke Bengkel Cahaya" },
+      { "waktu": "2024-03-21 14:45", "ref": "SL-2024-0030", "tipe": "OUT", "qty": 8, "user": "admin", "catatan": "Penjualan ke Toko Sparepart Jaya" },
+      { "waktu": "2024-03-27 10:30", "ref": "BONUS-PB-0011", "tipe": "BONUS_IN", "qty": 5, "user": "admin", "catatan": "Bonus pembelian dari supplier" },
+      { "waktu": "2024-03-30 16:00", "ref": "SL-2024-0036", "tipe": "OUT", "qty": 15, "user": "staf", "catatan": "Penjualan ke PT Berkah Selalu" }
+    ]
   }
 }
