@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 import seededUsers from '@/data/dummy/users.json';
 
@@ -272,9 +272,7 @@ export const useAuthStore = create(
             'laporan',
           ],
           staff: [
-            'dashboard',
             'master-data',
-            'laporan',
             // Staff hanya bisa view, tidak ada .create, .edit, .delete
           ],
         };
@@ -298,6 +296,7 @@ export const useAuthStore = create(
     }),
     {
       name: 'auth-storage',
+      storage: createJSONStorage(() => sessionStorage),
       version: 1,
       migrate: (persistedState) => {
         // For now: force users list to come from JSON seed.

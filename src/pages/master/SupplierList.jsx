@@ -8,8 +8,14 @@ import Modal from '@/components/ui/Modal';
 import SupplierForm from './SupplierForm';
 import { toast } from 'react-toastify';
 import supplierData from '@/data/dummy/m_supplier.json';
+import { useAuthStore } from '@/store/authStore';
 
 export default function SupplierList() {
+  const { hasPermission } = useAuthStore();
+  const canCreate = hasPermission('master-data.create');
+  const canEdit = hasPermission('master-data.edit');
+  const canDelete = hasPermission('master-data.delete');
+
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -71,8 +77,12 @@ export default function SupplierList() {
       render: (_, row) => (
         <div className="flex items-center justify-center gap-2">
           <Button size="sm" variant="ghost" onClick={() => handleView(row)}><Eye className="w-4 h-4" /></Button>
-          <Button size="sm" variant="ghost" onClick={() => handleEdit(row)}><Edit className="w-4 h-4" /></Button>
-          <Button size="sm" variant="ghost" onClick={() => handleDelete(row)}><Trash2 className="w-4 h-4 text-error-500" /></Button>
+          {canEdit && (
+            <Button size="sm" variant="ghost" onClick={() => handleEdit(row)}><Edit className="w-4 h-4" /></Button>
+          )}
+          {canDelete && (
+            <Button size="sm" variant="ghost" onClick={() => handleDelete(row)}><Trash2 className="w-4 h-4 text-error-500" /></Button>
+          )}
         </div>
       )
     }
@@ -88,10 +98,31 @@ export default function SupplierList() {
     }, 300);
   };
 
-  const handleCreate = () => { setMode('create'); setSelectedItem(null); setShowModal(true); };
-  const handleEdit = (item) => { setMode('edit'); setSelectedItem(item); setShowModal(true); };
+  const handleCreate = () => {
+    if (!canCreate) {
+      toast.error('Anda tidak memiliki akses untuk menambah supplier');
+      return;
+    }
+    setMode('create');
+    setSelectedItem(null);
+    setShowModal(true);
+  };
+
+  const handleEdit = (item) => {
+    if (!canEdit) {
+      toast.error('Anda tidak memiliki akses untuk mengubah supplier');
+      return;
+    }
+    setMode('edit');
+    setSelectedItem(item);
+    setShowModal(true);
+  };
   const handleView = (item) => { setMode('view'); setSelectedItem(item); setShowModal(true); };
   const handleDelete = (item) => {
+    if (!canDelete) {
+      toast.error('Anda tidak memiliki akses untuk menghapus supplier');
+      return;
+    }
     if (window.confirm(`Hapus supplier ${item.nama_supplier}?\n\nPerhatian: Pastikan tidak ada transaksi pembelian yang terkait dengan supplier ini.`)) {
       // TODO: Check if supplier has related purchases before deleting
       // const hasPurchases = checkSupplierPurchases(item.kode_supplier);
@@ -105,6 +136,14 @@ export default function SupplierList() {
   };
 
   const handleSubmit = (values) => {
+    if (mode === 'create' && !canCreate) {
+      toast.error('Anda tidak memiliki akses untuk menambah supplier');
+      return;
+    }
+    if (mode === 'edit' && !canEdit) {
+      toast.error('Anda tidak memiliki akses untuk mengubah supplier');
+      return;
+    }
     if (mode === 'create') toast.success('Supplier berhasil ditambahkan');
     if (mode === 'edit') toast.success('Supplier berhasil diperbarui');
     setShowModal(false);
@@ -146,9 +185,11 @@ export default function SupplierList() {
               startIcon={<Search className="w-4 h-4" />}
             />
           </div>
-          <Button onClick={handleCreate} startIcon={<Plus className="w-4 h-4" />}>
-            Tambah Supplier
-          </Button>
+          {canCreate && (
+            <Button onClick={handleCreate} startIcon={<Plus className="w-4 h-4" />}>
+              Tambah Supplier
+            </Button>
+          )}
         </div>
       </Card>
 

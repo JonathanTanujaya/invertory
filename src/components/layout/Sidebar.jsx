@@ -159,16 +159,6 @@ export default function Sidebar() {
               sidebarCollapsed && 'left-1 right-1'
             )}
           >
-            {hasPermission('settings') && (
-              <NavLink
-                to="/settings/users"
-                onClick={() => setDropdownOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 transition-colors text-gray-700"
-              >
-                <UserCog className="w-4 h-4" />
-                {!sidebarCollapsed && <span className="text-sm">Pengaturan</span>}
-              </NavLink>
-            )}
             <button
               onClick={handleLogout}
               className="flex items-center gap-3 px-4 py-3 hover:bg-red-50 transition-colors text-red-600 w-full"

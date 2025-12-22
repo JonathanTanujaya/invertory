@@ -11,8 +11,14 @@ import BarangForm from './BarangForm';
 import { formatCurrency, formatNumber } from '@/utils/helpers';
 import { toast } from 'react-toastify';
 import barangData from '@/data/dummy/m_barang.json';
+import { useAuthStore } from '@/store/authStore';
 
 export default function BarangList() {
+  const { hasPermission } = useAuthStore();
+  const canCreate = hasPermission('master-data.create');
+  const canEdit = hasPermission('master-data.edit');
+  const canDelete = hasPermission('master-data.delete');
+
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -93,12 +99,16 @@ export default function BarangList() {
           <Button size="sm" variant="ghost" onClick={() => handleView(row)}>
             <Eye className="w-4 h-4" />
           </Button>
-          <Button size="sm" variant="ghost" onClick={() => handleEdit(row)}>
-            <Edit className="w-4 h-4" />
-          </Button>
-          <Button size="sm" variant="ghost" onClick={() => handleDelete(row)}>
-            <Trash2 className="w-4 h-4 text-error-500" />
-          </Button>
+          {canEdit && (
+            <Button size="sm" variant="ghost" onClick={() => handleEdit(row)}>
+              <Edit className="w-4 h-4" />
+            </Button>
+          )}
+          {canDelete && (
+            <Button size="sm" variant="ghost" onClick={() => handleDelete(row)}>
+              <Trash2 className="w-4 h-4 text-error-500" />
+            </Button>
+          )}
         </div>
       ),
     },
@@ -133,7 +143,6 @@ export default function BarangList() {
           stok_minimal: item.stok_minimal,
           harga_beli: item.harga_beli,
           harga_jual: item.harga_jual,
-          lokasi_rak: item.lokasi_rak,
           created_at: item.created_at,
         }));
         console.log('Mapped data:', mappedData); // Debug log
@@ -148,12 +157,20 @@ export default function BarangList() {
   };
 
   const handleCreate = () => {
+    if (!canCreate) {
+      toast.error('Anda tidak memiliki akses untuk menambah data barang');
+      return;
+    }
     setMode('create');
     setSelectedItem(null);
     setShowModal(true);
   };
 
   const handleEdit = (item) => {
+    if (!canEdit) {
+      toast.error('Anda tidak memiliki akses untuk mengubah data barang');
+      return;
+    }
     setMode('edit');
     setSelectedItem(item);
     setShowModal(true);
@@ -166,6 +183,10 @@ export default function BarangList() {
   };
 
   const handleDelete = async (item) => {
+    if (!canDelete) {
+      toast.error('Anda tidak memiliki akses untuk menghapus data barang');
+      return;
+    }
     if (window.confirm(`Hapus barang ${item.nama_barang}?`)) {
       try {
         // API call to delete
@@ -180,9 +201,17 @@ export default function BarangList() {
   const handleSubmit = async (values) => {
     try {
       if (mode === 'create') {
+        if (!canCreate) {
+          toast.error('Anda tidak memiliki akses untuk menambah data barang');
+          return;
+        }
         // API call to create
         toast.success('Barang berhasil ditambahkan');
       } else if (mode === 'edit') {
+        if (!canEdit) {
+          toast.error('Anda tidak memiliki akses untuk mengubah data barang');
+          return;
+        }
         // API call to update
         toast.success('Barang berhasil diupdate');
       }
@@ -229,14 +258,16 @@ export default function BarangList() {
             >
               Filter Lainnya
             </Button>
-            <Button
-              size="md"
-              startIcon={<Plus className="w-4 h-4" />}
-              className="rounded-lg shadow-sm px-4"
-              onClick={handleCreate}
-            >
-              Tambah Barang
-            </Button>
+            {canCreate && (
+              <Button
+                size="md"
+                startIcon={<Plus className="w-4 h-4" />}
+                className="rounded-lg shadow-sm px-4"
+                onClick={handleCreate}
+              >
+                Tambah Barang
+              </Button>
+            )}
           </div>
         </div>
       </Card>

@@ -9,8 +9,14 @@ import AreaForm from './AreaForm';
 import { toast } from 'react-toastify';
 import kategoriJson from '@/data/dummy/m_kategori.json';
 import areaJson from '@/data/dummy/m_area.json';
+import { useAuthStore } from '@/store/authStore';
 
 export default function KategoriList() {
+  const { hasPermission } = useAuthStore();
+  const canCreate = hasPermission('master-data.create');
+  const canEdit = hasPermission('master-data.edit');
+  const canDelete = hasPermission('master-data.delete');
+
   const [kategoriData, setKategoriData] = useState([]);
   const [areaData, setAreaData] = useState([]);
   const [kategoriLoading, setKategoriLoading] = useState(false);
@@ -38,8 +44,12 @@ export default function KategoriList() {
       align: 'center',
       render: (_, row) => (
         <div className="flex items-center justify-center gap-2">
-          <Button size="sm" variant="ghost" onClick={() => handleEditKategori(row)}><Edit className="w-4 h-4" /></Button>
-          <Button size="sm" variant="ghost" onClick={() => handleDeleteKategori(row)}><Trash2 className="w-4 h-4 text-error-500" /></Button>
+          {canEdit && (
+            <Button size="sm" variant="ghost" onClick={() => handleEditKategori(row)}><Edit className="w-4 h-4" /></Button>
+          )}
+          {canDelete && (
+            <Button size="sm" variant="ghost" onClick={() => handleDeleteKategori(row)}><Trash2 className="w-4 h-4 text-error-500" /></Button>
+          )}
         </div>
       )
     }
@@ -61,8 +71,12 @@ export default function KategoriList() {
       align: 'center',
       render: (_, row) => (
         <div className="flex items-center justify-center gap-2">
-          <Button size="sm" variant="ghost" onClick={() => handleEditArea(row)}><Edit className="w-4 h-4" /></Button>
-          <Button size="sm" variant="ghost" onClick={() => handleDeleteArea(row)}><Trash2 className="w-4 h-4 text-error-500" /></Button>
+          {canEdit && (
+            <Button size="sm" variant="ghost" onClick={() => handleEditArea(row)}><Edit className="w-4 h-4" /></Button>
+          )}
+          {canDelete && (
+            <Button size="sm" variant="ghost" onClick={() => handleDeleteArea(row)}><Trash2 className="w-4 h-4 text-error-500" /></Button>
+          )}
         </div>
       )
     }
@@ -90,15 +104,44 @@ export default function KategoriList() {
   };
 
   // Kategori handlers
-  const handleCreateKategori = () => { setKategoriMode('create'); setSelectedKategori(null); setShowKategoriModal(true); };
-  const handleEditKategori = (item) => { setKategoriMode('edit'); setSelectedKategori(item); setShowKategoriModal(true); };
+  const handleCreateKategori = () => {
+    if (!canCreate) {
+      toast.error('Anda tidak memiliki akses untuk menambah kategori');
+      return;
+    }
+    setKategoriMode('create');
+    setSelectedKategori(null);
+    setShowKategoriModal(true);
+  };
+
+  const handleEditKategori = (item) => {
+    if (!canEdit) {
+      toast.error('Anda tidak memiliki akses untuk mengubah kategori');
+      return;
+    }
+    setKategoriMode('edit');
+    setSelectedKategori(item);
+    setShowKategoriModal(true);
+  };
   const handleDeleteKategori = (item) => {
+    if (!canDelete) {
+      toast.error('Anda tidak memiliki akses untuk menghapus kategori');
+      return;
+    }
     if (window.confirm(`Hapus kategori ${item.nama_kategori}?\n\nPerhatian: Pastikan tidak ada barang yang menggunakan kategori ini.`)) {
       toast.success('Kategori berhasil dihapus');
       fetchKategoriData();
     }
   };
   const handleKategoriSubmit = (values) => {
+    if (kategoriMode === 'create' && !canCreate) {
+      toast.error('Anda tidak memiliki akses untuk menambah kategori');
+      return;
+    }
+    if (kategoriMode === 'edit' && !canEdit) {
+      toast.error('Anda tidak memiliki akses untuk mengubah kategori');
+      return;
+    }
     if (kategoriMode === 'create') toast.success('Kategori berhasil ditambahkan');
     if (kategoriMode === 'edit') toast.success('Kategori berhasil diperbarui');
     setShowKategoriModal(false);
@@ -106,15 +149,44 @@ export default function KategoriList() {
   };
 
   // Area handlers
-  const handleCreateArea = () => { setAreaMode('create'); setSelectedArea(null); setShowAreaModal(true); };
-  const handleEditArea = (item) => { setAreaMode('edit'); setSelectedArea(item); setShowAreaModal(true); };
+  const handleCreateArea = () => {
+    if (!canCreate) {
+      toast.error('Anda tidak memiliki akses untuk menambah area');
+      return;
+    }
+    setAreaMode('create');
+    setSelectedArea(null);
+    setShowAreaModal(true);
+  };
+
+  const handleEditArea = (item) => {
+    if (!canEdit) {
+      toast.error('Anda tidak memiliki akses untuk mengubah area');
+      return;
+    }
+    setAreaMode('edit');
+    setSelectedArea(item);
+    setShowAreaModal(true);
+  };
   const handleDeleteArea = (item) => {
+    if (!canDelete) {
+      toast.error('Anda tidak memiliki akses untuk menghapus area');
+      return;
+    }
     if (window.confirm(`Hapus area ${item.nama_area}?\n\nPerhatian: Pastikan tidak ada customer yang menggunakan area ini.`)) {
       toast.success('Area berhasil dihapus');
       fetchAreaData();
     }
   };
   const handleAreaSubmit = (values) => {
+    if (areaMode === 'create' && !canCreate) {
+      toast.error('Anda tidak memiliki akses untuk menambah area');
+      return;
+    }
+    if (areaMode === 'edit' && !canEdit) {
+      toast.error('Anda tidak memiliki akses untuk mengubah area');
+      return;
+    }
     if (areaMode === 'create') toast.success('Area berhasil ditambahkan');
     if (areaMode === 'edit') toast.success('Area berhasil diperbarui');
     setShowAreaModal(false);
@@ -128,9 +200,11 @@ export default function KategoriList() {
         <div className="flex flex-col h-full overflow-hidden bg-white rounded-lg shadow-soft border border-gray-200">
           <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
             <h2 className="text-xl font-semibold text-gray-900">Kategori Barang</h2>
-            <Button onClick={handleCreateKategori} startIcon={<Plus className="w-4 h-4" />}>
-              Tambah Kategori
-            </Button>
+            {canCreate && (
+              <Button onClick={handleCreateKategori} startIcon={<Plus className="w-4 h-4" />}>
+                Tambah Kategori
+              </Button>
+            )}
           </div>
           <div className="flex-1 overflow-y-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -150,8 +224,12 @@ export default function KategoriList() {
                     <td className="px-4 py-3 text-sm text-gray-900">{row.nama_kategori}</td>
                     <td className="px-4 py-3 text-center">
                       <div className="flex items-center justify-center gap-2">
-                        <Button size="sm" variant="ghost" onClick={() => handleEditKategori(row)}><Edit className="w-4 h-4" /></Button>
-                        <Button size="sm" variant="ghost" onClick={() => handleDeleteKategori(row)}><Trash2 className="w-4 h-4 text-error-500" /></Button>
+                        {canEdit && (
+                          <Button size="sm" variant="ghost" onClick={() => handleEditKategori(row)}><Edit className="w-4 h-4" /></Button>
+                        )}
+                        {canDelete && (
+                          <Button size="sm" variant="ghost" onClick={() => handleDeleteKategori(row)}><Trash2 className="w-4 h-4 text-error-500" /></Button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -165,9 +243,11 @@ export default function KategoriList() {
         <div className="flex flex-col h-full overflow-hidden bg-white rounded-lg shadow-soft border border-gray-200">
           <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
             <h2 className="text-xl font-semibold text-gray-900">Area Customer</h2>
-            <Button onClick={handleCreateArea} startIcon={<Plus className="w-4 h-4" />}>
-              Tambah Area
-            </Button>
+            {canCreate && (
+              <Button onClick={handleCreateArea} startIcon={<Plus className="w-4 h-4" />}>
+                Tambah Area
+              </Button>
+            )}
           </div>
           <div className="flex-1 overflow-y-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -187,8 +267,12 @@ export default function KategoriList() {
                     <td className="px-4 py-3 text-sm text-gray-900">{row.nama_area}</td>
                     <td className="px-4 py-3 text-center">
                       <div className="flex items-center justify-center gap-2">
-                        <Button size="sm" variant="ghost" onClick={() => handleEditArea(row)}><Edit className="w-4 h-4" /></Button>
-                        <Button size="sm" variant="ghost" onClick={() => handleDeleteArea(row)}><Trash2 className="w-4 h-4 text-error-500" /></Button>
+                        {canEdit && (
+                          <Button size="sm" variant="ghost" onClick={() => handleEditArea(row)}><Edit className="w-4 h-4" /></Button>
+                        )}
+                        {canDelete && (
+                          <Button size="sm" variant="ghost" onClick={() => handleDeleteArea(row)}><Trash2 className="w-4 h-4 text-error-500" /></Button>
+                        )}
                       </div>
                     </td>
                   </tr>

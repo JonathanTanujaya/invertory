@@ -9,8 +9,14 @@ import CustomerForm from './CustomerForm';
 import { toast } from 'react-toastify';
 import customerData from '@/data/dummy/m_customer.json';
 import areaData from '@/data/dummy/m_area.json';
+import { useAuthStore } from '@/store/authStore';
 
 export default function CustomerList() {
+  const { hasPermission } = useAuthStore();
+  const canCreate = hasPermission('master-data.create');
+  const canEdit = hasPermission('master-data.edit');
+  const canDelete = hasPermission('master-data.delete');
+
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -74,8 +80,12 @@ export default function CustomerList() {
       render: (_, row) => (
         <div className="flex items-center justify-center gap-2">
           <Button size="sm" variant="ghost" onClick={() => handleView(row)}><Eye className="w-4 h-4" /></Button>
-          <Button size="sm" variant="ghost" onClick={() => handleEdit(row)}><Edit className="w-4 h-4" /></Button>
-          <Button size="sm" variant="ghost" onClick={() => handleDelete(row)}><Trash2 className="w-4 h-4 text-error-500" /></Button>
+          {canEdit && (
+            <Button size="sm" variant="ghost" onClick={() => handleEdit(row)}><Edit className="w-4 h-4" /></Button>
+          )}
+          {canDelete && (
+            <Button size="sm" variant="ghost" onClick={() => handleDelete(row)}><Trash2 className="w-4 h-4 text-error-500" /></Button>
+          )}
         </div>
       )
     }
@@ -101,16 +111,44 @@ export default function CustomerList() {
     }, 300);
   };
 
-  const handleCreate = () => { setMode('create'); setSelectedItem(null); setShowModal(true); };
-  const handleEdit = (item) => { setMode('edit'); setSelectedItem(item); setShowModal(true); };
+  const handleCreate = () => {
+    if (!canCreate) {
+      toast.error('Anda tidak memiliki akses untuk menambah customer');
+      return;
+    }
+    setMode('create');
+    setSelectedItem(null);
+    setShowModal(true);
+  };
+  const handleEdit = (item) => {
+    if (!canEdit) {
+      toast.error('Anda tidak memiliki akses untuk mengubah customer');
+      return;
+    }
+    setMode('edit');
+    setSelectedItem(item);
+    setShowModal(true);
+  };
   const handleView = (item) => { setMode('view'); setSelectedItem(item); setShowModal(true); };
   const handleDelete = (item) => {
+    if (!canDelete) {
+      toast.error('Anda tidak memiliki akses untuk menghapus customer');
+      return;
+    }
     if (window.confirm(`Hapus customer ${item.nama}?`)) {
       toast.success('Customer dihapus (dummy)');
       fetchData();
     }
   };
   const handleSubmit = (values) => {
+    if (mode === 'create' && !canCreate) {
+      toast.error('Anda tidak memiliki akses untuk menambah customer');
+      return;
+    }
+    if (mode === 'edit' && !canEdit) {
+      toast.error('Anda tidak memiliki akses untuk mengubah customer');
+      return;
+    }
     if (mode === 'create') toast.success('Customer ditambahkan (dummy)');
     if (mode === 'edit') toast.success('Customer diperbarui (dummy)');
     setShowModal(false);
@@ -141,7 +179,9 @@ export default function CustomerList() {
               startIcon={<Search className="w-4 h-4" />}
             />
           </div>
-          <Button onClick={handleCreate} startIcon={<Plus className="w-4 h-4" />}>Tambah Customer</Button>
+          {canCreate && (
+            <Button onClick={handleCreate} startIcon={<Plus className="w-4 h-4" />}>Tambah Customer</Button>
+          )}
         </div>
       </Card>
       <Card padding={false} className="flex-1 overflow-hidden">

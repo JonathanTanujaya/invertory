@@ -45,7 +45,6 @@ Data barang utama
 - stok_minimal (INT) // untuk alert
 - harga_beli (DECIMAL)
 - harga_jual (DECIMAL)
-- lokasi_rak (VARCHAR)
 - created_at (TIMESTAMP)
 - updated_at (TIMESTAMP)
 ```
@@ -1013,8 +1012,7 @@ src/data/dummy/
     "stok": 100,
     "stok_minimal": 10,
     "harga_beli": 50000,
-    "harga_jual": 75000,
-    "lokasi_rak": "A1-01"
+    "harga_jual": 75000
   }
 ]
 ```

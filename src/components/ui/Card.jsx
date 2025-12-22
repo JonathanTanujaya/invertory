@@ -75,7 +75,7 @@ export default function CardLegacy({ children, className, title, subtitle, actio
           {actions && <div className="flex items-center gap-2">{actions}</div>}
         </div>
       )}
-      <div className={clsx(padding && 'p-6', hasOverflowHidden && 'flex-1 overflow-hidden')}>{children}</div>
+      <div className={clsx(padding && 'p-6', hasOverflowHidden && 'flex-1 min-h-0 overflow-hidden')}>{children}</div>
     </div>
   );
 }

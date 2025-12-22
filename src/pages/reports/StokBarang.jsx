@@ -9,7 +9,7 @@ import Modal from '@/components/ui/Modal';
 import {
   Search, RefreshCcw, Download, Eye, X, Loader2, FileText,
   Package, AlertTriangle, CheckCircle, XCircle,
-  LayoutGrid, List, Filter, MapPin, Clock
+  LayoutGrid, List, Filter, Clock
 } from 'lucide-react';
 import { formatNumber, formatCurrency } from '@/utils/helpers';
 import BarangForm from '@/pages/master/BarangForm';
@@ -378,13 +378,6 @@ export default function StokBarang() {
             <span className="font-medium">{item.kategori_nama}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-gray-500">Lokasi</span>
-            <span className="font-medium flex items-center gap-1">
-              <MapPin className="w-3 h-3" />
-              {item.lokasi_rak || '-'}
-            </span>
-          </div>
-          <div className="flex items-center justify-between">
             <span className="text-gray-500">Stok</span>
             <span className="font-bold text-lg">{formatNumber(item.stok)} <span className="text-xs font-normal text-gray-400">{item.satuan}</span></span>
           </div>
@@ -687,7 +680,6 @@ export default function StokBarang() {
               stok_minimal: selected.stok_minimal,
               harga_beli: selected.harga_beli,
               harga_jual: selected.harga_jual,
-              lokasi_rak: selected.lokasi_rak,
             }}
             mode="view"
             onCancel={() => setShowModal(false)}

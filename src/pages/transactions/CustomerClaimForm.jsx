@@ -13,6 +13,7 @@ import { useForm } from 'react-hook-form';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Card from '@/components/ui/Card';
+import Modal from '@/components/ui/Modal';
 import { toast } from 'react-toastify';
 
 // Import data
@@ -37,6 +38,9 @@ export default function CustomerClaimForm() {
   const [showBarangDropdown, setShowBarangDropdown] = useState(false);
   const [claimItems, setClaimItems] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmSnapshot, setConfirmSnapshot] = useState(null);
 
   // Generate nomor claim
   useEffect(() => {
@@ -127,7 +131,32 @@ export default function CustomerClaimForm() {
   }, [claimItems]);
 
   // Submit form
-  const onSubmit = async (data) => {
+  const buildConfirmSnapshot = (data) => {
+    const rows = claimItems.map((it) => ({
+      kode_barang: it.kode_barang,
+      nama_barang: it.nama_barang,
+      satuan: it.satuan,
+      jumlah: it.jumlah,
+      keterangan: it.keterangan,
+    }));
+
+    return {
+      header: {
+        no_claim: data.no_claim,
+        tanggal_claim: data.tanggal_claim,
+        kode_customer: data.kode_customer,
+        customer_label: selectedCustomer?.nama_customer || searchCustomer || data.kode_customer,
+        alasan: data.alasan,
+      },
+      items: rows,
+      totals: {
+        totalItem: rows.length,
+        totalQty: rows.reduce((sum, r) => sum + (parseInt(r.jumlah, 10) || 0), 0),
+      },
+    };
+  };
+
+  const onSubmit = (data) => {
     if (!selectedCustomer) {
       toast.error('Pilih customer terlebih dahulu');
       return;
@@ -145,26 +174,35 @@ export default function CustomerClaimForm() {
       return;
     }
 
-    setLoading(true);
+    setConfirmSnapshot(buildConfirmSnapshot(data));
+    setConfirmOpen(true);
+  };
 
+  const handleFinalConfirm = async () => {
+    if (!confirmSnapshot || loading) return;
+    const data = watch();
+
+    setLoading(true);
     const payload = {
       ...data,
-      nama_customer: selectedCustomer.nama_customer,
-      detail_items: claimItems.map(item => ({
+      nama_customer: selectedCustomer?.nama_customer,
+      detail_items: claimItems.map((item) => ({
         kode_barang: item.kode_barang,
         nama_barang: item.nama_barang,
         jumlah: item.jumlah,
-        keterangan: item.keterangan
+        keterangan: item.keterangan,
       })),
       total_item: claimItems.length,
-      total_qty: totalQty
+      total_qty: totalQty,
     };
 
     try {
       console.log('Submitting customer claim:', payload);
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       toast.success('Customer claim berhasil disimpan!');
+      setConfirmOpen(false);
+      setConfirmSnapshot(null);
       navigate('/transactions/customer-claim');
     } catch (error) {
       console.error('Error saving customer claim:', error);
@@ -191,8 +229,8 @@ export default function CustomerClaimForm() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-9rem)]">
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 space-y-4 h-full">
+    <div className="flex flex-col h-[calc(100vh-48px)] overflow-hidden min-h-0">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col h-full gap-4 min-h-0">
         {/* Informasi Claim */}
         <Card className="px-1.5 py-0">
           <div className="space-y-3">
@@ -335,121 +373,104 @@ export default function CustomerClaimForm() {
         </Card>
 
         {/* Daftar Barang Claim */}
-        <Card className="flex-1 flex flex-col px-1.5 py-1.5">
-          <div className="flex-1 flex flex-col">
-            {claimItems.length === 0 ? (
-              <div className="flex-1 min-h-[calc(65vh-100px)] flex flex-col items-center justify-center text-center bg-gray-50/50 border border-dashed border-gray-200 rounded-lg">
-                <div className="w-14 h-14 bg-primary-50 rounded-xl flex items-center justify-center mb-4">
-                  <MessageSquareWarning className="w-7 h-7 text-primary-500" />
-                </div>
-                <p className="text-gray-700 font-medium text-base mb-1">Belum Ada Barang</p>
-                <p className="text-sm text-gray-400">
-                  Cari dan tambahkan barang untuk membuat claim
-                </p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">
-                        Kode
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">
-                        Nama Barang
-                      </th>
-                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase">
-                        Satuan
-                      </th>
-                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase">
-                        Jumlah
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">
-                        Keterangan
-                      </th>
-                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase">
-                        Aksi
-                      </th>
+        <Card padding={false} className="flex-1 overflow-hidden min-h-0">
+          <div className="h-full min-h-0 overflow-auto">
+            <table className="min-w-full text-sm">
+              <thead className="bg-primary-50 text-primary-800 sticky top-0 z-10 shadow-sm border-b border-primary-100">
+                <tr className="h-10">
+                  <th className="px-3 py-2 text-left w-32">Kode</th>
+                  <th className="px-3 py-2 text-left">Nama Barang</th>
+                  <th className="px-3 py-2 text-center w-24">Satuan</th>
+                  <th className="px-3 py-2 text-center w-24">Jumlah</th>
+                  <th className="px-3 py-2 text-left w-64">Keterangan</th>
+                  <th className="px-3 py-2 text-center w-16">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200/60">
+                {claimItems.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="py-16 text-center">
+                      <div className="mx-auto max-w-xl px-6">
+                        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary-50 text-primary-600">
+                          <MessageSquareWarning className="h-6 w-6" />
+                        </div>
+                        <div className="text-gray-900 font-semibold">Belum ada barang claim</div>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  claimItems.map((item) => (
+                    <tr key={item.kode_barang} className="h-10 hover:bg-gray-50 transition-colors">
+                      <td className="px-3 py-1.5 align-middle font-mono text-primary-600 whitespace-nowrap">
+                        {item.kode_barang}
+                      </td>
+                      <td className="px-3 py-1.5 align-middle text-gray-900 truncate max-w-[320px]">
+                        {item.nama_barang}
+                      </td>
+                      <td className="px-3 py-1.5 text-center align-middle text-gray-700 whitespace-nowrap">
+                        {item.satuan}
+                      </td>
+                      <td className="px-3 py-1.5 text-center align-middle">
+                        <input
+                          type="number"
+                          min="1"
+                          value={item.jumlah}
+                          onChange={(e) => handleJumlahChange(item.kode_barang, e.target.value)}
+                          className="w-20 h-8 text-center border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
+                        />
+                      </td>
+                      <td className="px-3 py-1.5 align-middle">
+                        <input
+                          type="text"
+                          value={item.keterangan}
+                          onChange={(e) => handleKeteranganChange(item.kode_barang, e.target.value)}
+                          placeholder="Alasan claim barang ini..."
+                          className="w-full h-8 px-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
+                        />
+                      </td>
+                      <td className="px-3 py-1.5 text-center align-middle">
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveItem(item.kode_barang)}
+                          className="text-gray-400 hover:text-red-600 transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {claimItems.map(item => (
-                      <tr key={item.kode_barang} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 text-sm font-mono text-primary-600">
-                          {item.kode_barang}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-900">
-                          {item.nama_barang}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-700 text-center">
-                          {item.satuan}
-                        </td>
-                        <td className="px-4 py-3 text-center">
-                          <input
-                            type="number"
-                            min="1"
-                            value={item.jumlah}
-                            onChange={(e) => handleJumlahChange(item.kode_barang, e.target.value)}
-                            className="w-20 px-2 py-1 border border-gray-300 rounded text-sm text-center focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                          />
-                        </td>
-                        <td className="px-4 py-3">
-                          <input
-                            type="text"
-                            value={item.keterangan}
-                            onChange={(e) => handleKeteranganChange(item.kode_barang, e.target.value)}
-                            placeholder="Alasan claim barang ini..."
-                            className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                          />
-                        </td>
-                        <td className="px-4 py-3 text-center">
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveItem(item.kode_barang)}
-                            className="text-red-600 hover:text-red-800 p-1"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         </Card>
 
-        {/* Actions */}
-        <div className="px-4 py-2 bg-white border border-gray-200 rounded-lg shadow-sm flex-shrink-0">
-          <div className="flex items-center justify-between gap-4 h-11">
-            {/* Summary */}
-            <div className="flex items-center gap-6 text-sm">
-              <div className="flex items-center gap-2">
-                <Package className="w-4 h-4 text-gray-500" />
-                <span className="text-gray-600">Total Item:</span>
-                <span className="font-semibold text-gray-900">{claimItems.length}</span>
-              </div>
-              {claimItems.length > 0 && (
-                <div className="flex items-center gap-2">
-                  <span className="text-gray-600">Total Qty:</span>
-                  <span className="font-semibold text-gray-900">{totalQty}</span>
+        {/* Actions (match Penjualan wrapper sizing) */}
+        <div className="mt-auto px-5 py-2.5 bg-white border border-gray-200 rounded-lg shadow-sm flex-shrink-0">
+          <div className="flex items-center justify-between gap-4 h-12">
+            {claimItems.length > 0 ? (
+              <div className="flex items-center gap-6 text-sm text-gray-800 font-medium">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-semibold">Total Item:</span>
+                  <span className="font-bold text-primary-700">{claimItems.length}</span>
                 </div>
-              )}
-            </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-semibold">Total Qty:</span>
+                  <span className="font-bold text-primary-700">{totalQty}</span>
+                </div>
+              </div>
+            ) : (
+              <div className="text-sm text-gray-400 font-medium">Belum ada item</div>
+            )}
 
-            {/* Buttons */}
-            <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleReset}
-              >
+            <div className="flex items-center gap-2 ml-auto">
+              <Button type="button" variant="outline" className="px-4 py-1.5 text-sm h-9" onClick={handleReset}>
                 <RotateCcw className="w-4 h-4 mr-2" />
                 Clear
               </Button>
               <Button
                 type="submit"
+                className="px-4 py-1.5 text-sm h-9"
                 disabled={loading || claimItems.length === 0 || !selectedCustomer}
               >
                 <Save className="w-4 h-4 mr-2" />
@@ -459,6 +480,95 @@ export default function CustomerClaimForm() {
           </div>
         </div>
       </form>
+
+      <Modal
+        open={confirmOpen}
+        onClose={() => {
+          if (loading) return;
+          setConfirmOpen(false);
+          setConfirmSnapshot(null);
+        }}
+        title="Konfirmasi Customer Claim"
+        size="lg"
+        closeOnOverlay={!loading}
+        footer={(
+          <>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={loading}
+              onClick={() => {
+                setConfirmOpen(false);
+                setConfirmSnapshot(null);
+              }}
+            >
+              Batal
+            </Button>
+            <Button type="button" loading={loading} onClick={handleFinalConfirm}>
+              Konfirmasi Simpan
+            </Button>
+          </>
+        )}
+      >
+        {confirmSnapshot && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+              <div className="rounded-md border border-gray-200 bg-white px-4 py-3">
+                <div className="text-gray-500">No. Claim</div>
+                <div className="font-semibold text-gray-900">{confirmSnapshot.header.no_claim}</div>
+              </div>
+              <div className="rounded-md border border-gray-200 bg-white px-4 py-3">
+                <div className="text-gray-500">Tanggal</div>
+                <div className="font-semibold text-gray-900">{confirmSnapshot.header.tanggal_claim}</div>
+              </div>
+              <div className="rounded-md border border-gray-200 bg-white px-4 py-3">
+                <div className="text-gray-500">Customer</div>
+                <div className="font-semibold text-gray-900">{confirmSnapshot.header.customer_label}</div>
+              </div>
+              <div className="rounded-md border border-gray-200 bg-white px-4 py-3">
+                <div className="text-gray-500">Alasan</div>
+                <div className="font-semibold text-gray-900">{confirmSnapshot.header.alasan || '-'}</div>
+              </div>
+            </div>
+
+            <div className="overflow-auto rounded-lg border border-gray-200">
+              <table className="min-w-full text-sm">
+                <thead className="bg-primary-50 text-primary-800 sticky top-0 z-10 border-b border-primary-100">
+                  <tr className="h-10">
+                    <th className="px-3 py-2 text-center w-10">No</th>
+                    <th className="px-3 py-2 text-left w-32">Kode</th>
+                    <th className="px-3 py-2 text-left">Nama</th>
+                    <th className="px-3 py-2 text-center w-24">Satuan</th>
+                    <th className="px-3 py-2 text-center w-24">Qty</th>
+                    <th className="px-3 py-2 text-left w-64">Keterangan</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200/60">
+                  {confirmSnapshot.items.map((row, idx) => (
+                    <tr key={row.kode_barang} className="h-10">
+                      <td className="px-3 py-1.5 text-center text-gray-600">{idx + 1}</td>
+                      <td className="px-3 py-1.5 font-medium text-gray-900 whitespace-nowrap">{row.kode_barang}</td>
+                      <td className="px-3 py-1.5 text-gray-900 truncate max-w-[260px]">{row.nama_barang}</td>
+                      <td className="px-3 py-1.5 text-center text-gray-700 whitespace-nowrap">{row.satuan || '-'}</td>
+                      <td className="px-3 py-1.5 text-center text-gray-700 whitespace-nowrap">{row.jumlah}</td>
+                      <td className="px-3 py-1.5 text-gray-700 truncate max-w-[320px]">{row.keterangan || '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-end gap-x-6 gap-y-2 text-sm">
+              <div className="text-gray-600">
+                Total Item: <span className="font-semibold text-gray-900">{confirmSnapshot.totals.totalItem}</span>
+              </div>
+              <div className="text-gray-600">
+                Total Qty: <span className="font-semibold text-gray-900">{confirmSnapshot.totals.totalQty}</span>
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
 
       {/* Click outside to close dropdown */}
       {(showCustomerDropdown || showBarangDropdown) && (

@@ -48,30 +48,121 @@ function App() {
               </ProtectedRoute>
             }
           >
-            <Route index element={<Dashboard />} />
+            <Route
+              index
+              element={
+                <ProtectedRoute permission="dashboard">
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Master Data */}
             <Route path="master">
-              <Route path="sparepart" element={<BarangList />} />
-              <Route path="kategori" element={<KategoriList />} />
-              <Route path="supplier" element={<SupplierList />} />
-              <Route path="customer" element={<CustomerList />} />
+              <Route
+                path="sparepart"
+                element={
+                  <ProtectedRoute permission="master-data">
+                    <BarangList />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="kategori"
+                element={
+                  <ProtectedRoute permission="master-data">
+                    <KategoriList />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="supplier"
+                element={
+                  <ProtectedRoute permission="master-data">
+                    <SupplierList />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="customer"
+                element={
+                  <ProtectedRoute permission="master-data">
+                    <CustomerList />
+                  </ProtectedRoute>
+                }
+              />
             </Route>
 
             {/* Transactions */}
             <Route path="transactions">
-              <Route path="pembelian" element={<PurchaseForm />} />
-              <Route path="penjualan" element={<SalesForm />} />
-              <Route path="stok-opname" element={<StokOpnameForm />} />
-              <Route path="customer-claim" element={<CustomerClaimForm />} />
+              <Route
+                path="pembelian"
+                element={
+                  <ProtectedRoute permission="transaksi">
+                    <PurchaseForm />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="penjualan"
+                element={
+                  <ProtectedRoute permission="transaksi">
+                    <SalesForm />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="stok-opname"
+                element={
+                  <ProtectedRoute permission="transaksi">
+                    <StokOpnameForm />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="customer-claim"
+                element={
+                  <ProtectedRoute permission="transaksi">
+                    <CustomerClaimForm />
+                  </ProtectedRoute>
+                }
+              />
             </Route>
 
             {/* Reports */}
             <Route path="reports">
-              <Route path="stok-barang" element={<StokBarang />} />
-              <Route path="stok-alert" element={<StokAlert />} />
-              <Route path="kartu-stok" element={<KartuStok />} />
-              <Route path="riwayat-transaksi" element={<RiwayatTransaksi />} />
+              <Route
+                path="stok-barang"
+                element={
+                  <ProtectedRoute permission="laporan">
+                    <StokBarang />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="stok-alert"
+                element={
+                  <ProtectedRoute permission="laporan">
+                    <StokAlert />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="kartu-stok"
+                element={
+                  <ProtectedRoute permission="laporan">
+                    <KartuStok />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="riwayat-transaksi"
+                element={
+                  <ProtectedRoute permission="laporan">
+                    <RiwayatTransaksi />
+                  </ProtectedRoute>
+                }
+              />
             </Route>
 
             {/* Settings - Owner Only */}

@@ -1,9 +1,13 @@
 export const formatCurrency = (value) => {
-  return new Intl.NumberFormat('id-ID', {
+  const formatted = new Intl.NumberFormat('id-ID', {
     style: 'currency',
     currency: 'IDR',
     minimumFractionDigits: 0,
   }).format(value);
+
+  // Intl for id-ID often uses a non‑breaking space after 'Rp'.
+  // Normalize to keep UI and tests consistent: 'Rp1.000' instead of 'Rp 1.000'.
+  return formatted.replace(/^Rp[\s\u00A0]+/u, 'Rp');
 };
 
 export const formatNumber = (value) => {
@@ -76,4 +80,27 @@ export const validateForm = (values, rules) => {
   });
   
   return errors;
+};
+
+export const generateTransactionNumber = (prefix, date = new Date()) => {
+  const normalizedPrefix = String(prefix || 'TRX').toUpperCase().trim();
+
+  const dateStr = typeof date === 'string'
+    ? date
+    : new Date(date).toISOString().slice(0, 10);
+
+  const yyyymmdd = dateStr.replaceAll('-', '');
+  const key = `inv:${normalizedPrefix}:${yyyymmdd}`;
+
+  let next = 1;
+  try {
+    const lastRaw = window?.localStorage?.getItem(key);
+    const last = parseInt(lastRaw || '0', 10);
+    next = Number.isFinite(last) ? last + 1 : 1;
+    window?.localStorage?.setItem(key, String(next));
+  } catch {
+    // Fallback: keep next=1 if storage unavailable.
+  }
+
+  return `${normalizedPrefix}-${yyyymmdd}-${String(next).padStart(4, '0')}`;
 };

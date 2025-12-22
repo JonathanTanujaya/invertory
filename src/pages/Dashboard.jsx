@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Package,
   TrendingUp,
@@ -103,7 +104,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-7xl mx-auto">
       {/* BARIS 1: Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
@@ -387,12 +388,12 @@ function ComparisonItem({ label, value, percent, isPositive }) {
 
 function QuickAction({ icon: Icon, title, href }) {
   return (
-    <a
-      href={href}
+    <Link
+      to={href}
       className="flex flex-col items-center gap-2 p-4 rounded-lg border-2 border-gray-200 hover:border-primary-500 hover:bg-primary-50 transition-all"
     >
       <Icon className="w-8 h-8 text-primary-500" />
       <span className="text-sm font-medium text-gray-700">{title}</span>
-    </a>
+    </Link>
   );
 }
