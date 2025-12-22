@@ -37,16 +37,16 @@ export default function Login() {
                 {/* Decorative circles */}
                 <div className="absolute -top-24 -left-24 w-96 h-96 bg-white/5 rounded-full" />
                 <div className="absolute -bottom-32 -right-32 w-[500px] h-[500px] bg-white/5 rounded-full" />
-                
+
                 <div className="relative z-10">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                        <div className="w-10 h-10 bg-white/10 border border-white/30 rounded-xl flex items-center justify-center">
                             <Box className="w-5 h-5" />
                         </div>
                         <span className="text-xl font-bold tracking-tight">STOIR</span>
                     </div>
                 </div>
-                
+
                 <div className="relative z-10 space-y-6">
                     <h1 className="text-4xl font-bold leading-tight">
                         Kelola inventori<br />dengan mudah.
@@ -67,7 +67,7 @@ export default function Login() {
                     {/* Mobile Logo */}
                     <div className="lg:hidden text-center mb-8">
                         <div className="inline-flex items-center gap-2 text-primary-600">
-                            <div className="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center">
+                            <div className="w-8 h-8 bg-primary-50 border border-primary-200 rounded-lg flex items-center justify-center">
                                 <Box className="w-4 h-4" />
                             </div>
                             <span className="text-lg font-bold">STOIR</span>
@@ -75,8 +75,8 @@ export default function Login() {
                     </div>
 
                     <div className="mb-8">
-                        <h2 className="text-2xl font-bold text-gray-900">Selamat datang</h2>
-                        <p className="text-gray-500 mt-2">Masuk untuk melanjutkan ke dashboard</p>
+                        <h2 className="text-h3 text-gray-800">Selamat datang</h2>
+                        <p className="text-body text-gray-600 mt-2">Masuk untuk melanjutkan ke dashboard</p>
                     </div>
 
                     {/* Error Message */}
@@ -89,7 +89,7 @@ export default function Login() {
 
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
                                 Username
                             </label>
                             <input
@@ -104,7 +104,7 @@ export default function Login() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
                                 Password
                             </label>
                             <div className="relative">
