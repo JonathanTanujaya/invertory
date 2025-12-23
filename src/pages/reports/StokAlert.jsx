@@ -12,64 +12,12 @@ import {
   ShoppingCart, TrendingDown, Truck
 } from 'lucide-react';
 import { formatNumber, formatCurrency, formatDate } from '@/utils/helpers';
-
-// Import data
-import kategoriData from '@/data/dummy/m_kategori.json';
-import barangData from '@/data/dummy/m_barang.json';
-import supplierData from '@/data/dummy/m_supplier.json';
-import stokMasukData from '@/data/dummy/t_stok_masuk.json';
-
-// Fungsi untuk mendapatkan nama kategori dari ID
-const getKategoriNama = (kategoriId) => {
-  const kat = kategoriData.find(k => k.kode_kategori === kategoriId);
-  return kat ? kat.nama_kategori : kategoriId;
-};
-
-// Fungsi untuk mendapatkan supplier history untuk suatu barang
-const getSupplierHistory = (kodeBarang) => {
-  const history = [];
-
-  stokMasukData.forEach(transaksi => {
-    const item = transaksi.items.find(i => i.kode_barang === kodeBarang);
-    if (item) {
-      const supplier = supplierData.find(s => s.kode_supplier === transaksi.kode_supplier);
-      if (supplier) {
-        // Check if supplier already in history
-        const existingIndex = history.findIndex(h => h.kode_supplier === supplier.kode_supplier);
-        if (existingIndex >= 0) {
-          // Update if this transaction is newer
-          if (new Date(transaksi.tanggal) > new Date(history[existingIndex].tanggal_terakhir)) {
-            history[existingIndex].tanggal_terakhir = transaksi.tanggal;
-            history[existingIndex].harga_terakhir = item.harga;
-            history[existingIndex].jumlah_terakhir = item.jumlah;
-          }
-          history[existingIndex].total_transaksi += 1;
-          history[existingIndex].total_qty += item.jumlah;
-        } else {
-          history.push({
-            kode_supplier: supplier.kode_supplier,
-            nama_supplier: supplier.nama_supplier,
-            alamat: supplier.alamat,
-            telepon: supplier.telepon,
-            kontak: supplier.kontak,
-            tanggal_terakhir: transaksi.tanggal,
-            harga_terakhir: item.harga,
-            jumlah_terakhir: item.jumlah,
-            total_transaksi: 1,
-            total_qty: item.jumlah
-          });
-        }
-      }
-    }
-  });
-
-  // Sort by tanggal_terakhir descending
-  return history.sort((a, b) => new Date(b.tanggal_terakhir) - new Date(a.tanggal_terakhir));
-};
+import api from '@/api/axios';
 
 export default function StokAlert() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [kategoriOptions, setKategoriOptions] = useState([]);
 
   // Filter states
   const [search, setSearch] = useState('');
@@ -96,21 +44,27 @@ export default function StokAlert() {
 
   const load = async () => {
     setLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 300));
+    try {
+      const [itemsRes, categoriesRes] = await Promise.all([
+        api.get('/reports/stok-alert'),
+        api.get('/categories'),
+      ]);
 
-    // Filter only items that need attention (stok <= stok_minimal)
-    const alertItems = barangData
-      .filter(item => item.stok <= item.stok_minimal)
-      .map(item => ({
-        ...item,
-        kategori_nama: getKategoriNama(item.kategori_id),
-        kekurangan: Math.max(0, item.stok_minimal - item.stok),
-        habis: item.stok === 0,
-        rendah: item.stok > 0 && item.stok <= item.stok_minimal,
-        estimasi_restock: (item.stok_minimal * 2 - item.stok) * item.harga_beli
-      }));
-
-    setData(alertItems);
+      const items = Array.isArray(itemsRes?.data) ? itemsRes.data : [];
+      const categories = Array.isArray(categoriesRes?.data) ? categoriesRes.data : [];
+      setKategoriOptions(
+        categories.map((k) => ({ value: k.kode_kategori, label: k.nama_kategori }))
+      );
+      setData(
+        items.map((i) => ({
+          ...i,
+          habis: Boolean(i.habis),
+          rendah: Boolean(i.rendah),
+        }))
+      );
+    } catch (err) {
+      setData([]);
+    }
     setLoading(false);
   };
 
@@ -157,11 +111,17 @@ export default function StokAlert() {
   }, [data]);
 
   // Handle supplier modal
-  const openSupplierModal = (item) => {
+  const openSupplierModal = async (item) => {
     setSelectedItem(item);
-    const history = getSupplierHistory(item.kode_barang);
-    setSupplierHistory(history);
+    setSupplierHistory([]);
     setShowSupplierModal(true);
+    try {
+      const res = await api.get(`/reports/stok-alert/${item.kode_barang}/suppliers`);
+      const history = Array.isArray(res?.data) ? res.data : [];
+      setSupplierHistory(history);
+    } catch (_) {
+      setSupplierHistory([]);
+    }
   };
 
   // Table columns
@@ -455,10 +415,7 @@ export default function StokAlert() {
                     onChange={(e) => setKategori(e.target.value)}
                     options={[
                       { value: '', label: 'Semua Kategori' },
-                      ...kategoriData.map(k => ({
-                        value: k.kode_kategori,
-                        label: k.nama_kategori
-                      }))
+                      ...kategoriOptions,
                     ]}
                   />
                 </div>

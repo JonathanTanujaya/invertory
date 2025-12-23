@@ -13,20 +13,12 @@ import {
 } from 'lucide-react';
 import { formatNumber, formatCurrency } from '@/utils/helpers';
 import BarangForm from '@/pages/master/BarangForm';
-
-// Import data
-import kategoriData from '@/data/dummy/m_kategori.json';
-import barangData from '@/data/dummy/m_barang.json';
-
-// Fungsi untuk mendapatkan nama kategori dari ID
-const getKategoriNama = (kategoriId) => {
-  const kat = kategoriData.find(k => k.kode_kategori === kategoriId);
-  return kat ? kat.nama_kategori : kategoriId;
-};
+import api from '@/api/axios';
 
 export default function StokBarang() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [kategoriOptions, setKategoriOptions] = useState([]);
 
   // Filter states
   const [search, setSearch] = useState('');
@@ -58,29 +50,23 @@ export default function StokBarang() {
 
   const load = async () => {
     setLoading(true);
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 300));
+    try {
+      const [itemsRes, categoriesRes] = await Promise.all([
+        api.get('/reports/stok-barang'),
+        api.get('/categories'),
+      ]);
 
-    // Enrich data with kategori name and simulate last_movement
-    const enrichedData = barangData.map((item, index) => {
-      // Simulasi last_movement: beberapa barang tidak laku dalam periode tertentu
-      const today = new Date();
-      let lastMovement;
+      const items = Array.isArray(itemsRes?.data) ? itemsRes.data : [];
+      const categories = Array.isArray(categoriesRes?.data) ? categoriesRes.data : [];
 
-      // Buat distribusi random untuk simulasi
-      const randomMonths = Math.floor(Math.random() * 15); // 0-14 bulan
-      lastMovement = new Date(today);
-      lastMovement.setMonth(today.getMonth() - randomMonths);
+      setKategoriOptions(
+        categories.map((k) => ({ value: k.kode_kategori, label: k.nama_kategori }))
+      );
 
-      return {
-        ...item,
-        kategori_nama: getKategoriNama(item.kategori_id),
-        nilai_stok: item.stok * item.harga_beli,
-        last_movement: lastMovement.toISOString().split('T')[0], // Format: YYYY-MM-DD
-      };
-    });
-
-    setData(enrichedData);
+      setData(items);
+    } catch (err) {
+      setData([]);
+    }
     setLoading(false);
   };
 
@@ -564,10 +550,7 @@ export default function StokBarang() {
                   onChange={(e) => setKategori(e.target.value)}
                   options={[
                     { value: '', label: 'Semua Kategori' },
-                    ...kategoriData.map(k => ({
-                      value: k.kode_kategori,
-                      label: k.nama_kategori
-                    }))
+                    ...kategoriOptions,
                   ]}
                 />
                 <Input

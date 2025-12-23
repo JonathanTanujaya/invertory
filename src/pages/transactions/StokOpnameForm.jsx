@@ -17,9 +17,7 @@ import Input from '@/components/ui/Input';
 import Card from '@/components/ui/Card';
 import Modal from '@/components/ui/Modal';
 import { toast } from 'react-toastify';
-
-// Import data barang
-import barangData from '@/data/dummy/m_barang.json';
+import api from '@/api/axios';
 
 export default function StokOpnameForm() {
   const navigate = useNavigate();
@@ -35,6 +33,7 @@ export default function StokOpnameForm() {
   const [showBarangDropdown, setShowBarangDropdown] = useState(false);
   const [opnameItems, setOpnameItems] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [allItems, setAllItems] = useState([]);
 
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmSnapshot, setConfirmSnapshot] = useState(null);
@@ -46,15 +45,32 @@ export default function StokOpnameForm() {
     setValue('no_opname', opnameNo);
   }, [setValue]);
 
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const itemsRes = await api.get('/items');
+        if (!mounted) return;
+        setAllItems(Array.isArray(itemsRes.data) ? itemsRes.data : []);
+      } catch (err) {
+        toast.error('Gagal memuat data barang');
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   // Filter barang berdasarkan pencarian
   const filteredBarang = useMemo(() => {
-    if (!searchBarang) return barangData.slice(0, 10);
+    if (!searchBarang) return allItems.slice(0, 10);
     const query = searchBarang.toLowerCase();
-    return barangData.filter(barang =>
-      barang.kode_barang.toLowerCase().includes(query) ||
-      barang.nama_barang.toLowerCase().includes(query)
+    return allItems.filter((barang) =>
+      String(barang.kode_barang || '').toLowerCase().includes(query) ||
+      String(barang.nama_barang || '').toLowerCase().includes(query)
     ).slice(0, 10);
-  }, [searchBarang]);
+  }, [searchBarang, allItems]);
 
   // Handle pilih barang
   const handleSelectBarang = (barang) => {
@@ -180,30 +196,36 @@ export default function StokOpnameForm() {
 
     setLoading(true);
     const payload = {
-      ...data,
+      no_opname: data.no_opname,
+      tanggal_opname: data.tanggal_opname,
+      catatan: data.catatan,
       detail_items: opnameItems.map((item) => ({
         kode_barang: item.kode_barang,
-        nama_barang: item.nama_barang,
-        stok_sistem: item.stok_sistem,
         stok_fisik: item.stok_fisik,
-        selisih: item.selisih,
         keterangan: item.keterangan,
       })),
-      total_item: opnameItems.length,
-      total_selisih_plus: totalSelisih.plus,
-      total_selisih_minus: totalSelisih.minus,
     };
 
     try {
-      console.log('Submitting stok opname:', payload);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await api.post('/stock-opname', payload);
+
+      // Refresh items (stock changed)
+      try {
+        const itemsRes = await api.get('/items');
+        setAllItems(Array.isArray(itemsRes.data) ? itemsRes.data : []);
+      } catch (_) {
+        // ignore refresh errors
+      }
+
       toast.success('Stok opname berhasil disimpan!');
       setConfirmOpen(false);
       setConfirmSnapshot(null);
       navigate('/transactions/stok-opname');
+
+      handleReset();
     } catch (error) {
       console.error('Error saving stok opname:', error);
-      toast.error('Gagal menyimpan stok opname');
+      toast.error(error?.response?.data?.error || 'Gagal menyimpan stok opname');
     } finally {
       setLoading(false);
     }

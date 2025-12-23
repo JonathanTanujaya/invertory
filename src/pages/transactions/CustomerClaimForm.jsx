@@ -16,9 +16,7 @@ import Card from '@/components/ui/Card';
 import Modal from '@/components/ui/Modal';
 import { toast } from 'react-toastify';
 
-// Import data
-import barangData from '@/data/dummy/m_barang.json';
-import customerData from '@/data/dummy/m_customer.json';
+import api from '@/api/axios';
 
 export default function CustomerClaimForm() {
   const navigate = useNavigate();
@@ -39,6 +37,9 @@ export default function CustomerClaimForm() {
   const [claimItems, setClaimItems] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const [allCustomers, setAllCustomers] = useState([]);
+  const [allItems, setAllItems] = useState([]);
+
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmSnapshot, setConfirmSnapshot] = useState(null);
 
@@ -49,25 +50,43 @@ export default function CustomerClaimForm() {
     setValue('no_claim', claimNo);
   }, [setValue]);
 
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const [customersRes, itemsRes] = await Promise.all([api.get('/customers'), api.get('/items')]);
+        if (!mounted) return;
+        setAllCustomers(Array.isArray(customersRes.data) ? customersRes.data : []);
+        setAllItems(Array.isArray(itemsRes.data) ? itemsRes.data : []);
+      } catch (err) {
+        toast.error('Gagal memuat data master');
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   // Filter customer berdasarkan pencarian
   const filteredCustomer = useMemo(() => {
-    if (!searchCustomer) return customerData.slice(0, 10);
+    if (!searchCustomer) return allCustomers.slice(0, 10);
     const query = searchCustomer.toLowerCase();
-    return customerData.filter(customer =>
-      customer.kode_customer.toLowerCase().includes(query) ||
-      customer.nama_customer.toLowerCase().includes(query)
+    return allCustomers.filter((customer) =>
+      String(customer.kode_customer || '').toLowerCase().includes(query) ||
+      String(customer.nama_customer || '').toLowerCase().includes(query)
     ).slice(0, 10);
-  }, [searchCustomer]);
+  }, [searchCustomer, allCustomers]);
 
   // Filter barang berdasarkan pencarian
   const filteredBarang = useMemo(() => {
-    if (!searchBarang) return barangData.slice(0, 10);
+    if (!searchBarang) return allItems.slice(0, 10);
     const query = searchBarang.toLowerCase();
-    return barangData.filter(barang =>
-      barang.kode_barang.toLowerCase().includes(query) ||
-      barang.nama_barang.toLowerCase().includes(query)
+    return allItems.filter((barang) =>
+      String(barang.kode_barang || '').toLowerCase().includes(query) ||
+      String(barang.nama_barang || '').toLowerCase().includes(query)
     ).slice(0, 10);
-  }, [searchBarang]);
+  }, [searchBarang, allItems]);
 
   // Handle pilih customer
   const handleSelectCustomer = (customer) => {
@@ -184,29 +203,44 @@ export default function CustomerClaimForm() {
 
     setLoading(true);
     const payload = {
-      ...data,
-      nama_customer: selectedCustomer?.nama_customer,
-      detail_items: claimItems.map((item) => ({
+      no_claim: data.no_claim,
+      tanggal: data.tanggal_claim,
+      kode_customer: data.kode_customer,
+      catatan: data.alasan,
+      items: claimItems.map((item) => ({
         kode_barang: item.kode_barang,
-        nama_barang: item.nama_barang,
         jumlah: item.jumlah,
-        keterangan: item.keterangan,
       })),
-      total_item: claimItems.length,
-      total_qty: totalQty,
     };
 
     try {
-      console.log('Submitting customer claim:', payload);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await api.post('/customer-claims', payload);
+
+      // Refresh items (stock changed)
+      try {
+        const itemsRes = await api.get('/items');
+        setAllItems(Array.isArray(itemsRes.data) ? itemsRes.data : []);
+      } catch (_) {
+        // ignore refresh errors
+      }
 
       toast.success('Customer claim berhasil disimpan!');
       setConfirmOpen(false);
       setConfirmSnapshot(null);
       navigate('/transactions/customer-claim');
+
+      handleReset();
     } catch (error) {
       console.error('Error saving customer claim:', error);
-      toast.error('Gagal menyimpan customer claim');
+      const status = error?.response?.status;
+      const data = error?.response?.data;
+      if (status === 409 && data?.meta?.kode_barang) {
+        toast.error(
+          `Stok tidak mencukupi (${data.meta.kode_barang}). Tersedia: ${data.meta.stok}, diminta: ${data.meta.diminta}`
+        );
+      } else {
+        toast.error(data?.error || 'Gagal menyimpan customer claim');
+      }
     } finally {
       setLoading(false);
     }

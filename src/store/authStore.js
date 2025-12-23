@@ -1,13 +1,10 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
-import seededUsers from '@/data/dummy/users.json';
-
-// Default users data (seeded from JSON, offline)
-const defaultUsers = (Array.isArray(seededUsers) ? seededUsers : []).map((u) => ({
-  ...u,
-  mustChangePassword: u.mustChangePassword ?? false,
-}));
+async function getApi() {
+  const mod = await import('@/api/axios');
+  return mod.default;
+}
 
 // Activity log store
 export const useActivityLogStore = create(
@@ -38,7 +35,8 @@ export const useAuthStore = create(
     (set, get) => ({
       user: null,
       isAuthenticated: false,
-      users: defaultUsers,
+      token: null,
+      users: [],
 
       _logActivity: ({ action, description, targetUserId, targetUsername, targetUserName, meta }) => {
         const actor = get().user;
@@ -58,35 +56,30 @@ export const useAuthStore = create(
         });
       },
 
-      // Login
-      login: (username, password) => {
-        const users = get().users;
-        const user = users.find(
-          (u) => u.username === username && u.password === password
-        );
+      // Login (via local API)
+      login: async (username, password) => {
+        const api = await getApi();
+        const res = await api.post('/auth/login', { username, password });
+        const token = res?.data?.token;
+        const user = res?.data?.user;
 
-        if (user) {
-          const { password: _, ...userWithoutPassword } = user;
-          set({ user: userWithoutPassword, isAuthenticated: true });
+        if (!token || !user) return false;
+        set({ token, user, isAuthenticated: true });
 
-          // Log activity
-          useActivityLogStore.getState().addLog({
-            userId: user.id,
-            username: user.username,
-            userName: user.nama,
-            userRole: user.role,
-            action: 'login',
-            description: `${user.nama} berhasil login`,
-          });
+        useActivityLogStore.getState().addLog({
+          userId: user.id,
+          username: user.username,
+          userName: user.nama,
+          userRole: user.role,
+          action: 'login',
+          description: `${user.nama} berhasil login`,
+        });
 
-          return true;
-        }
-
-        return false;
+        return true;
       },
 
       // Logout
-      logout: () => {
+      logout: async () => {
         const currentUser = get().user;
         if (currentUser) {
           // Log activity
@@ -100,50 +93,68 @@ export const useAuthStore = create(
           });
         }
 
-        set({ user: null, isAuthenticated: false });
+        try {
+          const api = await getApi();
+          await api.post('/auth/logout');
+        } catch (_) {
+          // ignore
+        }
+
+        set({ user: null, isAuthenticated: false, token: null, users: [] });
+      },
+
+      hydrateSession: async () => {
+        const token = get().token;
+        if (!token) return false;
+        try {
+          const api = await getApi();
+          const res = await api.get('/auth/me');
+          const user = res?.data?.user;
+          if (user) {
+            set({ user, isAuthenticated: true });
+            return true;
+          }
+        } catch (_) {
+          // token invalid
+        }
+        set({ user: null, isAuthenticated: false, token: null });
+        return false;
+      },
+
+      fetchUsers: async () => {
+        const api = await getApi();
+        const res = await api.get('/users');
+        const rows = Array.isArray(res?.data) ? res.data : [];
+        set({ users: rows });
+        return rows;
       },
 
       // Add user
-      addUser: (userData) => {
-        const users = get().users;
-        const newId = Math.max(...users.map(u => u.id), 0) + 1;
-        const newUser = {
-          id: newId,
-          ...userData,
-          mustChangePassword: userData.mustChangePassword ?? false,
-        };
-        set({ users: [...users, newUser] });
+      addUser: async (userData) => {
+        const api = await getApi();
+        const res = await api.post('/users', userData);
+        await get().fetchUsers();
 
-        get()._logActivity({
-          action: 'user_create',
-          description: `Membuat user @${newUser.username} (${newUser.nama})`,
-          targetUserId: newUser.id,
-          targetUsername: newUser.username,
-          targetUserName: newUser.nama,
-        });
+        const created = res?.data;
+        if (created) {
+          get()._logActivity({
+            action: 'user_create',
+            description: `Membuat user @${created.username} (${created.nama})`,
+            targetUserId: created.id,
+            targetUsername: created.username,
+            targetUserName: created.nama,
+          });
+        }
+        return created;
       },
 
       // Update user
-      updateUser: (id, userData) => {
-        const users = get().users;
+      updateUser: async (id, userData) => {
+        const api = await getApi();
+        const res = await api.put(`/users/${id}`, userData);
+        await get().fetchUsers();
 
-        // Password hanya bisa diubah oleh akun yang login (via changeOwnPassword)
-        // atau melalui reset password oleh owner.
-        const { password: _ignoredPassword, ...safeUserData } = userData || {};
-
-        const updatedUsers = users.map(u =>
-          u.id === id ? { ...u, ...safeUserData } : u
-        );
-        set({ users: updatedUsers });
-
-        // Update current user if editing self
-        const currentUser = get().user;
-        if (currentUser?.id === id) {
-          const { password: _, ...userWithoutPassword } = updatedUsers.find(u => u.id === id);
-          set({ user: userWithoutPassword });
-        }
-
-        const updated = updatedUsers.find(u => u.id === id);
+        const updated = res?.data;
         if (updated) {
           get()._logActivity({
             action: 'user_update',
@@ -153,13 +164,17 @@ export const useAuthStore = create(
             targetUserName: updated.nama,
           });
         }
+        return updated;
       },
 
       // Delete user
-      deleteUser: (id) => {
+      deleteUser: async (id) => {
         const users = get().users;
-        const toDelete = users.find(u => u.id === id);
-        set({ users: users.filter(u => u.id !== id) });
+        const toDelete = users.find((u) => u.id === id);
+
+        const api = await getApi();
+        await api.delete(`/users/${id}`);
+        await get().fetchUsers();
 
         if (toDelete) {
           get()._logActivity({
@@ -173,75 +188,61 @@ export const useAuthStore = create(
       },
 
       // Change password (self-only)
-      changeOwnPassword: (currentPassword, newPassword) => {
+      changeOwnPassword: async (currentPassword, newPassword) => {
         const actor = get().user;
         if (!actor) return { ok: false, message: 'Anda belum login.' };
 
-        const users = get().users;
-        const existing = users.find(u => u.id === actor.id);
-        if (!existing) return { ok: false, message: 'User tidak ditemukan.' };
-
-        if (existing.password !== currentPassword) {
-          return { ok: false, message: 'Password saat ini tidak sesuai.' };
+        try {
+          const api = await getApi();
+          await api.post('/auth/change-password', { currentPassword, newPassword });
+          get()._logActivity({
+            action: 'password_change',
+            description: `Mengubah password akun sendiri (@${actor.username})`,
+            targetUserId: actor.id,
+            targetUsername: actor.username,
+            targetUserName: actor.nama,
+          });
+          return { ok: true, message: 'Password berhasil diubah.' };
+        } catch (err) {
+          const msg = err?.response?.data?.error;
+          return { ok: false, message: msg || 'Gagal mengubah password.' };
         }
+      },
+
+      // Owner-only: set password explicitly for another user (admin/staff)
+      ownerSetUserPassword: async (targetUserId, newPassword) => {
+        const actor = get().user;
+        if (!actor) return { ok: false, message: 'Anda belum login.' };
+        if (actor.role !== 'owner') return { ok: false, message: 'Hanya Owner yang bisa mengubah password user lain.' };
+        if (actor.id === targetUserId) return { ok: false, message: 'Gunakan menu profil untuk mengubah password akun sendiri.' };
 
         if (!newPassword || newPassword.length < 4) {
           return { ok: false, message: 'Password baru minimal 4 karakter.' };
         }
 
-        const updatedUsers = users.map(u =>
-          u.id === actor.id
-            ? { ...u, password: newPassword, mustChangePassword: false }
-            : u
-        );
-
-        set({ users: updatedUsers });
-
-        // Update session user (without password)
-        const { password: _pw, ...userWithoutPassword } = updatedUsers.find(u => u.id === actor.id);
-        set({ user: userWithoutPassword });
-
-        get()._logActivity({
-          action: 'password_change',
-          description: `Mengubah password akun sendiri (@${actor.username})`,
-          targetUserId: actor.id,
-          targetUsername: actor.username,
-          targetUserName: actor.nama,
-        });
-
-        return { ok: true, message: 'Password berhasil diubah.' };
-      },
-
-      // Owner-only: reset password (generates temporary password)
-      resetUserPassword: (targetUserId) => {
-        const actor = get().user;
-        if (!actor) return { ok: false, message: 'Anda belum login.' };
-        if (actor.role !== 'owner') return { ok: false, message: 'Hanya Owner yang bisa reset password.' };
-        if (actor.id === targetUserId) return { ok: false, message: 'Tidak bisa reset password akun sendiri.' };
-
         const users = get().users;
-        const target = users.find(u => u.id === targetUserId);
+        const target = users.find((u) => u.id === targetUserId);
         if (!target) return { ok: false, message: 'User tidak ditemukan.' };
+        if (target.role === 'owner') return { ok: false, message: 'Tidak bisa mengubah password akun owner lain.' };
 
-        const tempPassword = `TMP-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+        try {
+          const api = await getApi();
+          await api.post(`/users/${targetUserId}/reset-password`, { newPassword });
+          await get().fetchUsers();
 
-        const updatedUsers = users.map(u =>
-          u.id === targetUserId
-            ? { ...u, password: tempPassword, mustChangePassword: true }
-            : u
-        );
+          get()._logActivity({
+            action: 'password_set',
+            description: `Mengubah password untuk @${target.username} (${target.nama})`,
+            targetUserId: target.id,
+            targetUsername: target.username,
+            targetUserName: target.nama,
+          });
 
-        set({ users: updatedUsers });
-
-        get()._logActivity({
-          action: 'password_reset',
-          description: `Reset password untuk @${target.username} (${target.nama})`,
-          targetUserId: target.id,
-          targetUsername: target.username,
-          targetUserName: target.nama,
-        });
-
-        return { ok: true, message: 'Password berhasil di-reset.', tempPassword };
+          return { ok: true, message: 'Password user berhasil diubah.' };
+        } catch (err) {
+          const msg = err?.response?.data?.error;
+          return { ok: false, message: msg || 'Gagal mengubah password user.' };
+        }
       },
 
       // Check if user has permission
@@ -298,32 +299,10 @@ export const useAuthStore = create(
       name: 'auth-storage',
       storage: createJSONStorage(() => sessionStorage),
       version: 1,
-      migrate: (persistedState) => {
-        // For now: force users list to come from JSON seed.
-        const nextUsers = defaultUsers;
-
-        const wasAuthenticated = Boolean(persistedState?.isAuthenticated);
-        const persistedUser = persistedState?.user;
-
-        let nextUser = null;
-        let nextIsAuthenticated = false;
-
-        if (wasAuthenticated && persistedUser) {
-          const found = nextUsers.find((u) => u.id === persistedUser.id) || nextUsers.find((u) => u.username === persistedUser.username);
-          if (found) {
-            const { password: _pw, ...userWithoutPassword } = found;
-            nextUser = userWithoutPassword;
-            nextIsAuthenticated = true;
-          }
-        }
-
-        return {
-          ...persistedState,
-          users: nextUsers,
-          user: nextUser,
-          isAuthenticated: nextIsAuthenticated,
-        };
-      },
+      migrate: (persistedState) => ({
+        ...persistedState,
+        users: [],
+      }),
     }
   )
 );

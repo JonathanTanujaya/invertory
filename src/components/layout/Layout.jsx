@@ -13,11 +13,11 @@ export default function Layout() {
 
       <main
         className={clsx(
-          'flex-1 transition-all duration-300 min-h-0 overflow-auto',
+          'flex-1 transition-all duration-300 min-h-0 overflow-y-auto overflow-x-hidden',
           sidebarCollapsed ? 'ml-20' : 'ml-64'
         )}
       >
-        <div className="p-6">
+        <div className="p-6 h-full flex flex-col min-h-0">
           <Outlet />
         </div>
       </main>

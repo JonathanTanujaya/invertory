@@ -6,7 +6,7 @@ import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
 import { toast } from 'react-toastify';
 import { PackageSearch, RotateCcw } from 'lucide-react';
-import barangData from '@/data/dummy/m_barang.json';
+import api from '@/api/axios';
 import { formatCurrency, formatNumber, generateTransactionNumber } from '@/utils/helpers';
 
 export default function SalesForm() {
@@ -34,6 +34,10 @@ export default function SalesForm() {
   const [showCustomerSuggestions, setShowCustomerSuggestions] = useState(false);
   const [customerHighlightIndex, setCustomerHighlightIndex] = useState(-1);
 
+  const [customerOptions, setCustomerOptions] = useState([]);
+  const [allItems, setAllItems] = useState([]);
+  const [kategoriMap, setKategoriMap] = useState({});
+
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmSnapshot, setConfirmSnapshot] = useState(null);
   const [confirmingSubmit, setConfirmingSubmit] = useState(false);
@@ -44,25 +48,41 @@ export default function SalesForm() {
     setValue('no_faktur', noFaktur, { shouldValidate: true });
   }, [getValues, setValue]);
 
-  // Dummy customers (replace with API later)
-  const customerOptions = [
-    { value: 'CUST001', label: 'Toko Makmur' },
-    { value: 'CUST002', label: 'CV Jaya Abadi' },
-    { value: 'CUST003', label: 'UD Berkah' },
-  ];
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const [customersRes, itemsRes, categoriesRes] = await Promise.all([
+          api.get('/customers'),
+          api.get('/items'),
+          api.get('/categories'),
+        ]);
 
-  // Items dari data dummy (konsisten dengan Pembelian)
-  const allItems = barangData;
+        if (!mounted) return;
 
-  // Mapping kategori_id ke nama kategori (konsisten dengan Master Barang)
-  const kategoriMap = {
-    KAT001: 'Bearing & Filter',
-    KAT002: 'Body & Kabel',
-    KAT003: 'Transmisi',
-    KAT004: 'Oli & Pelumas',
-    KAT005: 'Elektrikal',
-    KAT006: 'Ban & Velg',
-  };
+        setCustomerOptions(
+          (Array.isArray(customersRes.data) ? customersRes.data : []).map((c) => ({
+            value: c.kode_customer,
+            label: c.nama_customer,
+          }))
+        );
+
+        setAllItems(Array.isArray(itemsRes.data) ? itemsRes.data : []);
+
+        const map = {};
+        for (const cat of Array.isArray(categoriesRes.data) ? categoriesRes.data : []) {
+          map[cat.kode_kategori] = cat.nama_kategori;
+        }
+        setKategoriMap(map);
+      } catch (err) {
+        toast.error('Gagal memuat data master');
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const filteredItems = searchQuery
     ? allItems
@@ -167,13 +187,47 @@ export default function SalesForm() {
       setConfirmingSubmit(true);
       const data = getValues();
       const payload = {
-        ...data,
+        no_faktur: data.no_faktur,
+        tanggal: data.tanggal,
+        kode_customer: data.kode_customer,
+        catatan: data.catatan,
         items: items.map(({ kode_barang, jumlah }) => ({ kode_barang, jumlah })),
       };
-      console.log('Submit penjualan (inventory only):', payload);
+
+      await api.post('/stock-out', payload);
+
+      // Refresh items (stock changed)
+      try {
+        const itemsRes = await api.get('/items');
+        setAllItems(Array.isArray(itemsRes.data) ? itemsRes.data : []);
+      } catch (_) {
+        // ignore refresh errors
+      }
+
       toast.success('Penjualan tersimpan');
       setConfirmOpen(false);
       setConfirmSnapshot(null);
+
+      // Reset form
+      setItems([]);
+      setSearchQuery('');
+      setCustomerQuery('');
+      setPendingQty(1);
+      const newTanggal = new Date().toISOString().split('T')[0];
+      setValue('tanggal', newTanggal);
+      setValue('no_faktur', generateTransactionNumber('SL', newTanggal));
+      setValue('kode_customer', '');
+      setValue('catatan', '');
+    } catch (err) {
+      const status = err?.response?.status;
+      const data = err?.response?.data;
+      if (status === 409 && data?.meta?.kode_barang) {
+        toast.error(
+          `Stok tidak mencukupi (${data.meta.kode_barang}). Tersedia: ${data.meta.stok}, diminta: ${data.meta.diminta}`
+        );
+      } else {
+        toast.error(data?.error || 'Gagal menyimpan penjualan');
+      }
     } finally {
       setConfirmingSubmit(false);
     }

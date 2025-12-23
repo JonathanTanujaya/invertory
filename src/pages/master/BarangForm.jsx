@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
 import Button from '@/components/ui/Button';
+import api from '@/api/axios';
 
 export default function BarangForm({ initialData, mode, onSubmit, onCancel }) {
   const {
@@ -22,11 +23,24 @@ export default function BarangForm({ initialData, mode, onSubmit, onCancel }) {
 
   const isViewMode = mode === 'view';
 
-  const kategoriOptions = [
-    { value: 'KAT001', label: 'Elektronik' },
-    { value: 'KAT002', label: 'Mekanik' },
-    { value: 'KAT003', label: 'Aksesoris' },
-  ];
+  const [kategoriOptions, setKategoriOptions] = useState([]);
+
+  useEffect(() => {
+    let active = true;
+    api
+      .get('/categories')
+      .then((res) => {
+        if (!active) return;
+        const categories = Array.isArray(res.data) ? res.data : [];
+        setKategoriOptions(categories.map((c) => ({ value: c.kode_kategori, label: c.nama_kategori })));
+      })
+      .catch(() => {
+        // silent
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const satuanOptions = [
     { value: 'pcs', label: 'Pcs' },

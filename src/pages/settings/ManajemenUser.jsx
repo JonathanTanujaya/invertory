@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import DataTable from '@/components/ui/DataTable';
 import Modal from '@/components/ui/Modal';
@@ -6,19 +6,23 @@ import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
 import { useAuthStore } from '@/store/authStore';
-import { Plus, Pencil, Trash2, Eye, EyeOff, Shield, KeyRound } from 'lucide-react';
+import { toast } from 'react-toastify';
+import { Plus, Pencil, Trash2, Shield, KeyRound, Eye, EyeOff } from 'lucide-react';
 
 export default function ManajemenUser() {
-    const { users, addUser, updateUser, deleteUser, resetUserPassword, user: currentUser } = useAuthStore();
+    const { users, fetchUsers, addUser, updateUser, deleteUser, ownerSetUserPassword, user: currentUser } = useAuthStore();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isResetModalOpen, setIsResetModalOpen] = useState(false);
     const [editingUser, setEditingUser] = useState(null);
     const [selectedUser, setSelectedUser] = useState(null);
     const [resetTargetUser, setResetTargetUser] = useState(null);
-    const [resetTempPassword, setResetTempPassword] = useState('');
-    const [resetStep, setResetStep] = useState('confirm');
     const [showPassword, setShowPassword] = useState(false);
+    const [showResetCurrentPassword, setShowResetCurrentPassword] = useState(false);
+    const [showResetNewPassword, setShowResetNewPassword] = useState(false);
+    const [showResetConfirmPassword, setShowResetConfirmPassword] = useState(false);
+    const [resetNewPassword, setResetNewPassword] = useState('');
+    const [resetConfirmPassword, setResetConfirmPassword] = useState('');
     const [formData, setFormData] = useState({
         username: '',
         password: '',
@@ -28,7 +32,6 @@ export default function ManajemenUser() {
     });
 
     const roleOptions = [
-        { value: 'owner', label: 'Owner' },
         { value: 'admin', label: 'Admin' },
         { value: 'staff', label: 'Staf' },
     ];
@@ -61,6 +64,15 @@ export default function ManajemenUser() {
             </span>
         );
     };
+
+    useEffect(() => {
+        if (currentUser?.role === 'owner') {
+            fetchUsers?.().catch(() => {
+                toast.error('Gagal memuat data user');
+            });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentUser?.role]);
 
     const columns = [
         {
@@ -163,37 +175,81 @@ export default function ManajemenUser() {
 
     const handleResetPasswordClick = (user) => {
         setResetTargetUser(user);
-        setResetTempPassword('');
-        setResetStep('confirm');
+        setResetNewPassword('');
+        setResetConfirmPassword('');
+        setShowResetCurrentPassword(false);
+        setShowResetNewPassword(false);
+        setShowResetConfirmPassword(false);
         setIsResetModalOpen(true);
     };
 
-    const handleConfirmResetPassword = () => {
+    const handleSetPassword = async () => {
         if (!resetTargetUser) return;
-        const result = resetUserPassword?.(resetTargetUser.id);
-        if (result?.ok) {
-            setResetTempPassword(result.tempPassword || '');
-            setResetStep('result');
+        if (resetNewPassword !== resetConfirmPassword) {
+            toast.error('Konfirmasi password tidak cocok');
+            return;
         }
+
+        const result = await ownerSetUserPassword?.(resetTargetUser.id, resetNewPassword);
+        if (result?.ok) {
+            toast.success(result.message || 'Password user berhasil diubah');
+            setIsResetModalOpen(false);
+            return;
+        }
+
+        toast.error(result?.message || 'Gagal mengubah password user');
     };
 
-    const handleDelete = () => {
+    const handleDelete = async () => {
         if (selectedUser) {
-            deleteUser(selectedUser.id);
+            try {
+                await deleteUser(selectedUser.id);
+                toast.success('User berhasil dihapus');
+            } catch (err) {
+                const msg = err?.response?.data?.error;
+                toast.error(msg || 'Gagal menghapus user');
+                return;
+            }
             setIsDeleteModalOpen(false);
             setSelectedUser(null);
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (editingUser) {
-            updateUser(editingUser.id, {
-                ...formData,
-            });
-        } else {
-            addUser(formData);
+        if (!formData.nama?.trim()) {
+            toast.error('Nama wajib diisi');
+            return;
+        }
+
+        if (!editingUser) {
+            if (!formData.username?.trim()) {
+                toast.error('Username wajib diisi');
+                return;
+            }
+            if (!formData.password || formData.password.length < 4) {
+                toast.error('Password minimal 4 karakter');
+                return;
+            }
+        }
+
+        try {
+            if (editingUser) {
+                await updateUser(editingUser.id, {
+                    nama: formData.nama,
+                    role: formData.role,
+                    avatar: formData.avatar,
+                });
+                toast.success('Profil user berhasil diperbarui');
+            } else {
+                await addUser(formData);
+                toast.success('User berhasil ditambahkan');
+            }
+        } catch (err) {
+            const msg = err?.response?.data?.error;
+            toast.error(msg || 'Gagal menyimpan user');
+            return;
         }
 
         setIsModalOpen(false);
@@ -215,11 +271,17 @@ export default function ManajemenUser() {
                     </div>
                 </CardHeader>
                 <CardContent>
+                    {currentUser?.role !== 'owner' ? (
+                        <div className="text-sm text-gray-600">
+                            Hanya Owner yang dapat mengakses manajemen user.
+                        </div>
+                    ) : (
                     <DataTable
                         columns={columns}
                         data={users}
                         searchPlaceholder="Cari user..."
                     />
+                    )}
                 </CardContent>
             </Card>
 
@@ -321,45 +383,92 @@ export default function ManajemenUser() {
                 open={isResetModalOpen}
                 onClose={() => setIsResetModalOpen(false)}
                 title="Reset Password"
-                closeOnOverlay={resetStep !== 'confirm'}
             >
-                <div className="space-y-4">
-                    {resetStep === 'confirm' && (
-                        <>
-                            <p className="text-gray-700">
-                                Anda akan mereset password untuk user <strong>{resetTargetUser?.nama}</strong> (@{resetTargetUser?.username}).
-                            </p>
-                            <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                                Setelah di-reset, sistem akan membuat password sementara. User wajib mengganti password setelah login.
+                {resetTargetUser && (
+                    <div className="space-y-4">
+                        <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+                            <div className="text-sm font-medium text-gray-900">Target User</div>
+                            <div className="text-sm text-gray-600 mt-1">
+                                <span className="font-semibold">@{resetTargetUser.username}</span> ({resetTargetUser.nama})
                             </div>
-                            <div className="flex gap-3">
-                                <Button variant="secondary" onClick={() => setIsResetModalOpen(false)} className="flex-1">
-                                    Batal
-                                </Button>
-                                <Button variant="warning" onClick={handleConfirmResetPassword} className="flex-1">
-                                    Reset
-                                </Button>
-                            </div>
-                        </>
-                    )}
+                        </div>
 
-                    {resetStep === 'result' && (
-                        <>
-                            <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
-                                <div className="text-sm font-medium text-gray-900">Password Sementara</div>
-                                <div className="mt-2 font-mono text-sm bg-white border border-gray-200 rounded-md px-3 py-2">
-                                    {resetTempPassword}
+                        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+                            <div className="text-sm font-medium text-amber-900">Password Saat Ini</div>
+                            <div className="mt-2 flex items-center gap-2">
+                                <div className="flex-1 font-mono text-sm text-gray-900">
+                                    {showResetCurrentPassword ? (resetTargetUser.password || '-') : '••••••'}
                                 </div>
-                                <div className="mt-2 text-sm text-gray-600">
-                                    Simpan password ini dan berikan ke user terkait.
+                                <button
+                                    type="button"
+                                    onClick={() => setShowResetCurrentPassword(!showResetCurrentPassword)}
+                                    className="text-gray-600 hover:text-gray-800"
+                                    title={showResetCurrentPassword ? 'Sembunyikan password' : 'Lihat password'}
+                                >
+                                    {showResetCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="rounded-lg border border-gray-200 bg-white px-4 py-3">
+                            <div className="text-sm font-medium text-gray-900">Set Password Baru</div>
+                            <div className="grid gap-3 mt-3">
+                                <div className="relative">
+                                    <Input
+                                        label="Password Baru"
+                                        type={showResetNewPassword ? 'text' : 'password'}
+                                        value={resetNewPassword}
+                                        onChange={(e) => setResetNewPassword(e.target.value)}
+                                        placeholder="Masukkan password baru"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowResetNewPassword(!showResetNewPassword)}
+                                        className="absolute right-3 top-9 text-gray-500 hover:text-gray-700"
+                                    >
+                                        {showResetNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    </button>
+                                </div>
+
+                                <div className="relative">
+                                    <Input
+                                        label="Konfirmasi Password Baru"
+                                        type={showResetConfirmPassword ? 'text' : 'password'}
+                                        value={resetConfirmPassword}
+                                        onChange={(e) => setResetConfirmPassword(e.target.value)}
+                                        placeholder="Ulangi password baru"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowResetConfirmPassword(!showResetConfirmPassword)}
+                                        className="absolute right-3 top-9 text-gray-500 hover:text-gray-700"
+                                    >
+                                        {showResetConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    </button>
+                                </div>
+
+                                <div className="flex gap-3">
+                                    <Button
+                                        type="button"
+                                        onClick={handleSetPassword}
+                                        className="w-full bg-amber-600 hover:bg-amber-700"
+                                    >
+                                        Simpan Password Baru
+                                    </Button>
                                 </div>
                             </div>
-                            <Button onClick={() => setIsResetModalOpen(false)} className="w-full">
-                                Selesai
-                            </Button>
-                        </>
-                    )}
-                </div>
+                        </div>
+
+                        <Button
+                            type="button"
+                            variant="secondary"
+                            onClick={() => setIsResetModalOpen(false)}
+                            className="w-full"
+                        >
+                            Tutup
+                        </Button>
+                    </div>
+                )}
             </Modal>
 
             {/* Delete Confirmation Modal */}
@@ -369,9 +478,11 @@ export default function ManajemenUser() {
                 title="Hapus User"
             >
                 <div className="space-y-4">
-                    <p className="text-gray-600">
-                        Apakah Anda yakin ingin menghapus user <strong>{selectedUser?.nama}</strong>?
-                        Tindakan ini tidak dapat dibatalkan.
+                    <p className="text-sm text-gray-700">
+                        {selectedUser
+                            ? <>Yakin ingin menghapus user <span className="font-semibold">@{selectedUser.username}</span> ({selectedUser.nama})?</>
+                            : 'Yakin ingin menghapus user ini?'
+                        }
                     </p>
                     <div className="flex gap-3">
                         <Button variant="secondary" onClick={() => setIsDeleteModalOpen(false)} className="flex-1">

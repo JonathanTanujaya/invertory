@@ -1,8 +1,13 @@
 import axios from 'axios';
 import { useAuthStore } from '@/store/authStore';
 
+const runtimeApiBaseUrl =
+  typeof window !== 'undefined' && window.stoir?.apiBaseUrl
+    ? window.stoir.apiBaseUrl
+    : undefined;
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api',
+  baseURL: runtimeApiBaseUrl || import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3131/api',
   timeout: parseInt(import.meta.env.VITE_API_TIMEOUT) || 30000,
   headers: {
     'Content-Type': 'application/json',

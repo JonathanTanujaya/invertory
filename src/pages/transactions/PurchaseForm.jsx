@@ -6,8 +6,7 @@ import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
 import { toast } from 'react-toastify';
 import { PackageSearch, RotateCcw } from 'lucide-react';
-import supplierData from '@/data/dummy/m_supplier.json';
-import barangData from '@/data/dummy/m_barang.json';
+import api from '@/api/axios';
 import { formatCurrency, formatNumber, generateTransactionNumber } from '@/utils/helpers';
 
 export default function PurchaseForm() {
@@ -35,6 +34,10 @@ export default function PurchaseForm() {
   const [showSupplierSuggestions, setShowSupplierSuggestions] = useState(false);
   const [supplierHighlightIndex, setSupplierHighlightIndex] = useState(-1);
 
+  const [supplierOptions, setSupplierOptions] = useState([]);
+  const [allItems, setAllItems] = useState([]);
+  const [kategoriMap, setKategoriMap] = useState({});
+
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmSnapshot, setConfirmSnapshot] = useState(null);
   const [confirmingSubmit, setConfirmingSubmit] = useState(false);
@@ -45,24 +48,41 @@ export default function PurchaseForm() {
     setValue('no_faktur', noFaktur, { shouldValidate: true });
   }, [getValues, setValue]);
 
-  // Supplier options dari data dummy
-  const supplierOptions = supplierData.map(s => ({
-    value: s.kode_supplier,
-    label: s.nama_supplier
-  }));
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const [suppliersRes, itemsRes, categoriesRes] = await Promise.all([
+          api.get('/suppliers'),
+          api.get('/items'),
+          api.get('/categories'),
+        ]);
 
-  // Items dari data dummy
-  const allItems = barangData;
+        if (!mounted) return;
 
-  // Mapping kategori_id ke nama kategori (konsisten dengan Master Barang)
-  const kategoriMap = {
-    KAT001: 'Bearing & Filter',
-    KAT002: 'Body & Kabel',
-    KAT003: 'Transmisi',
-    KAT004: 'Oli & Pelumas',
-    KAT005: 'Elektrikal',
-    KAT006: 'Ban & Velg',
-  };
+        setSupplierOptions(
+          (Array.isArray(suppliersRes.data) ? suppliersRes.data : []).map((s) => ({
+            value: s.kode_supplier,
+            label: s.nama_supplier,
+          }))
+        );
+
+        setAllItems(Array.isArray(itemsRes.data) ? itemsRes.data : []);
+
+        const map = {};
+        for (const c of Array.isArray(categoriesRes.data) ? categoriesRes.data : []) {
+          map[c.kode_kategori] = c.nama_kategori;
+        }
+        setKategoriMap(map);
+      } catch (err) {
+        toast.error('Gagal memuat data master');
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const filteredItems = searchQuery
     ? allItems
@@ -163,13 +183,40 @@ export default function PurchaseForm() {
       setConfirmingSubmit(true);
       const data = getValues();
       const payload = {
-        ...data,
+        no_faktur: data.no_faktur,
+        tanggal: data.tanggal,
+        kode_supplier: data.kode_supplier,
+        catatan: data.catatan,
         items: items.map(({ kode_barang, jumlah }) => ({ kode_barang, jumlah })),
       };
-      console.log('Submit pembelian (inventory only):', payload);
+
+      await api.post('/stock-in', payload);
+
+      // Refresh items (stock changed)
+      try {
+        const itemsRes = await api.get('/items');
+        setAllItems(Array.isArray(itemsRes.data) ? itemsRes.data : []);
+      } catch (_) {
+        // ignore refresh errors
+      }
+
       toast.success('Pembelian tersimpan');
       setConfirmOpen(false);
       setConfirmSnapshot(null);
+
+      // Reset form
+      setItems([]);
+      setSearchQuery('');
+      setSupplierQuery('');
+      setPendingQty(1);
+      const newTanggal = new Date().toISOString().split('T')[0];
+      setValue('tanggal', newTanggal);
+      setValue('no_faktur', generateTransactionNumber('PO', newTanggal));
+      setValue('kode_supplier', '');
+      setValue('catatan', '');
+    } catch (err) {
+      const data = err?.response?.data;
+      toast.error(data?.error || 'Gagal menyimpan pembelian');
     } finally {
       setConfirmingSubmit(false);
     }

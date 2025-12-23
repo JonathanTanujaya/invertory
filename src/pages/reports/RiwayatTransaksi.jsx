@@ -6,14 +6,9 @@ import Select from '@/components/ui/Select';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Modal from '@/components/ui/Modal';
-import { Search, RefreshCcw, Eye, FileText, Calendar } from 'lucide-react';
+import { Search, RefreshCcw } from 'lucide-react';
 import { formatNumber, formatCurrency } from '@/utils/helpers';
-
-// Import data transaksi
-import stokMasukData from '@/data/dummy/t_stok_masuk.json';
-import stokKeluarData from '@/data/dummy/t_stok_keluar.json';
-import supplierData from '@/data/dummy/m_supplier.json';
-import customerData from '@/data/dummy/m_customer.json';
+import api from '@/api/axios';
 
 export default function RiwayatTransaksi() {
   const [search, setSearch] = useState('');
@@ -21,69 +16,46 @@ export default function RiwayatTransaksi() {
   const [dateTo, setDateTo] = useState('');
   const [tipeFilter, setTipeFilter] = useState('all');
   const [loading, setLoading] = useState(false);
+  const [data, setData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
   const pageSize = 15;
 
-  // Buat mapping supplier dan customer
-  const supplierMap = useMemo(() => {
-    return supplierData.reduce((acc, sup) => {
-      acc[sup.kode_supplier] = sup.nama_supplier;
-      return acc;
-    }, {});
+  useEffect(() => {
+    load();
   }, []);
 
-  const customerMap = useMemo(() => {
-    return customerData.reduce((acc, cust) => {
-      acc[cust.kode_customer] = cust.nama_customer;
-      return acc;
-    }, {});
-  }, []);
+  const load = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get('/reports/riwayat-transaksi', { params: { limit: 500 } });
+      const rows = Array.isArray(res?.data) ? res.data : [];
 
-  // Gabungkan semua transaksi dengan format unified
-  const allTransactions = useMemo(() => {
-    const transactions = [];
-
-    // Stok Masuk (Pembelian)
-    stokMasukData.forEach(item => {
-      transactions.push({
-        no_faktur: item.no_faktur,
-        tanggal: item.tanggal,
-        tipe: 'pembelian',
-        tipe_label: 'Pembelian',
-        partner: supplierMap[item.kode_supplier] || item.kode_supplier,
-        partner_type: 'Supplier',
-        total: item.total,
-        status: item.status || 'Selesai',
-        items: item.items,
-        raw_data: item
-      });
-    });
-
-    // Stok Keluar (Penjualan)
-    stokKeluarData.forEach(item => {
-      transactions.push({
-        no_faktur: item.no_faktur,
-        tanggal: item.tanggal,
-        tipe: 'penjualan',
-        tipe_label: 'Penjualan',
-        partner: customerMap[item.kode_customer] || item.kode_customer,
-        partner_type: 'Customer',
-        total: item.total,
-        status: item.status || 'Selesai',
-        items: item.items,
-        raw_data: item
-      });
-    });
-
-    // Sort by tanggal (newest first)
-    return transactions.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
-  }, [supplierMap, customerMap]);
+      setData(
+        rows.map((r) => ({
+          no_faktur: r.ref_no,
+          tanggal: r.tanggal,
+          tipe: r.tipe,
+          tipe_label: r.tipe_label,
+          partner: r.partner,
+          partner_type: r.partner_type,
+          total: Number(r.total ?? 0),
+          status: r.status || 'Selesai',
+          ref_id: r.ref_id,
+          catatan: r.catatan ?? null,
+        }))
+      );
+    } catch (err) {
+      setData([]);
+    }
+    setLoading(false);
+  };
 
   // Filter transaksi
   const filteredTransactions = useMemo(() => {
-    return allTransactions.filter(trx => {
+    return data.filter(trx => {
       // Search filter
       if (search) {
         const query = search.toLowerCase();
@@ -113,7 +85,7 @@ export default function RiwayatTransaksi() {
 
       return true;
     });
-  }, [allTransactions, search, tipeFilter, dateFrom, dateTo]);
+  }, [data, search, tipeFilter, dateFrom, dateTo]);
 
   const handleReset = () => {
     setSearch('');
@@ -123,9 +95,32 @@ export default function RiwayatTransaksi() {
     setCurrentPage(1);
   };
 
-  const handleViewDetail = (transaction) => {
-    setSelectedTransaction(transaction);
+  const handleViewDetail = async (transaction) => {
     setShowModal(true);
+    setDetailLoading(true);
+    setSelectedTransaction({ ...transaction, items: [] });
+    try {
+      const res = await api.get(
+        `/reports/riwayat-transaksi/${encodeURIComponent(transaction.tipe)}/${transaction.ref_id}`
+      );
+      const detail = res?.data;
+      if (detail && typeof detail === 'object') {
+        setSelectedTransaction((prev) => ({
+          ...(prev || transaction),
+          no_faktur: detail.ref_no ?? prev?.no_faktur ?? transaction.no_faktur,
+          tanggal: detail.tanggal ?? prev?.tanggal ?? transaction.tanggal,
+          partner: detail.partner ?? prev?.partner ?? transaction.partner,
+          partner_type: detail.partner_type ?? prev?.partner_type ?? transaction.partner_type,
+          tipe_label: detail.tipe_label ?? prev?.tipe_label ?? transaction.tipe_label,
+          total: Number(detail.total ?? prev?.total ?? transaction.total ?? 0),
+          items: Array.isArray(detail.items) ? detail.items : [],
+          catatan: detail.catatan ?? prev?.catatan ?? transaction.catatan ?? null,
+        }));
+      }
+    } catch (err) {
+      // keep modal open with summary-only data
+    }
+    setDetailLoading(false);
   };
 
   // Table columns
@@ -172,6 +167,8 @@ export default function RiwayatTransaksi() {
         const variants = {
           'pembelian': 'success',
           'penjualan': 'error',
+          'opname': 'warning',
+          'customer-claim': 'default',
         };
         return <Badge variant={variants[val] || 'default'}>{row.tipe_label}</Badge>;
       }
@@ -299,7 +296,11 @@ export default function RiwayatTransaksi() {
       {showModal && selectedTransaction && (
         <Modal
           open={showModal}
-          onClose={() => setShowModal(false)}
+          onClose={() => {
+            setShowModal(false);
+            setSelectedTransaction(null);
+            setDetailLoading(false);
+          }}
           title="Detail Transaksi"
           size="xl"
         >
@@ -341,61 +342,74 @@ export default function RiwayatTransaksi() {
               </div>
             </div>
 
+            {detailLoading ? (
+              <div className="text-sm text-gray-500">Memuat detail...</div>
+            ) : null}
+
             {/* Items Table */}
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">
-                      Kode
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">
-                      Nama Barang
-                    </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase">
-                      Qty
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-700 uppercase">
-                      Harga
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-700 uppercase">
-                      Subtotal
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {selectedTransaction.items.map((item, index) => (
-                    <tr key={index}>
-                      <td className="px-4 py-3 text-sm font-mono text-primary-600">
-                        {item.kode_barang}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-900">
-                        {item.nama_barang}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-700 text-center">
-                        {formatNumber(item.jumlah)}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-700 text-right">
-                        {formatCurrency(item.harga)}
-                      </td>
-                      <td className="px-4 py-3 text-sm font-medium text-gray-900 text-right">
-                        {formatCurrency(item.subtotal)}
+            {selectedTransaction.tipe === 'opname' ? (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Kode</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Nama Barang</th>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase">Stok Sistem</th>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase">Stok Fisik</th>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase">Selisih</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Keterangan</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {(selectedTransaction.items || []).map((item, index) => (
+                      <tr key={index}>
+                        <td className="px-4 py-3 text-sm font-mono text-primary-600">{item.kode_barang}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{item.nama_barang}</td>
+                        <td className="px-4 py-3 text-sm text-gray-700 text-center">{formatNumber(item.stok_sistem)}</td>
+                        <td className="px-4 py-3 text-sm text-gray-700 text-center">{formatNumber(item.stok_fisik)}</td>
+                        <td className="px-4 py-3 text-sm font-medium text-gray-900 text-center">{formatNumber(item.selisih)}</td>
+                        <td className="px-4 py-3 text-sm text-gray-700">{item.keterangan || '-'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Kode</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Nama Barang</th>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase">Qty</th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-700 uppercase">Harga</th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-700 uppercase">Subtotal</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {(selectedTransaction.items || []).map((item, index) => (
+                      <tr key={index}>
+                        <td className="px-4 py-3 text-sm font-mono text-primary-600">{item.kode_barang}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{item.nama_barang}</td>
+                        <td className="px-4 py-3 text-sm text-gray-700 text-center">{formatNumber(item.jumlah)}</td>
+                        <td className="px-4 py-3 text-sm text-gray-700 text-right">{formatCurrency(item.harga || 0)}</td>
+                        <td className="px-4 py-3 text-sm font-medium text-gray-900 text-right">
+                          {formatCurrency(item.subtotal || 0)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot className="bg-gray-50">
+                    <tr>
+                      <td colSpan={4} className="px-4 py-3 text-right font-semibold text-gray-900">Grand Total:</td>
+                      <td className="px-4 py-3 text-right font-bold text-lg text-primary-600">
+                        {formatCurrency(selectedTransaction.total)}
                       </td>
                     </tr>
-                  ))}
-                </tbody>
-                <tfoot className="bg-gray-50">
-                  <tr>
-                    <td colSpan={4} className="px-4 py-3 text-right font-semibold text-gray-900">
-                      Grand Total:
-                    </td>
-                    <td className="px-4 py-3 text-right font-bold text-lg text-primary-600">
-                      {formatCurrency(selectedTransaction.total)}
-                    </td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
+                  </tfoot>
+                </table>
+              </div>
+            )}
           </div>
         </Modal>
       )}

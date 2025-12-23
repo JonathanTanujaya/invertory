@@ -3,18 +3,32 @@ import { useForm } from 'react-hook-form';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
 import Button from '@/components/ui/Button';
-import areaData from '@/data/dummy/m_area.json';
+import { useState } from 'react';
+import api from '@/api/axios';
 
 export default function CustomerForm({ initialData, mode = 'create', onSubmit, onCancel }) {
   const { register, handleSubmit, formState: { errors }, setValue } = useForm({
     defaultValues: initialData || { kode: '', nama: '', alamat: '', telepon: '', kontak_person: '', kode_area: '' }
   });
 
-  // Siapkan options area dari data
-  const areaOptions = areaData.map((area) => ({
-    value: area.kode_area,
-    label: area.nama_area,
-  }));
+  const [areaOptions, setAreaOptions] = useState([]);
+
+  useEffect(() => {
+    let active = true;
+    api
+      .get('/areas')
+      .then((res) => {
+        if (!active) return;
+        const areas = Array.isArray(res.data) ? res.data : [];
+        setAreaOptions(areas.map((area) => ({ value: area.kode_area, label: area.nama_area })));
+      })
+      .catch(() => {
+        // silent: keep empty options
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (mode === 'create' && !initialData) {

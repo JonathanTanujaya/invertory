@@ -7,9 +7,8 @@ import Modal from '@/components/ui/Modal';
 import KategoriForm from './KategoriForm';
 import AreaForm from './AreaForm';
 import { toast } from 'react-toastify';
-import kategoriJson from '@/data/dummy/m_kategori.json';
-import areaJson from '@/data/dummy/m_area.json';
 import { useAuthStore } from '@/store/authStore';
+import api from '@/api/axios';
 
 export default function KategoriList() {
   const { hasPermission } = useAuthStore();
@@ -87,20 +86,28 @@ export default function KategoriList() {
     fetchAreaData();
   }, []);
 
-  const fetchKategoriData = () => {
+  const fetchKategoriData = async () => {
     setKategoriLoading(true);
-    setTimeout(() => {
-      setKategoriData(kategoriJson);
+    try {
+      const res = await api.get('/categories');
+      setKategoriData(Array.isArray(res.data) ? res.data : []);
+    } catch (error) {
+      toast.error('Gagal memuat kategori');
+    } finally {
       setKategoriLoading(false);
-    }, 300);
+    }
   };
 
-  const fetchAreaData = () => {
+  const fetchAreaData = async () => {
     setAreaLoading(true);
-    setTimeout(() => {
-      setAreaData(areaJson);
+    try {
+      const res = await api.get('/areas');
+      setAreaData(Array.isArray(res.data) ? res.data : []);
+    } catch (error) {
+      toast.error('Gagal memuat area');
+    } finally {
       setAreaLoading(false);
-    }, 300);
+    }
   };
 
   // Kategori handlers
@@ -128,12 +135,24 @@ export default function KategoriList() {
       toast.error('Anda tidak memiliki akses untuk menghapus kategori');
       return;
     }
-    if (window.confirm(`Hapus kategori ${item.nama_kategori}?\n\nPerhatian: Pastikan tidak ada barang yang menggunakan kategori ini.`)) {
-      toast.success('Kategori berhasil dihapus');
-      fetchKategoriData();
+    if (window.confirm(`Hapus kategori ${item.nama_kategori}?`)) {
+      api
+        .delete(`/categories/${item.kode_kategori}`)
+        .then(() => {
+          toast.success('Kategori berhasil dihapus');
+          fetchKategoriData();
+        })
+        .catch((error) => {
+          const msg = error?.response?.data?.error;
+          if (error?.response?.status === 409) {
+            toast.error(msg || 'Kategori tidak dapat dihapus karena masih digunakan');
+            return;
+          }
+          toast.error(msg || 'Gagal menghapus kategori');
+        });
     }
   };
-  const handleKategoriSubmit = (values) => {
+  const handleKategoriSubmit = async (values) => {
     if (kategoriMode === 'create' && !canCreate) {
       toast.error('Anda tidak memiliki akses untuk menambah kategori');
       return;
@@ -142,10 +161,26 @@ export default function KategoriList() {
       toast.error('Anda tidak memiliki akses untuk mengubah kategori');
       return;
     }
-    if (kategoriMode === 'create') toast.success('Kategori berhasil ditambahkan');
-    if (kategoriMode === 'edit') toast.success('Kategori berhasil diperbarui');
-    setShowKategoriModal(false);
-    fetchKategoriData();
+
+    try {
+      if (kategoriMode === 'create') {
+        await api.post('/categories', {
+          kode_kategori: values.kode,
+          nama_kategori: values.nama,
+        });
+        toast.success('Kategori berhasil ditambahkan');
+      } else if (kategoriMode === 'edit') {
+        await api.put(`/categories/${selectedKategori.kode_kategori}`, {
+          nama_kategori: values.nama,
+        });
+        toast.success('Kategori berhasil diperbarui');
+      }
+      setShowKategoriModal(false);
+      fetchKategoriData();
+    } catch (error) {
+      const msg = error?.response?.data?.error;
+      toast.error(msg || 'Gagal menyimpan kategori');
+    }
   };
 
   // Area handlers
@@ -173,12 +208,24 @@ export default function KategoriList() {
       toast.error('Anda tidak memiliki akses untuk menghapus area');
       return;
     }
-    if (window.confirm(`Hapus area ${item.nama_area}?\n\nPerhatian: Pastikan tidak ada customer yang menggunakan area ini.`)) {
-      toast.success('Area berhasil dihapus');
-      fetchAreaData();
+    if (window.confirm(`Hapus area ${item.nama_area}?`)) {
+      api
+        .delete(`/areas/${item.kode_area}`)
+        .then(() => {
+          toast.success('Area berhasil dihapus');
+          fetchAreaData();
+        })
+        .catch((error) => {
+          const msg = error?.response?.data?.error;
+          if (error?.response?.status === 409) {
+            toast.error(msg || 'Area tidak dapat dihapus karena masih digunakan');
+            return;
+          }
+          toast.error(msg || 'Gagal menghapus area');
+        });
     }
   };
-  const handleAreaSubmit = (values) => {
+  const handleAreaSubmit = async (values) => {
     if (areaMode === 'create' && !canCreate) {
       toast.error('Anda tidak memiliki akses untuk menambah area');
       return;
@@ -187,10 +234,23 @@ export default function KategoriList() {
       toast.error('Anda tidak memiliki akses untuk mengubah area');
       return;
     }
-    if (areaMode === 'create') toast.success('Area berhasil ditambahkan');
-    if (areaMode === 'edit') toast.success('Area berhasil diperbarui');
-    setShowAreaModal(false);
-    fetchAreaData();
+
+    try {
+      if (areaMode === 'create') {
+        await api.post('/areas', values);
+        toast.success('Area berhasil ditambahkan');
+      } else if (areaMode === 'edit') {
+        await api.put(`/areas/${selectedArea.kode_area}`, {
+          nama_area: values.nama_area,
+        });
+        toast.success('Area berhasil diperbarui');
+      }
+      setShowAreaModal(false);
+      fetchAreaData();
+    } catch (error) {
+      const msg = error?.response?.data?.error;
+      toast.error(msg || 'Gagal menyimpan area');
+    }
   };
 
   return (

@@ -7,8 +7,8 @@ import DataTable from '@/components/ui/DataTable';
 import Modal from '@/components/ui/Modal';
 import SupplierForm from './SupplierForm';
 import { toast } from 'react-toastify';
-import supplierData from '@/data/dummy/m_supplier.json';
 import { useAuthStore } from '@/store/authStore';
+import api from '@/api/axios';
 
 export default function SupplierList() {
   const { hasPermission } = useAuthStore();
@@ -90,12 +90,16 @@ export default function SupplierList() {
 
   useEffect(() => { fetchData(); }, []);
 
-  const fetchData = () => {
+  const fetchData = async () => {
     setLoading(true);
-    setTimeout(() => {
-      setData(supplierData);
+    try {
+      const res = await api.get('/suppliers');
+      setData(Array.isArray(res.data) ? res.data : []);
+    } catch (error) {
+      toast.error('Gagal memuat data supplier');
+    } finally {
       setLoading(false);
-    }, 300);
+    }
   };
 
   const handleCreate = () => {
@@ -124,18 +128,20 @@ export default function SupplierList() {
       return;
     }
     if (window.confirm(`Hapus supplier ${item.nama_supplier}?\n\nPerhatian: Pastikan tidak ada transaksi pembelian yang terkait dengan supplier ini.`)) {
-      // TODO: Check if supplier has related purchases before deleting
-      // const hasPurchases = checkSupplierPurchases(item.kode_supplier);
-      // if (hasPurchases) {
-      //   toast.error('Tidak dapat menghapus supplier yang memiliki riwayat transaksi pembelian');
-      //   return;
-      // }
-      toast.success('Supplier berhasil dihapus');
-      fetchData();
+      api
+        .delete(`/suppliers/${item.kode_supplier}`)
+        .then(() => {
+          toast.success('Supplier berhasil dihapus');
+          fetchData();
+        })
+        .catch((error) => {
+          const msg = error?.response?.data?.error;
+          toast.error(msg || 'Gagal menghapus supplier');
+        });
     }
   };
 
-  const handleSubmit = (values) => {
+  const handleSubmit = async (values) => {
     if (mode === 'create' && !canCreate) {
       toast.error('Anda tidak memiliki akses untuk menambah supplier');
       return;
@@ -144,10 +150,24 @@ export default function SupplierList() {
       toast.error('Anda tidak memiliki akses untuk mengubah supplier');
       return;
     }
-    if (mode === 'create') toast.success('Supplier berhasil ditambahkan');
-    if (mode === 'edit') toast.success('Supplier berhasil diperbarui');
-    setShowModal(false);
-    fetchData();
+
+    try {
+      if (mode === 'create') {
+        await api.post('/suppliers', values);
+        toast.success('Supplier berhasil ditambahkan');
+      }
+
+      if (mode === 'edit') {
+        await api.put(`/suppliers/${selectedItem.kode_supplier}`, values);
+        toast.success('Supplier berhasil diperbarui');
+      }
+
+      setShowModal(false);
+      fetchData();
+    } catch (error) {
+      const msg = error?.response?.data?.error;
+      toast.error(msg || 'Gagal menyimpan supplier');
+    }
   };
 
   // Filter data berdasarkan search query

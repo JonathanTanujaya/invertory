@@ -34,11 +34,24 @@ export default function KartuStok() {
   const [loading, setLoading] = useState(false);
   const [header, setHeader] = useState(null);
   const [rows, setRows] = useState([]);
+  const [availableItems, setAvailableItems] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 15;
 
-  // Get available items from movements API
-  const availableItems = useMemo(() => getAvailableItems(), []);
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const list = await getAvailableItems();
+        if (mounted) setAvailableItems(list);
+      } catch (err) {
+        toast.error('Gagal memuat daftar barang');
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   // Filter barang berdasarkan pencarian
   const filteredBarang = useMemo(() => {
@@ -63,7 +76,7 @@ export default function KartuStok() {
       loadData();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kodeBarang]);
+  }, [kodeBarang, from, to, tipe]);
 
   const loadData = async () => {
     if (!kodeBarang) return;
@@ -147,8 +160,8 @@ export default function KartuStok() {
       className: 'px-3 py-2.5',
       render: (val) => (
         <div className="text-sm">
-          <div className="font-medium text-gray-900">{val.split(' ')[0]}</div>
-          <div className="text-xs text-gray-500">{val.split(' ')[1]}</div>
+          <div className="font-medium text-gray-900">{String(val || '').split(' ')[0] || '-'}</div>
+          <div className="text-xs text-gray-500">{String(val || '').split(' ')[1] || '-'}</div>
         </div>
       )
     },
@@ -217,7 +230,7 @@ export default function KartuStok() {
       render: (val) => (
         <div className="flex items-center justify-center">
           <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 text-xs font-medium">
-            {val.substring(0, 2).toUpperCase()}
+            {String(val || '--').substring(0, 2).toUpperCase()}
           </span>
         </div>
       )

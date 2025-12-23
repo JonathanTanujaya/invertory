@@ -7,9 +7,8 @@ import DataTable from '@/components/ui/DataTable';
 import Modal from '@/components/ui/Modal';
 import CustomerForm from './CustomerForm';
 import { toast } from 'react-toastify';
-import customerData from '@/data/dummy/m_customer.json';
-import areaData from '@/data/dummy/m_area.json';
 import { useAuthStore } from '@/store/authStore';
+import api from '@/api/axios';
 
 export default function CustomerList() {
   const { hasPermission } = useAuthStore();
@@ -24,11 +23,7 @@ export default function CustomerList() {
   const [mode, setMode] = useState('create');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Buat mapping kode_area ke nama_area
-  const areaMap = areaData.reduce((acc, area) => {
-    acc[area.kode_area] = area.nama_area;
-    return acc;
-  }, {});
+  const [areaMap, setAreaMap] = useState({});
 
   const columns = [
     {
@@ -93,22 +88,37 @@ export default function CustomerList() {
 
   useEffect(() => { fetchData(); }, []);
 
-  const fetchData = () => {
+  const fetchData = async () => {
     setLoading(true);
-    setTimeout(() => {
-      // Map data from JSON file dan konversi kode_area ke nama_area
-      const mappedData = customerData.map((item) => ({
+    try {
+      const [customersRes, areasRes] = await Promise.all([
+        api.get('/customers'),
+        api.get('/areas'),
+      ]);
+
+      const areas = Array.isArray(areasRes.data) ? areasRes.data : [];
+      const nextAreaMap = areas.reduce((acc, area) => {
+        acc[area.kode_area] = area.nama_area;
+        return acc;
+      }, {});
+      setAreaMap(nextAreaMap);
+
+      const customers = Array.isArray(customersRes.data) ? customersRes.data : [];
+      const mappedData = customers.map((item) => ({
         kode: item.kode_customer,
         nama: item.nama_customer,
         alamat: item.alamat,
         telepon: item.telepon,
         kontak_person: item.kontak_person,
         kode_area: item.kode_area,
-        area: areaMap[item.kode_area] || item.kode_area,
+        area: nextAreaMap[item.kode_area] || item.kode_area,
       }));
       setData(mappedData);
+    } catch (error) {
+      toast.error('Gagal memuat data customer');
+    } finally {
       setLoading(false);
-    }, 300);
+    }
   };
 
   const handleCreate = () => {
@@ -136,11 +146,19 @@ export default function CustomerList() {
       return;
     }
     if (window.confirm(`Hapus customer ${item.nama}?`)) {
-      toast.success('Customer dihapus (dummy)');
-      fetchData();
+      api
+        .delete(`/customers/${item.kode}`)
+        .then(() => {
+          toast.success('Customer berhasil dihapus');
+          fetchData();
+        })
+        .catch((error) => {
+          const msg = error?.response?.data?.error;
+          toast.error(msg || 'Gagal menghapus customer');
+        });
     }
   };
-  const handleSubmit = (values) => {
+  const handleSubmit = async (values) => {
     if (mode === 'create' && !canCreate) {
       toast.error('Anda tidak memiliki akses untuk menambah customer');
       return;
@@ -149,10 +167,35 @@ export default function CustomerList() {
       toast.error('Anda tidak memiliki akses untuk mengubah customer');
       return;
     }
-    if (mode === 'create') toast.success('Customer ditambahkan (dummy)');
-    if (mode === 'edit') toast.success('Customer diperbarui (dummy)');
-    setShowModal(false);
-    fetchData();
+
+    try {
+      if (mode === 'create') {
+        await api.post('/customers', {
+          kode_customer: values.kode,
+          nama_customer: values.nama,
+          kode_area: values.kode_area,
+          telepon: values.telepon,
+          alamat: values.alamat,
+        });
+        toast.success('Customer berhasil ditambahkan');
+      }
+
+      if (mode === 'edit') {
+        await api.put(`/customers/${selectedItem.kode}`, {
+          nama_customer: values.nama,
+          kode_area: values.kode_area,
+          telepon: values.telepon,
+          alamat: values.alamat,
+        });
+        toast.success('Customer berhasil diperbarui');
+      }
+
+      setShowModal(false);
+      fetchData();
+    } catch (error) {
+      const msg = error?.response?.data?.error;
+      toast.error(msg || 'Gagal menyimpan customer');
+    }
   };
 
   // Filter sederhana berdasarkan kode, nama, telepon, area

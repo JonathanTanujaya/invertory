@@ -17,9 +17,15 @@ export default function Login() {
         setError('');
         setIsLoading(true);
 
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        const success = login(username, password);
+        let success = false;
+        try {
+            success = await login(username, password);
+        } catch (err) {
+            const msg = err?.response?.data?.error;
+            setError(msg || 'Gagal login');
+            setIsLoading(false);
+            return;
+        }
 
         if (success) {
             navigate('/');

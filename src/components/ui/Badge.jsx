@@ -15,7 +15,20 @@ const sizes = {
   lg: 'px-3 py-1.5 text-base',
 };
 
-export default function Badge({ children, variant = 'default', size = 'md', className, ...props }) {
+export default function Badge({
+  children,
+  variant = 'default',
+  size = 'md',
+  className,
+  startIcon,
+  endIcon,
+  ...props
+}) {
+  const domProps = { ...props };
+  // Defensive: avoid forwarding non-DOM props if they slip in via spreads.
+  delete domProps.startIcon;
+  delete domProps.endIcon;
+
   return (
     <span
       className={clsx(
@@ -24,9 +37,11 @@ export default function Badge({ children, variant = 'default', size = 'md', clas
         sizes[size],
         className
       )}
-      {...props}
+      {...domProps}
     >
+      {startIcon ? <span className="mr-1 inline-flex items-center">{startIcon}</span> : null}
       {children}
+      {endIcon ? <span className="ml-1 inline-flex items-center">{endIcon}</span> : null}
     </span>
   );
 }

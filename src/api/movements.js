@@ -1,7 +1,4 @@
-// Placeholder movement service for Kartu Stok
-// In real implementation, replace timeouts with axios calls to backend endpoints.
 import axios from './axios';
-import kartuStokData from '../data/dummy/t_kartu_stok.json';
 
 // Map raw movement types to display labels and direction
 export const MOVEMENT_META = {
@@ -15,70 +12,99 @@ export const MOVEMENT_META = {
   ADJ: { label: 'Adjustment', direction: 'adj' },
 };
 
-// Get all available items for dropdown
-export function getAvailableItems() {
-  return Object.entries(kartuStokData).map(([kode, data]) => ({
-    kode: data.kode_barang,
-    nama: data.nama_barang,
-    satuan: data.satuan,
-  }));
+export async function fetchItemMovements(kodeBarang, { from, to, type } = {}) {
+  if (!kodeBarang) return null;
+
+  const [itemsRes, ledgerRes] = await Promise.all([
+    axios.get('/items'),
+    axios.get('/ledger', {
+      params: {
+        kode_barang: kodeBarang,
+        from: from || undefined,
+        to: to || undefined,
+        limit: 2000,
+      },
+    }),
+  ]);
+
+  const item = Array.isArray(itemsRes.data)
+    ? itemsRes.data.find((it) => it.kode_barang === kodeBarang)
+    : null;
+  if (!item) return null;
+
+  const raw = Array.isArray(ledgerRes.data) ? ledgerRes.data : [];
+  let filtered = raw
+    .map((r) => ({
+      id: r.id,
+      waktu: r.waktu,
+      tipe: r.ref_type,
+      ref: r.ref_no,
+      qty_in: Number(r.qty_in ?? 0) || 0,
+      qty_out: Number(r.qty_out ?? 0) || 0,
+      stok_after: Number.isFinite(Number(r.stok_after)) ? Number(r.stok_after) : null,
+      catatan: r.keterangan ?? null,
+      user: '-',
+    }))
+    .filter((r) => (type ? r.tipe === type : true));
+
+  // Chronological order for display
+  filtered.sort((a, b) => {
+    const ta = new Date(a.waktu).getTime();
+    const tb = new Date(b.waktu).getTime();
+    if (ta !== tb) return ta - tb;
+    return (a.id || 0) - (b.id || 0);
+  });
+
+  const rows = filtered.map((m) => {
+    const meta = MOVEMENT_META[m.tipe] || { direction: 'other' };
+    let masuk = 0;
+    let keluar = 0;
+    if (meta.direction === 'in') masuk = m.qty_in;
+    else if (meta.direction === 'out') keluar = m.qty_out;
+    else if (meta.direction === 'adj') {
+      masuk = m.qty_in;
+      keluar = m.qty_out;
+    } else {
+      masuk = m.qty_in;
+      keluar = m.qty_out;
+    }
+
+    const saldo = m.stok_after;
+    return {
+      waktu: m.waktu,
+      ref: m.ref || '-',
+      tipe: m.tipe,
+      masuk,
+      keluar,
+      saldo: saldo == null ? 0 : saldo,
+      user: m.user,
+      catatan: m.catatan,
+    };
+  });
+
+  const stokAkhir = rows.length ? rows[rows.length - 1].saldo : Number(item.stok ?? 0);
+  const stokAwal = rows.length
+    ? (Number(rows[0].saldo) || 0) - (Number(rows[0].masuk) || 0) + (Number(rows[0].keluar) || 0)
+    : Number(item.stok ?? 0);
+
+  return {
+    kode_barang: item.kode_barang,
+    nama_barang: item.nama_barang,
+    satuan: item.satuan,
+    stok_awal: stokAwal,
+    stok_akhir: stokAkhir,
+    movements: rows,
+  };
 }
 
-export async function fetchItemMovements(kodeBarang, { from, to, type } = {}) {
-  // Example axios usage (commented until backend ready):
-  // const res = await axios.get(`/stok/movements/${kodeBarang}`, { params: { from, to, type } });
-  // return res.data;
-
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      // Get data from JSON file
-      const itemData = kartuStokData[kodeBarang];
-      
-      if (!itemData) {
-        resolve(null);
-        return;
-      }
-
-      const dummy = {
-        kode_barang: itemData.kode_barang,
-        nama_barang: itemData.nama_barang,
-        satuan: itemData.satuan,
-        stok_awal: itemData.stok_awal,
-        movements: itemData.movements,
-      };
-
-      // Filter by type if provided
-      let filtered = [...dummy.movements];
-      if (type) filtered = filtered.filter(m => m.tipe === type);
-      // Filter by date range if provided
-      if (from) filtered = filtered.filter(m => new Date(m.waktu) >= new Date(from));
-      if (to) filtered = filtered.filter(m => new Date(m.waktu) <= new Date(to));
-      // Sort ascending by waktu
-      filtered.sort((a, b) => new Date(a.waktu) - new Date(b.waktu));
-      // Compute running balance
-      let balance = dummy.stok_awal;
-      const rows = filtered.map(m => {
-        const meta = MOVEMENT_META[m.tipe] || { direction: 'other' };
-        let masuk = 0; let keluar = 0; let adj = 0;
-        if (meta.direction === 'in') masuk = m.qty;
-        else if (meta.direction === 'out') keluar = m.qty;
-        else if (meta.direction === 'adj') {
-          if (m.qty >= 0) masuk = m.qty; else keluar = Math.abs(m.qty);
-          adj = m.qty;
-        } else {
-          if (m.qty > 0) masuk = m.qty; else keluar = Math.abs(m.qty);
-        }
-        balance = balance + masuk - keluar;
-        return {
-          ...m,
-          masuk,
-          keluar,
-          saldo: balance,
-        };
-      });
-      resolve({ ...dummy, movements: rows, stok_akhir: balance });
-    }, 400);
-  });
+export async function getAvailableItems() {
+  const res = await axios.get('/items');
+  const items = Array.isArray(res.data) ? res.data : [];
+  return items.map((it) => ({
+    kode: it.kode_barang,
+    nama: it.nama_barang,
+    satuan: it.satuan,
+  }));
 }
 
 export function formatMovementType(tipe) {

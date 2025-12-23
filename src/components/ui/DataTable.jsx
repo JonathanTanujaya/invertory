@@ -25,6 +25,11 @@ export default function DataTable({
 }) {
   const [selectedRows, setSelectedRows] = useState(new Set());
   const [searchQuery, setSearchQuery] = useState('');
+  const [internalSortBy, setInternalSortBy] = useState(undefined);
+  const [internalSortOrder, setInternalSortOrder] = useState('asc');
+
+  const effectiveSortBy = sortBy ?? internalSortBy;
+  const effectiveSortOrder = sortBy ? sortOrder : internalSortOrder;
 
   const normalizedColumns = useMemo(() => {
     return columns
@@ -47,23 +52,47 @@ export default function DataTable({
           key: key ?? `col_${index}`,
           label: label ?? '',
           render,
+          sortable: col.sortable ?? (key !== 'actions'),
         };
       })
       .filter(Boolean);
   }, [columns]);
 
   const filteredData = useMemo(() => {
-    if (!searchPlaceholder) return data;
-    const q = (searchQuery || '').trim().toLowerCase();
-    if (!q) return data;
-    return data.filter((row) => {
-      try {
-        return JSON.stringify(row).toLowerCase().includes(q);
-      } catch {
-        return false;
-      }
+    const base = (() => {
+      if (!searchPlaceholder) return data;
+      const q = (searchQuery || '').trim().toLowerCase();
+      if (!q) return data;
+      return data.filter((row) => {
+        try {
+          return JSON.stringify(row).toLowerCase().includes(q);
+        } catch {
+          return false;
+        }
+      });
+    })();
+
+    if (!effectiveSortBy) return base;
+
+    const sorted = [...base].sort((a, b) => {
+      const av = a?.[effectiveSortBy];
+      const bv = b?.[effectiveSortBy];
+
+      if (av == null && bv == null) return 0;
+      if (av == null) return 1;
+      if (bv == null) return -1;
+
+      const an = typeof av === 'number' ? av : Number(av);
+      const bn = typeof bv === 'number' ? bv : Number(bv);
+      const bothNumeric = Number.isFinite(an) && Number.isFinite(bn);
+
+      if (bothNumeric) return an - bn;
+
+      return String(av).localeCompare(String(bv), undefined, { numeric: true, sensitivity: 'base' });
     });
-  }, [data, searchPlaceholder, searchQuery]);
+
+    return effectiveSortOrder === 'desc' ? sorted.reverse() : sorted;
+  }, [data, searchPlaceholder, searchQuery, effectiveSortBy, effectiveSortOrder]);
 
   const totalPages = Math.ceil(totalItems / pageSize);
 
@@ -89,8 +118,15 @@ export default function DataTable({
 
   const handleSort = (column) => {
     if (!column.sortable) return;
-    const newOrder = sortBy === column.key && sortOrder === 'asc' ? 'desc' : 'asc';
-    onSort?.(column.key, newOrder);
+    if (onSort) {
+      const newOrder = sortBy === column.key && sortOrder === 'asc' ? 'desc' : 'asc';
+      onSort(column.key, newOrder);
+      return;
+    }
+
+    const newOrder = internalSortBy === column.key && internalSortOrder === 'asc' ? 'desc' : 'asc';
+    setInternalSortBy(column.key);
+    setInternalSortOrder(newOrder);
   };
 
   if (loading) {
@@ -135,6 +171,7 @@ export default function DataTable({
           "border border-gray-200 rounded-lg",
           stickyHeader ? "flex-1 overflow-hidden min-h-0" : "overflow-x-auto"
         )}
+        style={stickyHeader ? { maxHeight } : undefined}
       >
         <div className={clsx(stickyHeader ? "h-full overflow-auto" : "")}>
           <table className={clsx("min-w-full divide-y divide-gray-200", stickyHeader && "relative")}>
@@ -170,8 +207,8 @@ export default function DataTable({
                     ) : (
                       <div className="flex items-center gap-2">
                         {column.label}
-                        {column.sortable && sortBy === column.key && (
-                          <span>{sortOrder === 'asc' ? '↑' : '↓'}</span>
+                        {column.sortable && effectiveSortBy === column.key && (
+                          <span>{effectiveSortOrder === 'asc' ? '↑' : '↓'}</span>
                         )}
                       </div>
                     )}

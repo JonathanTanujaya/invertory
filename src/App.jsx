@@ -21,6 +21,7 @@ import StokOpnameForm from './pages/transactions/StokOpnameForm';
 import CustomerClaimForm from './pages/transactions/CustomerClaimForm';
 import ManajemenUser from './pages/settings/ManajemenUser';
 import LogAktivitas from './pages/settings/LogAktivitas';
+import BackupRestore from './pages/settings/BackupRestore';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -180,6 +181,14 @@ function App() {
                 element={
                   <ProtectedRoute permission="settings">
                     <LogAktivitas />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="backup-restore"
+                element={
+                  <ProtectedRoute permission="settings">
+                    <BackupRestore />
                   </ProtectedRoute>
                 }
               />

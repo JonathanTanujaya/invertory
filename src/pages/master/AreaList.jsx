@@ -7,6 +7,7 @@ import DataTable from '@/components/ui/DataTable';
 import Modal from '@/components/ui/Modal';
 import AreaForm from './AreaForm';
 import { toast } from 'react-toastify';
+import api from '@/api/axios';
 
 export default function AreaList() {
   const [data, setData] = useState([]);
@@ -50,20 +51,16 @@ export default function AreaList() {
     fetchData();
   }, []);
 
-  const fetchData = () => {
+  const fetchData = async () => {
     setLoading(true);
-    // Dummy data - replace with actual API call
-    setTimeout(() => {
-      const dummy = [
-        { kode_area: 'JKT', nama_area: 'Jakarta' },
-        { kode_area: 'BDG', nama_area: 'Bandung' },
-        { kode_area: 'SBY', nama_area: 'Surabaya' },
-        { kode_area: 'YGY', nama_area: 'Yogyakarta' },
-        { kode_area: 'SMG', nama_area: 'Semarang' },
-      ];
-      setData(dummy);
+    try {
+      const res = await api.get('/areas');
+      setData(Array.isArray(res.data) ? res.data : []);
+    } catch (error) {
+      toast.error('Gagal memuat data area');
+    } finally {
       setLoading(false);
-    }, 300);
+    }
   };
 
   const handleCreate = () => {
@@ -85,27 +82,41 @@ export default function AreaList() {
   };
 
   const handleDelete = (item) => {
-    // TODO: Check if area has customers
-    // const customersCount = checkCustomersInArea(item.kode_area);
-    // if (customersCount > 0) {
-    //   toast.error(`Area tidak dapat dihapus, masih digunakan oleh ${customersCount} customer`);
-    //   return;
-    // }
-    
     if (window.confirm(`Hapus area ${item.nama_area}?`)) {
-      toast.success('Area berhasil dihapus (dummy)');
-      fetchData();
+      api
+        .delete(`/areas/${item.kode_area}`)
+        .then(() => {
+          toast.success('Area berhasil dihapus');
+          fetchData();
+        })
+        .catch((error) => {
+          const msg = error?.response?.data?.error;
+          if (error?.response?.status === 409) {
+            toast.error(msg || 'Area tidak dapat dihapus karena masih digunakan');
+            return;
+          }
+          toast.error(msg || 'Gagal menghapus area');
+        });
     }
   };
 
-  const handleSubmit = (values) => {
-    if (mode === 'create') {
-      toast.success('Area berhasil ditambahkan (dummy)');
-    } else if (mode === 'edit') {
-      toast.success('Area berhasil diperbarui (dummy)');
+  const handleSubmit = async (values) => {
+    try {
+      if (mode === 'create') {
+        await api.post('/areas', values);
+        toast.success('Area berhasil ditambahkan');
+      } else if (mode === 'edit') {
+        await api.put(`/areas/${selectedItem.kode_area}`, {
+          nama_area: values.nama_area,
+        });
+        toast.success('Area berhasil diperbarui');
+      }
+      setShowModal(false);
+      fetchData();
+    } catch (error) {
+      const msg = error?.response?.data?.error;
+      toast.error(msg || 'Gagal menyimpan area');
     }
-    setShowModal(false);
-    fetchData();
   };
 
   const filteredData = data.filter(item => {
