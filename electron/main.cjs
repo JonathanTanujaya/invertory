@@ -50,7 +50,7 @@ async function createMainWindow() {
   });
 
   if (app.isPackaged) {
-    await mainWindow.loadURL(`http://${API_HOST}:${API_PORT}/`);
+    await mainWindow.loadURL(`http://${API_HOST}:${actualApiPort}/`);
   } else {
     await mainWindow.loadURL(DEV_RENDERER_URL);
     mainWindow.webContents.openDevTools({ mode: 'detach' });

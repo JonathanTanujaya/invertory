@@ -27,3 +27,5 @@ dist-ssr
 .env
 .env.local
 .env.production
+release/win-unpacked/Stoir.exe
+release/win-unpacked/resources/app.asar

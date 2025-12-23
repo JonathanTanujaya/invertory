@@ -1,0 +1,25 @@
+directories:
+  output: release
+  buildResources: build
+appId: com.stoir.inventory
+productName: Stoir
+forceCodeSigning: false
+files:
+  - filter:
+      - dist/**
+      - electron/**
+      - package.json
+win:
+  icon: build/icon.ico
+  target:
+    - target: nsis
+      arch:
+        - x64
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  installerIcon: build/icon.ico
+  uninstallerIcon: build/icon.ico
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+electronVersion: 35.7.5
