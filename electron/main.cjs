@@ -7,6 +7,11 @@ const API_HOST = '127.0.0.1';
 const API_PORT = Number(process.env.STOIR_API_PORT || 3131);
 const DEV_RENDERER_URL = process.env.ELECTRON_RENDERER_URL || 'http://localhost:3000';
 
+// In dev, avoid stale renderer due to Electron HTTP cache.
+if (!app.isPackaged) {
+  app.commandLine.appendSwitch('disable-http-cache');
+}
+
 let mainWindow;
 let server;
 let actualApiPort = API_PORT;
@@ -48,6 +53,14 @@ async function createMainWindow() {
       nodeIntegration: false,
     },
   });
+
+  if (!app.isPackaged) {
+    try {
+      await mainWindow.webContents.session.clearCache();
+    } catch {
+      // ignore
+    }
+  }
 
   if (app.isPackaged) {
     await mainWindow.loadURL(`http://${API_HOST}:${actualApiPort}/`);

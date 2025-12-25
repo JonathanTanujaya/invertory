@@ -142,6 +142,67 @@ function registerAuthRoutes(fastify, { db }) {
 
     return reply.send({ ok: true });
   });
+
+  // Bootstrap (first run) helpers
+  fastify.get('/api/auth/bootstrap-status', async (_request, reply) => {
+    const row = db.get('SELECT COUNT(1) AS userCount FROM m_user');
+    const userCount = Number(row?.userCount || 0);
+    return reply.send({ hasUsers: userCount > 0, userCount });
+  });
+
+  // Create the very first owner user (only allowed when DB has no users)
+  fastify.post('/api/auth/bootstrap-owner', async (request, reply) => {
+    const row = db.get('SELECT COUNT(1) AS userCount FROM m_user');
+    const userCount = Number(row?.userCount || 0);
+    if (userCount > 0) {
+      return reply.code(409).send({ error: 'bootstrap already completed' });
+    }
+
+    const body = request.body || {};
+    const username = String(body.username ?? '').trim();
+    const password = String(body.password ?? '');
+    const nama = String(body.nama ?? username).trim();
+
+    if (!username || !password) {
+      return reply.code(400).send({ error: 'username and password are required' });
+    }
+    if (!nama) {
+      return reply.code(400).send({ error: 'nama is required' });
+    }
+
+    try {
+      const result = db.run(
+        `INSERT INTO m_user (username, password_hash, nama, role, avatar, must_change_password, is_active)
+         VALUES (?, ?, ?, 'owner', NULL, 0, 1)`,
+        [username, hashPassword(password), nama]
+      );
+
+      const created = db.get(
+        `SELECT id, username, nama, role, avatar, must_change_password, is_active, created_at, updated_at
+         FROM m_user
+         WHERE id = ?`,
+        [result.lastInsertRowid]
+      );
+
+      return reply.code(201).send({
+        id: created.id,
+        username: created.username,
+        nama: created.nama,
+        role: created.role,
+        avatar: created.avatar,
+        mustChangePassword: Boolean(created.must_change_password),
+        isActive: Boolean(created.is_active),
+        created_at: created.created_at,
+        updated_at: created.updated_at,
+      });
+    } catch (err) {
+      if (err && String(err.message || '').includes('UNIQUE')) {
+        return reply.code(409).send({ error: 'username already exists' });
+      }
+      fastify.log.error(err);
+      return reply.code(500).send({ error: 'internal error' });
+    }
+  });
 }
 
 module.exports = { registerAuthRoutes };
