@@ -24,6 +24,9 @@ import {
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import { formatNumber } from '@/utils/helpers';
+import api from '@/api/axios';
+import { formatDistanceToNow } from 'date-fns';
+import { id as localeId } from 'date-fns/locale';
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
@@ -41,56 +44,88 @@ export default function Dashboard() {
   });
   const [topItems, setTopItems] = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
-    // Fetch dashboard data - akan diganti dengan API call
-    setStats({
-      totalSKU: 1250,
-      stokMasukHariIni: 45,
-      stokKeluarHariIni: 32,
-      stokAlertCount: 12,
-    });
+    let cancelled = false;
 
-    // Data chart 7 hari terakhir
-    setChartData([
-      { name: 'Sen', masuk: 24, keluar: 18 },
-      { name: 'Sel', masuk: 32, keluar: 28 },
-      { name: 'Rab', masuk: 18, keluar: 22 },
-      { name: 'Kam', masuk: 45, keluar: 35 },
-      { name: 'Jum', masuk: 38, keluar: 30 },
-      { name: 'Sab', masuk: 28, keluar: 25 },
-      { name: 'Min', masuk: 15, keluar: 12 },
-    ]);
+    const dayLabels = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+    const labelForIsoDate = (isoDate) => {
+      const d = new Date(`${isoDate}T00:00:00`);
+      const idx = Number.isFinite(d.getTime()) ? d.getDay() : null;
+      return idx == null ? isoDate : dayLabels[idx] || isoDate;
+    };
 
-    // Perbandingan bulan ini vs bulan lalu
-    setComparison({
-      stokMasuk: { value: 342, percent: 15.2 },
-      stokKeluar: { value: 285, percent: 8.5 },
-      totalTransaksi: { value: 627, percent: 12.1 },
-    });
+    const formatTimeAgo = (value) => {
+      const raw = String(value ?? '').trim();
+      if (!raw) return '';
 
-    // Top 5 barang terlaris
-    setTopItems([
-      { rank: 1, kode: 'BRG001', nama: 'Bearing 6205', qty: 156, satuan: 'pcs' },
-      { rank: 2, kode: 'BRG015', nama: 'Oil Filter Universal', qty: 142, satuan: 'pcs' },
-      { rank: 3, kode: 'BRG008', nama: 'Seal Kit Honda', qty: 128, satuan: 'set' },
-      { rank: 4, kode: 'BRG022', nama: 'Kampas Rem Depan', qty: 115, satuan: 'set' },
-      { rank: 5, kode: 'BRG003', nama: 'Busi NGK Iridium', qty: 98, satuan: 'pcs' },
-    ]);
+      const d = raw.length === 10 ? new Date(`${raw}T00:00:00`) : new Date(raw);
+      if (!Number.isFinite(d.getTime())) return raw;
 
-    // Aktivitas terakhir
-    setRecentActivity([
-      { id: 1, type: 'masuk', desc: 'Stok Masuk BRG001 - Bearing 6205', qty: '+50', time: '2 menit lalu' },
-      { id: 2, type: 'keluar', desc: 'Stok Keluar BRG015 - Oil Filter', qty: '-20', time: '5 menit lalu' },
-      { id: 3, type: 'opname', desc: 'Stok Opname selesai - Gudang A', qty: '', time: '10 menit lalu' },
-      { id: 4, type: 'masuk', desc: 'Stok Masuk BRG022 - Kampas Rem', qty: '+30', time: '15 menit lalu' },
-      { id: 5, type: 'claim', desc: 'Customer Claim CC-2024-001', qty: '', time: '20 menit lalu' },
-      { id: 6, type: 'keluar', desc: 'Stok Keluar BRG008 - Seal Kit Honda', qty: '-12', time: '25 menit lalu' },
-      { id: 7, type: 'masuk', desc: 'Stok Masuk BRG003 - Busi NGK Iridium', qty: '+40', time: '32 menit lalu' },
-      { id: 8, type: 'claim', desc: 'Customer Claim CC-2024-002', qty: '', time: '45 menit lalu' },
-      { id: 9, type: 'opname', desc: 'Stok Opname mulai - Gudang B', qty: '', time: '1 jam lalu' },
-      { id: 10, type: 'keluar', desc: 'Stok Keluar BRG001 - Bearing 6205', qty: '-8', time: '1 jam 12 menit lalu' },
-    ]);
+      return formatDistanceToNow(d, { addSuffix: true, locale: localeId });
+    };
+
+    (async () => {
+      try {
+        setLoading(true);
+        setLoadError(false);
+
+        const res = await api.get('/reports/dashboard-summary');
+        if (cancelled) return;
+
+        const data = res.data || {};
+        const newStats = data.stats || {};
+        setStats({
+          totalSKU: Number(newStats.totalSKU ?? 0),
+          stokMasukHariIni: Number(newStats.stokMasukHariIni ?? 0),
+          stokKeluarHariIni: Number(newStats.stokKeluarHariIni ?? 0),
+          stokAlertCount: Number(newStats.stokAlertCount ?? 0),
+        });
+
+        const rawChart = Array.isArray(data.chart) ? data.chart : [];
+        setChartData(
+          rawChart.map((p) => ({
+            name: labelForIsoDate(p.date),
+            masuk: Number(p.masuk ?? 0),
+            keluar: Number(p.keluar ?? 0),
+          }))
+        );
+
+        setComparison({
+          stokMasuk: {
+            value: Number(data.comparison?.stokMasuk?.value ?? 0),
+            percent: Number(data.comparison?.stokMasuk?.percent ?? 0),
+          },
+          stokKeluar: {
+            value: Number(data.comparison?.stokKeluar?.value ?? 0),
+            percent: Number(data.comparison?.stokKeluar?.percent ?? 0),
+          },
+          totalTransaksi: {
+            value: Number(data.comparison?.totalTransaksi?.value ?? 0),
+            percent: Number(data.comparison?.totalTransaksi?.percent ?? 0),
+          },
+        });
+
+        setTopItems(Array.isArray(data.topItems) ? data.topItems : []);
+        setRecentActivity(
+          (Array.isArray(data.recentActivity) ? data.recentActivity : []).map((a) => ({
+            ...a,
+            time: formatTimeAgo(a.time),
+          }))
+        );
+      } catch (e) {
+        if (cancelled) return;
+        setLoadError(true);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const getActivityIcon = (type) => {
@@ -105,6 +140,11 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6 w-full">
+      {loadError && (
+        <div className="p-3 rounded-lg border border-red-200 bg-red-50 text-sm text-red-700">
+          Gagal memuat data dashboard. Silakan refresh.
+        </div>
+      )}
       {/* BARIS 1: Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
@@ -116,21 +156,21 @@ export default function Dashboard() {
         />
         <StatCard
           title="Stok Masuk"
-          value={stats.stokMasukHariIni}
+          value={loading ? '-' : stats.stokMasukHariIni}
           subtitle="Hari ini"
           icon={TrendingUp}
           color="success"
         />
         <StatCard
           title="Stok Keluar"
-          value={stats.stokKeluarHariIni}
+          value={loading ? '-' : stats.stokKeluarHariIni}
           subtitle="Hari ini"
           icon={TrendingDown}
           color="info"
         />
         <StatCard
           title="Stok Alert"
-          value={stats.stokAlertCount}
+          value={loading ? '-' : stats.stokAlertCount}
           subtitle="Perlu restock"
           icon={AlertTriangle}
           color="warning"

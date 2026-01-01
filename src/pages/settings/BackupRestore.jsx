@@ -22,11 +22,14 @@ export default function BackupRestore() {
   const [loadingInfo, setLoadingInfo] = useState(false);
   const [backupLoading, setBackupLoading] = useState(false);
   const [restoreLoading, setRestoreLoading] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [restoreResult, setRestoreResult] = useState(null);
+  const [resetResult, setResetResult] = useState(null);
   const fileInputRef = useRef(null);
 
   const canRestart = useMemo(() => typeof window !== 'undefined' && window.stoir?.restartApp, []);
+  const canDevReset = info?.isPackaged === false;
 
   const loadInfo = async () => {
     setLoadingInfo(true);
@@ -89,9 +92,47 @@ export default function BackupRestore() {
     setRestoreLoading(false);
   };
 
-  const handleRestart = async () => {
+  const handleRestart = async (redirectTo) => {
     if (!window.stoir?.restartApp) return;
-    await window.stoir.restartApp();
+    await window.stoir.restartApp(redirectTo ? { redirectTo } : undefined);
+  };
+
+  const handleDevReset = async () => {
+    const ok = window.confirm(
+      'DEV RESET: Ini akan menghapus database dan menghapus semua data aplikasi. Lanjutkan?'
+    );
+    if (!ok) return;
+
+    setResetLoading(true);
+    setResetResult(null);
+
+    try {
+      const res = await api.post('/admin/db/reset');
+      const data = res?.data || { ok: true, requiresRestart: true };
+      setResetResult(data);
+
+      // Wipe persisted client state (auth, logs, etc)
+      try {
+        window.localStorage?.removeItem?.('auth-storage');
+        window.localStorage?.removeItem?.('activity-log-storage');
+        window.localStorage?.removeItem?.('theme-storage');
+      } catch {
+        // ignore
+      }
+
+      if (data?.requiresRestart && canRestart) {
+        await handleRestart('/setup-owner');
+        return;
+      }
+
+      // If restart is not available (or fails), ensure we don't end up on a protected blank state.
+      window.location.href = '/setup-owner';
+    } catch (err) {
+      const msg = err?.response?.data?.error || 'Gagal reset aplikasi.';
+      setResetResult({ ok: false, message: msg, requiresRestart: false });
+    }
+
+    setResetLoading(false);
   };
 
   const clearSelectedFile = () => {
@@ -234,6 +275,36 @@ export default function BackupRestore() {
           </div>
         ) : null}
       </Card>
+
+      {canDevReset ? (
+        <Card>
+          <h3 className="text-base font-semibold text-gray-900">Dev Reset (Hapus Semua Data)</h3>
+          <p className="text-sm text-gray-600 mt-1">
+            Khusus mode development. Ini akan menghapus database dan mengulang aplikasi dari awal.
+          </p>
+
+          <div className="mt-4 flex flex-col md:flex-row gap-2 md:items-center md:justify-between">
+            <Button variant="danger" onClick={handleDevReset} disabled={resetLoading}>
+              {resetLoading ? 'Memproses...' : 'Reset Aplikasi & Hapus Database'}
+            </Button>
+
+            {resetResult ? (
+              <div className="flex items-center gap-2">
+                <Badge variant={resetResult.ok ? 'warning' : 'error'}>
+                  {resetResult.ok ? 'Perlu Restart' : 'Gagal'}
+                </Badge>
+                <div className="text-sm text-gray-700">
+                  {resetResult.message || (resetResult.ok ? 'Reset sukses. Restart aplikasi untuk mulai dari awal.' : 'Terjadi kesalahan.')}
+                </div>
+              </div>
+            ) : null}
+          </div>
+
+          {resetResult?.ok && resetResult?.requiresRestart && !canRestart ? (
+            <div className="mt-3 text-sm text-gray-600">Tutup dan buka ulang aplikasi.</div>
+          ) : null}
+        </Card>
+      ) : null}
     </div>
   );
 }

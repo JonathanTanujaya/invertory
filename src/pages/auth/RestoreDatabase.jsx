@@ -2,20 +2,18 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import api from '@/api/axios';
-import { useAuthStore } from '@/store/authStore';
-import { Eye, EyeOff, ArrowRight, AlertCircle, Box } from 'lucide-react';
+import { ArrowRight, AlertCircle, Box } from 'lucide-react';
 
-export default function SetupOwner() {
+export default function RestoreDatabase() {
     const navigate = useNavigate();
-    const { login } = useAuthStore();
-    const [nama, setNama] = useState('');
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
+    const [restoreFile, setRestoreFile] = useState(null);
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [canRestart, setCanRestart] = useState(false);
 
     useEffect(() => {
+        setCanRestart(Boolean(typeof window !== 'undefined' && window.stoir?.restartApp));
+
         let cancelled = false;
 
         (async () => {
@@ -35,43 +33,41 @@ export default function SetupOwner() {
         };
     }, [navigate]);
 
-    const handleSubmit = async (e) => {
+    const doRestart = () => {
+        try {
+            window?.stoir?.restartApp?.();
+        } catch {
+            // ignore
+        }
+    };
+
+    const handleRestore = async (e) => {
         e.preventDefault();
         setError('');
-        setIsLoading(true);
 
+        if (!restoreFile) {
+            setError('Pilih file database (.sqlite) terlebih dahulu');
+            return;
+        }
+
+        setIsLoading(true);
         try {
-            await api.post('/auth/bootstrap-owner', {
-                nama,
-                username,
-                password,
+            const buf = await restoreFile.arrayBuffer();
+            await api.post('/setup/db/restore', buf, {
+                headers: { 'Content-Type': 'application/octet-stream' },
+                transformRequest: (d) => d,
             });
 
-            let ok = false;
-            try {
-                ok = await login(username, password);
-            } catch {
-                ok = false;
-            }
+            toast.success('Restore selesai. Aplikasi akan direstart.');
 
-            if (ok) {
-                toast.success('Akun owner berhasil dibuat. Login otomatis berhasil.');
-                navigate('/', { replace: true });
+            if (canRestart) {
+                doRestart();
             } else {
-                toast.success('Akun owner berhasil dibuat. Silakan login.');
-                navigate('/login', { replace: true });
+                setError('Restore selesai. Silakan tutup dan buka ulang aplikasi.');
             }
         } catch (err) {
-            const status = err?.response?.status;
             const msg = err?.response?.data?.error;
-
-            if (status === 409) {
-                // bootstrap already completed
-                navigate('/login', { replace: true });
-                return;
-            }
-
-            setError(msg || 'Gagal membuat akun owner');
+            setError(msg || 'Gagal restore database');
         } finally {
             setIsLoading(false);
         }
@@ -95,17 +91,17 @@ export default function SetupOwner() {
 
                 <div className="relative z-10 space-y-6">
                     <h1 className="text-4xl font-bold leading-tight">
-                        Setup awal<br />akun owner.
+                        Restore<br />database.
                     </h1>
                     <p className="text-primary-100 text-lg max-w-md">
-                        Karena ini pertama kali aplikasi dijalankan, silakan buat akun Owner untuk mengelola sistem.
+                        Pilih file database (.sqlite) untuk memulihkan data lama. Setelah restore, aplikasi perlu direstart.
                     </p>
                 </div>
 
                 <div className="relative z-10 text-sm text-primary-200">&copy; 2024 STOIR</div>
             </div>
 
-            {/* Right Panel - Setup Form */}
+            {/* Right Panel - Restore Form */}
             <div className="flex-1 flex items-center justify-center p-6 sm:p-12">
                 <div className="w-full max-w-sm">
                     {/* Mobile Logo */}
@@ -119,8 +115,8 @@ export default function SetupOwner() {
                     </div>
 
                     <div className="mb-8">
-                        <h2 className="text-h3 text-gray-800">Setup awal</h2>
-                        <p className="text-body text-gray-600 mt-2">Buat akun Owner pertama untuk mulai menggunakan aplikasi</p>
+                        <h2 className="text-h3 text-gray-800">Restore database</h2>
+                        <p className="text-body text-gray-600 mt-2">Upload file .sqlite untuk memulihkan database</p>
                     </div>
 
                     {error && (
@@ -130,51 +126,17 @@ export default function SetupOwner() {
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit} className="space-y-5">
+                    <form onSubmit={handleRestore} className="space-y-5">
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Nama</label>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">File database (.sqlite)</label>
                             <input
-                                type="text"
-                                value={nama}
-                                onChange={(e) => setNama(e.target.value)}
+                                type="file"
+                                accept=".sqlite,application/x-sqlite3"
+                                onChange={(e) => setRestoreFile(e.target.files?.[0] || null)}
                                 className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 focus:bg-white transition-all"
-                                placeholder="Nama owner"
-                                required
-                                autoFocus
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Username</label>
-                            <input
-                                type="text"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 focus:bg-white transition-all"
-                                placeholder="Buat username"
+                                disabled={isLoading}
                                 required
                             />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
-                            <div className="relative">
-                                <input
-                                    type={showPassword ? 'text' : 'password'}
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 focus:bg-white transition-all pr-12"
-                                    placeholder="Buat password"
-                                    required
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                                >
-                                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                                </button>
-                            </div>
                         </div>
 
                         <button
@@ -189,7 +151,7 @@ export default function SetupOwner() {
                                 </>
                             ) : (
                                 <>
-                                    <span>Buat Akun Owner</span>
+                                    <span>Restore Database</span>
                                     <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                                 </>
                             )}
@@ -197,11 +159,11 @@ export default function SetupOwner() {
 
                         <button
                             type="button"
-                            onClick={() => navigate('/restore-database')}
+                            onClick={() => navigate('/setup-owner')}
                             className="w-full bg-white hover:bg-gray-50 text-gray-700 font-medium py-3 px-4 rounded-xl transition-all border border-gray-200"
                             disabled={isLoading}
                         >
-                            Restore database
+                            Kembali ke Setup Owner
                         </button>
                     </form>
                 </div>

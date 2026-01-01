@@ -7,6 +7,7 @@ import Layout from './components/layout/Layout';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import Login from './pages/auth/Login';
 import SetupOwner from './pages/auth/SetupOwner';
+import RestoreDatabase from './pages/auth/RestoreDatabase';
 import Dashboard from './pages/Dashboard';
 import BarangList from './pages/master/BarangList';
 import KategoriList from './pages/master/KategoriList';
@@ -41,6 +42,7 @@ function App() {
           {/* Public Route - Login */}
           <Route path="/login" element={<Login />} />
           <Route path="/setup-owner" element={<SetupOwner />} />
+          <Route path="/restore-database" element={<RestoreDatabase />} />
 
           {/* Protected Routes */}
           <Route
