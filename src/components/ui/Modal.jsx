@@ -2,14 +2,15 @@ import { clsx } from 'clsx';
 import { X } from 'lucide-react';
 import { useEffect } from 'react';
 
-export default function Modal({ 
-  open, 
-  onClose, 
-  title, 
-  children, 
+export default function Modal({
+  open,
+  onClose,
+  title,
+  children,
   size = 'md',
   footer,
   closeOnOverlay = true,
+  bodyClassName,
 }) {
   const sizes = {
     sm: 'max-w-md',
@@ -62,7 +63,12 @@ export default function Modal({
           )}
 
           {/* Body */}
-          <div className="px-6 py-4 max-h-[70vh] overflow-y-auto scrollbar-thin">
+          <div
+            className={clsx(
+              'px-6 py-4 max-h-[70vh] overflow-y-auto scrollbar-thin',
+              bodyClassName
+            )}
+          >
             {children}
           </div>
 

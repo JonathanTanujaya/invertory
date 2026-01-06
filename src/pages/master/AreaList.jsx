@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Eye, Search } from 'lucide-react';
+import { Plus, Edit, Trash2, Search } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -18,14 +18,6 @@ export default function AreaList() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const columns = [
-    { 
-      key: 'kode_area', 
-      label: 'Kode', 
-      sortable: true,
-      render: (value) => (
-        <span className="font-mono font-semibold text-primary-600">{value}</span>
-      ),
-    },
     { key: 'nama_area', label: 'Nama Area', sortable: true },
     {
       key: 'actions',
@@ -33,9 +25,6 @@ export default function AreaList() {
       align: 'center',
       render: (_, row) => (
         <div className="flex items-center justify-center gap-2">
-          <Button size="sm" variant="ghost" onClick={() => handleView(row)}>
-            <Eye className="w-4 h-4" />
-          </Button>
           <Button size="sm" variant="ghost" onClick={() => handleEdit(row)}>
             <Edit className="w-4 h-4" />
           </Button>
@@ -71,12 +60,6 @@ export default function AreaList() {
 
   const handleEdit = (item) => {
     setMode('edit');
-    setSelectedItem(item);
-    setShowModal(true);
-  };
-
-  const handleView = (item) => {
-    setMode('view');
     setSelectedItem(item);
     setShowModal(true);
   };
@@ -123,7 +106,6 @@ export default function AreaList() {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
     return (
-      item.kode_area?.toLowerCase().includes(query) ||
       item.nama_area?.toLowerCase().includes(query)
     );
   });
@@ -140,7 +122,7 @@ export default function AreaList() {
       {/* Search */}
       <Card>
         <Input
-          placeholder="Cari kode atau nama area..."
+          placeholder="Cari nama area..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           startIcon={<Search className="w-4 h-4 text-gray-500" />}
@@ -161,13 +143,7 @@ export default function AreaList() {
       <Modal
         open={showModal}
         onClose={() => setShowModal(false)}
-        title={
-          mode === 'create'
-            ? 'Tambah Area'
-            : mode === 'edit'
-            ? 'Edit Area'
-            : 'Detail Area'
-        }
+        title={mode === 'create' ? 'Tambah Area' : 'Edit Area'}
       >
         <AreaForm
           initialData={selectedItem}

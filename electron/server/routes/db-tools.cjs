@@ -187,9 +187,12 @@ function registerDbToolsRoutes(fastify, { db }) {
         });
       }
 
+      const noSeedMarkerPath = touchNoSeedMarker(dbPath);
+
       return reply.send({
         ok: true,
         backupPath,
+        noSeedMarkerPath,
         requiresRestart: true,
         message:
           "Restore selesai. Aplikasi akan direstart agar database baru terbaca.",
@@ -292,9 +295,12 @@ function registerDbToolsRoutes(fastify, { db }) {
       });
     }
 
+    const noSeedMarkerPath = touchNoSeedMarker(dbPath);
+
     return reply.send({
       ok: true,
       backupPath,
+      noSeedMarkerPath,
       requiresRestart: true,
       message:
         "Restore selesai. Aplikasi harus direstart agar database baru terbaca.",

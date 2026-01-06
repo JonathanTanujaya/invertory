@@ -270,7 +270,6 @@ export default function KategoriList() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50 sticky top-0 z-10">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kode</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Kategori</th>
                   <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                 </tr>
@@ -278,9 +277,6 @@ export default function KategoriList() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {kategoriData.map((row, idx) => (
                   <tr key={idx} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-sm">
-                      <span className="font-mono font-semibold text-primary-600">{row.kode_kategori}</span>
-                    </td>
                     <td className="px-4 py-3 text-sm text-gray-900">{row.nama_kategori}</td>
                     <td className="px-4 py-3 text-center">
                       <div className="flex items-center justify-center gap-2">
@@ -313,7 +309,6 @@ export default function KategoriList() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50 sticky top-0 z-10">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kode</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Area</th>
                   <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                 </tr>
@@ -321,9 +316,6 @@ export default function KategoriList() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {areaData.map((row, idx) => (
                   <tr key={idx} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-sm">
-                      <span className="font-mono font-semibold text-primary-600">{row.kode_area}</span>
-                    </td>
                     <td className="px-4 py-3 text-sm text-gray-900">{row.nama_area}</td>
                     <td className="px-4 py-3 text-center">
                       <div className="flex items-center justify-center gap-2">

@@ -209,7 +209,7 @@ export default function RiwayatTransaksi() {
   ];
 
   return (
-    <div className="h-full flex flex-col gap-4">
+    <div className="flex flex-col gap-4 h-[calc(100vh-40px)] min-h-0">
       {/* Filter */}
       <Card className="flex-shrink-0">
         <div className="grid grid-cols-12 gap-3 items-end">
@@ -288,6 +288,7 @@ export default function RiwayatTransaksi() {
           data={filteredTransactions}
           loading={loading}
           stickyHeader
+          maxHeight="100%"
           onRowClick={(row) => handleViewDetail(row)}
         />
       </Card>

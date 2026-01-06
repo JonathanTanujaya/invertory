@@ -28,15 +28,7 @@ export default function KategoriForm({ initialData, mode = 'create', onSubmit, o
 
   return (
     <form onSubmit={handleSubmit(submitHandler)} className="space-y-4">
-      <Input
-        label="Kode Kategori"
-        placeholder="KTG001"
-        disabled={readOnly || mode === 'edit'}
-        readOnly={mode === 'create' || mode === 'edit'}
-        className={mode === 'create' || mode === 'edit' ? 'bg-gray-50' : ''}
-        {...register('kode', { required: 'Kode wajib diisi' })}
-        error={errors.kode?.message}
-      />
+      <input type="hidden" {...register('kode', { required: 'Kode wajib diisi' })} />
       <Input
         label="Nama Kategori"
         placeholder="Contoh: Elektronik"

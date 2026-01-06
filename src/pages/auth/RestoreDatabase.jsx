@@ -35,7 +35,7 @@ export default function RestoreDatabase() {
 
     const doRestart = () => {
         try {
-            window?.stoir?.restartApp?.();
+            window?.stoir?.restartApp?.({ redirectTo: '/login' });
         } catch {
             // ignore
         }
@@ -50,24 +50,35 @@ export default function RestoreDatabase() {
             return;
         }
 
+        const ok = window.confirm(
+            'Restore database akan mengganti database yang ada saat ini. Pastikan kamu sudah memilih file yang benar. Lanjutkan restore?'
+        );
+        if (!ok) return;
+
         setIsLoading(true);
         try {
             const buf = await restoreFile.arrayBuffer();
-            await api.post('/setup/db/restore', buf, {
+            const res = await api.post('/setup/db/restore', buf, {
                 headers: { 'Content-Type': 'application/octet-stream' },
                 transformRequest: (d) => d,
             });
 
-            toast.success('Restore selesai. Aplikasi akan direstart.');
+            const serverMessage = res?.data?.message;
+            const requiresRestart = Boolean(res?.data?.requiresRestart);
 
-            if (canRestart) {
+            toast.success(serverMessage || 'Restore selesai. Aplikasi akan direstart.');
+
+            if (requiresRestart && canRestart) {
                 doRestart();
             } else {
-                setError('Restore selesai. Silakan tutup dan buka ulang aplikasi.');
+                setError(
+                    'Restore selesai. Silakan tutup dan buka ulang aplikasi agar database baru terbaca.'
+                );
             }
         } catch (err) {
             const msg = err?.response?.data?.error;
-            setError(msg || 'Gagal restore database');
+            const detail = err?.response?.data?.detail;
+            setError(detail ? `${msg || 'Gagal restore database'}: ${detail}` : (msg || 'Gagal restore database'));
         } finally {
             setIsLoading(false);
         }

@@ -238,9 +238,9 @@ export default function SalesForm() {
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col h-full gap-4 min-h-0">
         {/* Header Info Stok Keluar (Compact) */}
         <Card className="px-1.5 py-0">
-          {/* Baris 1: No Faktur, Tanggal, Customer, Kode/Nama Barang, Qty */}
+          {/* Baris 1: No Faktur, Tanggal, Customer, Kode/Nama Barang */}
           <div className="relative z-30 flex items-start gap-3 flex-nowrap overflow-visible pb-0">
-            <div className="w-36 flex-shrink-0">
+            <div className="w-40 flex-shrink-0">
               <Input
                 label="No Faktur"
                 {...register('no_faktur')}
@@ -254,7 +254,7 @@ export default function SalesForm() {
                 {...register('tanggal')}
               />
             </div>
-            <div className={`w-52 flex-shrink-0 relative ${showCustomerSuggestions ? 'z-[60]' : 'z-10'}`}>
+            <div className={`w-60 flex-shrink-0 relative ${showCustomerSuggestions ? 'z-[60]' : 'z-10'}`}>
               {/* Hidden field to store selected customer code */}
               <input
                 type="hidden"
@@ -320,7 +320,7 @@ export default function SalesForm() {
                 </div>
               )}
             </div>
-            <div className={`flex-1 min-w-[240px] relative ${showSuggestions ? 'z-20' : ''}`}>
+            <div className={`flex-1 min-w-[200px] relative ${showSuggestions ? 'z-20' : ''}`}>
               <Input
                 label="Kode Barang / Nama Barang"
                 placeholder="Ketik kode atau nama barang..."
@@ -378,15 +378,6 @@ export default function SalesForm() {
                   )}
                 </div>
               )}
-            </div>
-            <div className="w-28 flex-shrink-0">
-              <Input
-                label="Qty"
-                type="number"
-                min={1}
-                value={pendingQty}
-                onChange={(e) => setPendingQty(parseInt(e.target.value || '1'))}
-              />
             </div>
           </div>
           {/* Baris 2: Catatan full */}

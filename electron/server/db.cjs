@@ -51,6 +51,7 @@ function migrate(sqlDb) {
       kode TEXT NOT NULL UNIQUE,
       nama TEXT NOT NULL,
       telepon TEXT,
+      email TEXT,
       alamat TEXT,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -62,6 +63,7 @@ function migrate(sqlDb) {
       nama TEXT NOT NULL,
       area_kode TEXT,
       telepon TEXT,
+      kontak_person TEXT,
       alamat TEXT,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at TEXT NOT NULL DEFAULT (datetime('now')),
@@ -284,6 +286,30 @@ function migrate(sqlDb) {
       WHERE id = OLD.id;
     END;
   `);
+
+  // Lightweight migrations for existing DB files.
+  // sql.js throws on duplicate columns; ignore if already migrated.
+  try {
+    sqlDb.exec("ALTER TABLE m_customer ADD COLUMN kontak_person TEXT");
+  } catch {
+    // ignore
+  }
+
+  try {
+    sqlDb.exec("ALTER TABLE m_supplier ADD COLUMN email TEXT");
+  } catch {
+    // ignore
+  }
+
+  // Backfill so older DBs don't show empty Kontak Person everywhere.
+  // Best-effort: default to customer name if kontak_person is missing.
+  try {
+    sqlDb.exec(
+      "UPDATE m_customer SET kontak_person = nama WHERE (kontak_person IS NULL OR TRIM(kontak_person) = '') AND nama IS NOT NULL"
+    );
+  } catch {
+    // ignore
+  }
 }
 
 function rowsToObjects(columns, valuesRows) {
@@ -375,7 +401,7 @@ function seedIfEmpty(sqlDb, { seedDir }) {
     );
     if (suppliers) {
       const stmt = sqlDb.prepare(
-        "INSERT OR IGNORE INTO m_supplier (kode, nama, telepon, alamat) VALUES (?, ?, ?, ?)"
+        "INSERT OR IGNORE INTO m_supplier (kode, nama, telepon, email, alamat) VALUES (?, ?, ?, ?, ?)"
       );
       try {
         for (const row of suppliers) {
@@ -383,6 +409,7 @@ function seedIfEmpty(sqlDb, { seedDir }) {
             row.kode_supplier,
             row.nama_supplier,
             row.telepon ?? null,
+            row.email ?? null,
             row.alamat ?? null,
           ]);
         }
@@ -398,7 +425,7 @@ function seedIfEmpty(sqlDb, { seedDir }) {
     );
     if (customers) {
       const stmt = sqlDb.prepare(
-        "INSERT OR IGNORE INTO m_customer (kode, nama, area_kode, telepon, alamat) VALUES (?, ?, ?, ?, ?)"
+        "INSERT OR IGNORE INTO m_customer (kode, nama, area_kode, telepon, kontak_person, alamat) VALUES (?, ?, ?, ?, ?, ?)"
       );
       try {
         for (const row of customers) {
@@ -407,6 +434,7 @@ function seedIfEmpty(sqlDb, { seedDir }) {
             row.nama_customer,
             row.kode_area ?? null,
             row.telepon ?? null,
+            row.kontak_person ?? null,
             row.alamat ?? null,
           ]);
         }
@@ -464,7 +492,7 @@ function seedIfEmpty(sqlDb, { seedDir }) {
     if (count >= targetMasterRows) return;
 
     const stmt = sqlDb.prepare(
-      "INSERT OR IGNORE INTO m_supplier (kode, nama, telepon, alamat) VALUES (?, ?, ?, ?)"
+      "INSERT OR IGNORE INTO m_supplier (kode, nama, telepon, email, alamat) VALUES (?, ?, ?, ?, ?)"
     );
     try {
       for (let i = count + 1; i <= targetMasterRows; i += 1) {
@@ -473,6 +501,7 @@ function seedIfEmpty(sqlDb, { seedDir }) {
           kode,
           `Supplier ${pad3(i)}`,
           `08${pad3(i)}-${pad3(i)}${pad3(i)}`,
+          null,
           `Jl. Gudang No. ${i}, Kota Demo`,
         ]);
       }
@@ -492,7 +521,7 @@ function seedIfEmpty(sqlDb, { seedDir }) {
     ).map((r) => r[0]);
 
     const stmt = sqlDb.prepare(
-      "INSERT OR IGNORE INTO m_customer (kode, nama, area_kode, telepon, alamat) VALUES (?, ?, ?, ?, ?)"
+      "INSERT OR IGNORE INTO m_customer (kode, nama, area_kode, telepon, kontak_person, alamat) VALUES (?, ?, ?, ?, ?, ?)"
     );
     try {
       for (let i = count + 1; i <= targetMasterRows; i += 1) {
@@ -503,6 +532,7 @@ function seedIfEmpty(sqlDb, { seedDir }) {
           `Customer ${pad3(i)}`,
           area,
           `08${pad3(i)}-${pad3(i)}${pad3(i)}`,
+          `Kontak ${pad3(i)}`,
           `Jl. Pelanggan No. ${i}, Kota Demo`,
         ]);
       }
@@ -598,10 +628,10 @@ function seedIfEmpty(sqlDb, { seedDir }) {
 
     // Make sure master data for referenced codes exists.
     const ensureSupplierStmt = sqlDb.prepare(
-      "INSERT OR IGNORE INTO m_supplier (kode, nama, telepon, alamat) VALUES (?, ?, ?, ?)"
+      "INSERT OR IGNORE INTO m_supplier (kode, nama, telepon, email, alamat) VALUES (?, ?, ?, ?, ?)"
     );
     const ensureCustomerStmt = sqlDb.prepare(
-      "INSERT OR IGNORE INTO m_customer (kode, nama, area_kode, telepon, alamat) VALUES (?, ?, ?, ?, ?)"
+      "INSERT OR IGNORE INTO m_customer (kode, nama, area_kode, telepon, kontak_person, alamat) VALUES (?, ?, ?, ?, ?, ?)"
     );
     const ensureItemStmt = sqlDb.prepare(
       "INSERT OR IGNORE INTO m_barang (kode_barang, nama_barang, kategori_kode, satuan, stok, stok_minimal, harga_beli, harga_jual) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
@@ -700,7 +730,7 @@ function seedIfEmpty(sqlDb, { seedDir }) {
     };
 
     const applyIn = ({ no, tanggal, supplier, catatan, items }) => {
-      ensureSupplierStmt.run([supplier, supplier || "-", null, null]);
+      ensureSupplierStmt.run([supplier, supplier || "-", null, null, null]);
       insMasukHdr.run([no, tanggal, supplier || null, catatan || null]);
       const headerId = getIdByNo("t_stok_masuk", "no_faktur", no);
       if (!headerId) return;
@@ -734,7 +764,14 @@ function seedIfEmpty(sqlDb, { seedDir }) {
     };
 
     const applyOut = ({ no, tanggal, customer, catatan, items }) => {
-      ensureCustomerStmt.run([customer, customer || "-", null, null, null]);
+      ensureCustomerStmt.run([
+        customer,
+        customer || "-",
+        null,
+        null,
+        null,
+        null,
+      ]);
       insKeluarHdr.run([no, tanggal, customer || null, catatan || null]);
       const headerId = getIdByNo("t_stok_keluar", "no_faktur", no);
       if (!headerId) return;
@@ -773,7 +810,14 @@ function seedIfEmpty(sqlDb, { seedDir }) {
       kodeBarang,
       qty,
     }) => {
-      ensureCustomerStmt.run([customer, customer || "-", null, null, null]);
+      ensureCustomerStmt.run([
+        customer,
+        customer || "-",
+        null,
+        null,
+        null,
+        null,
+      ]);
       insClaimHdr.run([no, tanggal, customer || null, catatan || null]);
       const headerId = getIdByNo("t_customer_claim", "no_claim", no);
       if (!headerId) return;

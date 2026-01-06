@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Eye, Search } from 'lucide-react';
+import { Plus, Edit, Trash2, Search } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -26,16 +26,6 @@ export default function CustomerList() {
   const [areaMap, setAreaMap] = useState({});
 
   const columns = [
-    {
-      key: 'kode',
-      label: 'Kode',
-      sortable: true,
-      render: (val) => (
-        <span className="font-mono text-sm font-semibold text-primary-600">
-          {val}
-        </span>
-      )
-    },
     {
       key: 'nama',
       label: 'Nama Customer',
@@ -74,7 +64,6 @@ export default function CustomerList() {
       align: 'center',
       render: (_, row) => (
         <div className="flex items-center justify-center gap-2">
-          <Button size="sm" variant="ghost" onClick={() => handleView(row)}><Eye className="w-4 h-4" /></Button>
           {canEdit && (
             <Button size="sm" variant="ghost" onClick={() => handleEdit(row)}><Edit className="w-4 h-4" /></Button>
           )}
@@ -139,7 +128,6 @@ export default function CustomerList() {
     setSelectedItem(item);
     setShowModal(true);
   };
-  const handleView = (item) => { setMode('view'); setSelectedItem(item); setShowModal(true); };
   const handleDelete = (item) => {
     if (!canDelete) {
       toast.error('Anda tidak memiliki akses untuk menghapus customer');
@@ -175,6 +163,7 @@ export default function CustomerList() {
           nama_customer: values.nama,
           kode_area: values.kode_area,
           telepon: values.telepon,
+          kontak_person: values.kontak_person,
           alamat: values.alamat,
         });
         toast.success('Customer berhasil ditambahkan');
@@ -185,6 +174,7 @@ export default function CustomerList() {
           nama_customer: values.nama,
           kode_area: values.kode_area,
           telepon: values.telepon,
+          kontak_person: values.kontak_person,
           alamat: values.alamat,
         });
         toast.success('Customer berhasil diperbarui');
@@ -198,12 +188,11 @@ export default function CustomerList() {
     }
   };
 
-  // Filter sederhana berdasarkan kode, nama, telepon, area
+  // Filter sederhana berdasarkan nama, telepon, area
   const filteredData = data.filter((item) => {
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return (
-      item.kode?.toLowerCase().includes(q) ||
       item.nama?.toLowerCase().includes(q) ||
       item.telepon?.toLowerCase().includes(q) ||
       item.area?.toLowerCase().includes(q)
@@ -216,7 +205,7 @@ export default function CustomerList() {
         <div className="flex items-center gap-3">
           <div className="flex-1">
             <Input
-              placeholder="Cari customer (kode, nama, telepon, area)..."
+              placeholder="Cari customer (nama, telepon, area)..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               startIcon={<Search className="w-4 h-4" />}
@@ -240,7 +229,8 @@ export default function CustomerList() {
       <Modal
         open={showModal}
         onClose={() => setShowModal(false)}
-        title={mode === 'create' ? 'Tambah Customer' : mode === 'edit' ? 'Edit Customer' : 'Detail Customer'}
+        title={mode === 'create' ? 'Tambah Customer' : 'Edit Customer'}
+        bodyClassName="overflow-hidden"
       >
         <CustomerForm
           initialData={selectedItem}

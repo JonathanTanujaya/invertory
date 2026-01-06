@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, Filter, Edit, Trash2, Eye } from 'lucide-react';
+import { Plus, Search, Edit, Trash2 } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -31,7 +31,7 @@ export default function BarangList() {
   const [sortOrder, setSortOrder] = useState('asc');
   const [showModal, setShowModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [mode, setMode] = useState('create'); // create, edit, view
+  const [mode, setMode] = useState('create'); // create, edit
 
   const columns = [
     {
@@ -99,9 +99,6 @@ export default function BarangList() {
       align: 'center',
       render: (_, row) => (
         <div className="flex items-center justify-center gap-1">
-          <Button size="sm" variant="ghost" onClick={() => handleView(row)}>
-            <Eye className="w-4 h-4" />
-          </Button>
           {canEdit && (
             <Button size="sm" variant="ghost" onClick={() => handleEdit(row)}>
               <Edit className="w-4 h-4" />
@@ -214,12 +211,6 @@ export default function BarangList() {
     setShowModal(true);
   };
 
-  const handleView = (item) => {
-    setMode('view');
-    setSelectedItem(item);
-    setShowModal(true);
-  };
-
   const handleDelete = async (item) => {
     if (!canDelete) {
       toast.error('Anda tidak memiliki akses untuk menghapus data barang');
@@ -247,6 +238,8 @@ export default function BarangList() {
         await api.post('/items', {
           ...values,
           stok_minimal: Number(values.stok_minimal ?? 0),
+          harga_beli: values.harga_beli == null ? null : Number(values.harga_beli),
+          harga_jual: values.harga_jual == null ? null : Number(values.harga_jual),
         });
         toast.success('Barang berhasil ditambahkan');
       } else if (mode === 'edit') {
@@ -257,6 +250,8 @@ export default function BarangList() {
         await api.put(`/items/${selectedItem.kode_barang}`, {
           ...values,
           stok_minimal: Number(values.stok_minimal ?? 0),
+          harga_beli: values.harga_beli == null ? null : Number(values.harga_beli),
+          harga_jual: values.harga_jual == null ? null : Number(values.harga_jual),
         });
         toast.success('Barang berhasil diupdate');
       }
@@ -288,15 +283,6 @@ export default function BarangList() {
             className="rounded-lg"
           />
           <div className="flex items-center justify-end gap-2">
-            <Button
-              variant="outline"
-              size="md"
-              startIcon={<Filter className="w-4 h-4" />}
-              className="rounded-lg shadow-sm border-primary-400 text-primary-600 hover:bg-primary-50"
-              onClick={() => { }}
-            >
-              Filter Lainnya
-            </Button>
             {canCreate && (
               <Button
                 size="md"
@@ -330,13 +316,7 @@ export default function BarangList() {
       <Modal
         open={showModal}
         onClose={() => setShowModal(false)}
-        title={
-          mode === 'create'
-            ? 'Tambah Barang'
-            : mode === 'edit'
-              ? 'Edit Barang'
-              : 'Detail Barang'
-        }
+        title={mode === 'create' ? 'Tambah Barang' : 'Edit Barang'}
         size="lg"
       >
         <BarangForm

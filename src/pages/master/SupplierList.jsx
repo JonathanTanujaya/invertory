@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Eye, Search } from 'lucide-react';
+import { Plus, Edit, Trash2, Search } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -26,14 +26,6 @@ export default function SupplierList() {
   const [pageSize] = useState(10);
 
   const columns = [
-    {
-      key: 'kode_supplier',
-      label: 'Kode',
-      sortable: true,
-      render: (value) => (
-        <span className="font-mono font-semibold text-primary-600">{value}</span>
-      ),
-    },
     {
       key: 'nama_supplier',
       label: 'Nama Supplier',
@@ -76,7 +68,6 @@ export default function SupplierList() {
       align: 'center',
       render: (_, row) => (
         <div className="flex items-center justify-center gap-2">
-          <Button size="sm" variant="ghost" onClick={() => handleView(row)}><Eye className="w-4 h-4" /></Button>
           {canEdit && (
             <Button size="sm" variant="ghost" onClick={() => handleEdit(row)}><Edit className="w-4 h-4" /></Button>
           )}
@@ -121,7 +112,6 @@ export default function SupplierList() {
     setSelectedItem(item);
     setShowModal(true);
   };
-  const handleView = (item) => { setMode('view'); setSelectedItem(item); setShowModal(true); };
   const handleDelete = (item) => {
     if (!canDelete) {
       toast.error('Anda tidak memiliki akses untuk menghapus supplier');
@@ -175,7 +165,6 @@ export default function SupplierList() {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
     return (
-      item.kode_supplier?.toLowerCase().includes(query) ||
       item.nama_supplier?.toLowerCase().includes(query) ||
       item.alamat?.toLowerCase().includes(query) ||
       item.telepon?.toLowerCase().includes(query) ||
@@ -196,7 +185,7 @@ export default function SupplierList() {
         <div className="flex items-center gap-3">
           <div className="flex-1">
             <Input
-              placeholder="Cari supplier (kode, nama, telepon, kota)..."
+              placeholder="Cari supplier (nama, telepon, kota)..."
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
@@ -244,7 +233,7 @@ export default function SupplierList() {
             ? 'Tambah Supplier'
             : mode === 'edit'
               ? 'Edit Supplier'
-              : 'Detail Supplier'
+              : 'Edit Supplier'
         }
       >
         <SupplierForm

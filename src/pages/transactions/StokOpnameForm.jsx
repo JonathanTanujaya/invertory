@@ -277,7 +277,7 @@ export default function StokOpnameForm() {
             </div>
 
             {/* Search Barang */}
-            <div className="relative w-full">
+            <div className="relative z-40 w-full">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Tambah Barang
               </label>
@@ -296,7 +296,7 @@ export default function StokOpnameForm() {
 
               {/* Dropdown Barang */}
               {showBarangDropdown && searchBarang && (
-                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                <div className="absolute z-[80] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto">
                   {filteredBarang.length === 0 ? (
                     <div className="p-4 text-center text-gray-500">
                       Tidak ada barang ditemukan

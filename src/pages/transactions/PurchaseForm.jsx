@@ -9,6 +9,8 @@ import { PackageSearch, RotateCcw } from 'lucide-react';
 import api from '@/api/axios';
 import { formatCurrency, formatNumber, generateTransactionNumber } from '@/utils/helpers';
 
+const MAX_QTY_PER_ITEM = 200;
+
 export default function PurchaseForm() {
   const {
     register,
@@ -110,7 +112,11 @@ export default function PurchaseForm() {
       toast.warning('Item sudah ditambahkan');
       return;
     }
-    const jumlah = Math.max(1, parseInt(qtyOverride || pendingQty || 1, 10));
+    const rawQty = parseInt(qtyOverride || pendingQty || 1, 10);
+    const jumlah = Math.max(1, Math.min(MAX_QTY_PER_ITEM, Number.isFinite(rawQty) ? rawQty : 1));
+    if (rawQty > MAX_QTY_PER_ITEM) {
+      toast.warning(`Maksimal ${MAX_QTY_PER_ITEM} pcs per item per transaksi. Qty diset ke ${MAX_QTY_PER_ITEM}.`);
+    }
     setItems((prev) => [...prev, { ...item, jumlah }]);
     setSearchQuery('');
     setShowSuggestions(false);
@@ -120,7 +126,15 @@ export default function PurchaseForm() {
   const handleUpdateItem = (index, field, value) => {
     setItems((prev) => {
       const next = [...prev];
-      const v = field === 'jumlah' ? Math.max(1, parseInt(value || '1', 10)) : value;
+      const v = (() => {
+        if (field !== 'jumlah') return value;
+        const raw = parseInt(value || '1', 10);
+        const clamped = Math.max(1, Math.min(MAX_QTY_PER_ITEM, Number.isFinite(raw) ? raw : 1));
+        if (raw > MAX_QTY_PER_ITEM) {
+          toast.warning(`Maksimal ${MAX_QTY_PER_ITEM} pcs per item per transaksi.`);
+        }
+        return clamped;
+      })();
       next[index] = { ...next[index], [field]: v };
       return next;
     });
@@ -170,6 +184,12 @@ export default function PurchaseForm() {
     }
     if (items.length === 0) {
       toast.error('Tambahkan minimal satu item');
+      return;
+    }
+
+    const overLimit = items.find((it) => (parseInt(it.jumlah, 10) || 0) > MAX_QTY_PER_ITEM);
+    if (overLimit) {
+      toast.error(`Qty ${overLimit.kode_barang} melebihi ${MAX_QTY_PER_ITEM}. Buat faktur baru untuk qty > ${MAX_QTY_PER_ITEM}.`);
       return;
     }
 
@@ -227,9 +247,9 @@ export default function PurchaseForm() {
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col h-full gap-4 min-h-0">
         {/* Header Info Stok Masuk (Compact) */}
         <Card className="px-1.5 py-0">
-          {/* Baris 1: No Faktur, Tanggal, Supplier, Kode/Nama Barang, Qty */}
+          {/* Baris 1: No Faktur, Tanggal, Supplier, Kode/Nama Barang */}
           <div className="relative z-30 flex items-start gap-3 flex-nowrap overflow-visible pb-0">
-            <div className="w-36 flex-shrink-0">
+            <div className="w-40 flex-shrink-0">
               <Input
                 label="No Faktur"
                 {...register('no_faktur')}
@@ -243,7 +263,7 @@ export default function PurchaseForm() {
                 {...register('tanggal')}
               />
             </div>
-            <div className={`w-52 flex-shrink-0 relative ${showSupplierSuggestions ? 'z-[60]' : 'z-10'}`}>
+            <div className={`w-60 flex-shrink-0 relative ${showSupplierSuggestions ? 'z-[60]' : 'z-10'}`}>
               {/* Hidden field to store selected supplier code */}
               <input
                 type="hidden"
@@ -309,7 +329,7 @@ export default function PurchaseForm() {
                 </div>
               )}
             </div>
-            <div className={`flex-1 min-w-[240px] relative ${showSuggestions ? 'z-20' : ''}`}>
+            <div className={`flex-1 min-w-[200px] relative ${showSuggestions ? 'z-20' : ''}`}>
               <Input
                 label="Kode Barang / Nama Barang"
                 placeholder="Ketik kode atau nama barang..."
@@ -367,15 +387,6 @@ export default function PurchaseForm() {
                   )}
                 </div>
               )}
-            </div>
-            <div className="w-28 flex-shrink-0">
-              <Input
-                label="Qty"
-                type="number"
-                min={1}
-                value={pendingQty}
-                onChange={(e) => setPendingQty(parseInt(e.target.value || '1'))}
-              />
             </div>
           </div>
 
@@ -438,6 +449,7 @@ export default function PurchaseForm() {
                         <input
                           type="number"
                           min="1"
+                          max={MAX_QTY_PER_ITEM}
                           id={`qty-${index}`}
                           value={item.jumlah}
                           onChange={(e) => handleUpdateItem(index, 'jumlah', e.target.value)}
