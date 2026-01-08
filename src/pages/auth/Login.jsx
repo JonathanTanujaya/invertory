@@ -12,6 +12,7 @@ export default function Login() {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [shake, setShake] = useState(false);
 
     useEffect(() => {
         let cancelled = false;
@@ -44,6 +45,8 @@ export default function Login() {
         } catch (err) {
             const msg = err?.response?.data?.error;
             setError(msg || 'Gagal login');
+            setShake(true);
+            setTimeout(() => setShake(false), 500);
             setIsLoading(false);
             return;
         }
@@ -52,6 +55,8 @@ export default function Login() {
             navigate('/');
         } else {
             setError('Username atau password salah');
+            setShake(true);
+            setTimeout(() => setShake(false), 500);
         }
 
         setIsLoading(false);
@@ -114,7 +119,7 @@ export default function Login() {
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit} className="space-y-5">
+                    <form onSubmit={handleSubmit} className={`space-y-5 ${shake ? 'animate-shake' : ''}`}>
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-2">
                                 Username

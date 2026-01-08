@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useDeferredValue } from 'react';
 import { useForm } from 'react-hook-form';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -27,10 +27,12 @@ export default function SalesForm() {
 
   const [items, setItems] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const deferredSearchQuery = useDeferredValue(searchQuery);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [highlightIndex, setHighlightIndex] = useState(-1);
   const [pendingQty, setPendingQty] = useState(1);
   const [customerQuery, setCustomerQuery] = useState('');
+  const deferredCustomerQuery = useDeferredValue(customerQuery);
   const [showCustomerSuggestions, setShowCustomerSuggestions] = useState(false);
   const [customerHighlightIndex, setCustomerHighlightIndex] = useState(-1);
 
@@ -84,21 +86,21 @@ export default function SalesForm() {
     };
   }, []);
 
-  const filteredItems = searchQuery
+  const filteredItems = deferredSearchQuery
     ? allItems
       .filter(
         (it) =>
-          it.nama_barang.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          it.kode_barang.toLowerCase().includes(searchQuery.toLowerCase())
+          it.nama_barang.toLowerCase().includes(deferredSearchQuery.toLowerCase()) ||
+          it.kode_barang.toLowerCase().includes(deferredSearchQuery.toLowerCase())
       )
       .slice(0, 5)
     : [];
 
-  const filteredCustomers = customerQuery
+  const filteredCustomers = deferredCustomerQuery
     ? customerOptions.filter(
       (c) =>
-        c.label.toLowerCase().includes(customerQuery.toLowerCase()) ||
-        c.value.toLowerCase().includes(customerQuery.toLowerCase())
+        c.label.toLowerCase().includes(deferredCustomerQuery.toLowerCase()) ||
+        c.value.toLowerCase().includes(deferredCustomerQuery.toLowerCase())
     )
     : customerOptions;
 

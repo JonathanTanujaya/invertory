@@ -33,6 +33,7 @@ const Input = forwardRef(({
             'w-full px-3 py-2 h-[42px] border rounded-md transition-colors',
             'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent',
             'disabled:bg-gray-100 disabled:cursor-not-allowed',
+            'caret-gray-900',
             error ? 'border-error-500' : 'border-gray-300',
             startIcon && 'pl-10',
             endIcon && 'pr-10',

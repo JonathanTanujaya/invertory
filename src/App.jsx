@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastContainer } from 'react-toastify';
+import { useEffect } from 'react';
 import 'react-toastify/dist/ReactToastify.css';
 
 import Layout from './components/layout/Layout';
@@ -24,6 +25,7 @@ import CustomerClaimForm from './pages/transactions/CustomerClaimForm';
 import ManajemenUser from './pages/settings/ManajemenUser';
 import LogAktivitas from './pages/settings/LogAktivitas';
 import BackupRestore from './pages/settings/BackupRestore';
+import { useAuthStore } from './store/authStore';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -35,6 +37,23 @@ const queryClient = new QueryClient({
 });
 
 function App() {
+  const logout = useAuthStore((state) => state.logout);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
+  // Handle app closing event from Electron
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.stoir?.onAppClosing) {
+      window.stoir.onAppClosing(async () => {
+        if (isAuthenticated) {
+          await logout();
+        }
+        if (window.stoir?.logoutComplete) {
+          window.stoir.logoutComplete();
+        }
+      });
+    }
+  }, [logout, isAuthenticated]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>

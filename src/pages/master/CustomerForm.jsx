@@ -82,6 +82,7 @@ export default function CustomerForm({ initialData, mode = 'create', onSubmit, o
         maxLength={13}
         placeholder="081234567890"
         disabled={readOnly}
+        onInput={(e) => { e.target.value = e.target.value.replace(/\D/g, ''); }}
         {...register('telepon', {
           required: 'No Telp wajib diisi',
           setValueAs: (v) => String(v ?? '').replace(/\D+/g, ''),

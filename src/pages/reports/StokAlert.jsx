@@ -35,7 +35,8 @@ export default function StokAlert() {
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 10;
+  const [pageSize, setPageSize] = useState(10);
+  const pageSizeOptions = [10, 25, 50, 100];
 
   // Export dropdown
   const [showExportMenu, setShowExportMenu] = useState(false);
@@ -73,6 +74,13 @@ export default function StokAlert() {
     setKategori('');
     setUrgencyFilter('all');
     setCurrentPage(1);
+    setPageSize(10);
+  };
+
+  // Handle page size change
+  const handlePageSizeChange = (newSize) => {
+    setPageSize(Number(newSize));
+    setCurrentPage(1); // Reset ke halaman pertama
   };
 
   // Quick filter dari stat card
@@ -443,6 +451,16 @@ export default function StokAlert() {
                     Reset Filter
                   </Button>
                 </div>
+                <div className="col-span-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Tampilkan
+                  </label>
+                  <Select
+                    value={pageSize}
+                    onChange={(e) => handlePageSizeChange(e.target.value)}
+                    options={pageSizeOptions.map(size => ({ value: size, label: `${size} per halaman` }))}
+                  />
+                </div>
               </div>
             </div>
           )}
@@ -451,17 +469,16 @@ export default function StokAlert() {
 
       {/* Table Section - Separate Card */}
       {viewMode === 'table' && (
-        <Card padding={false}>
-          <DataTable
-            columns={columns}
-            data={paginatedData}
-            loading={loading}
-            pagination
-            currentPage={currentPage}
-            pageSize={pageSize}
-            totalItems={filtered.length}
-            onPageChange={setCurrentPage}
-          />
+        <Card padding={false} className="flex-1 flex flex-col min-h-0 overflow-hidden">
+          <div className="flex-1 min-h-0 overflow-hidden">
+            <DataTable
+              columns={columns}
+              data={filtered}
+              loading={loading}
+              stickyHeader
+              maxHeight="calc(100vh - 300px)"
+            />
+          </div>
         </Card>
       )}
 
@@ -489,26 +506,41 @@ export default function StokAlert() {
 
               {/* Pagination for Grid */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-2 mt-6">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
-                  >
-                    Sebelumnya
-                  </Button>
-                  <span className="text-sm text-gray-600">
-                    Halaman {currentPage} dari {totalPages}
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                    disabled={currentPage === totalPages}
-                  >
-                    Selanjutnya
-                  </Button>
+                <div className="flex items-center justify-between mt-6 flex-wrap gap-4">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <span>Menampilkan {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, filtered.length)} dari {filtered.length} item</span>
+                    <span className="text-gray-400">|</span>
+                    <select
+                      value={pageSize}
+                      onChange={(e) => handlePageSizeChange(e.target.value)}
+                      className="border border-gray-300 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-primary-500"
+                    >
+                      {pageSizeOptions.map(size => (
+                        <option key={size} value={size}>{size} / hal</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                    >
+                      Sebelumnya
+                    </Button>
+                    <span className="text-sm text-gray-600">
+                      Halaman {currentPage} dari {totalPages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                    >
+                      Selanjutnya
+                    </Button>
+                  </div>
                 </div>
               )}
             </>

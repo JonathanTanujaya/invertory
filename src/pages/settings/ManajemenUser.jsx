@@ -18,7 +18,6 @@ export default function ManajemenUser() {
     const [selectedUser, setSelectedUser] = useState(null);
     const [resetTargetUser, setResetTargetUser] = useState(null);
     const [showPassword, setShowPassword] = useState(false);
-    const [showResetCurrentPassword, setShowResetCurrentPassword] = useState(false);
     const [showResetNewPassword, setShowResetNewPassword] = useState(false);
     const [showResetConfirmPassword, setShowResetConfirmPassword] = useState(false);
     const [resetNewPassword, setResetNewPassword] = useState('');
@@ -177,7 +176,6 @@ export default function ManajemenUser() {
         setResetTargetUser(user);
         setResetNewPassword('');
         setResetConfirmPassword('');
-        setShowResetCurrentPassword(false);
         setShowResetNewPassword(false);
         setShowResetConfirmPassword(false);
         setIsResetModalOpen(true);
@@ -276,11 +274,11 @@ export default function ManajemenUser() {
                             Hanya Owner yang dapat mengakses manajemen user.
                         </div>
                     ) : (
-                    <DataTable
-                        columns={columns}
-                        data={users}
-                        searchPlaceholder="Cari user..."
-                    />
+                        <DataTable
+                            columns={columns}
+                            data={users}
+                            searchPlaceholder="Cari user..."
+                        />
                     )}
                 </CardContent>
             </Card>
@@ -393,20 +391,9 @@ export default function ManajemenUser() {
                             </div>
                         </div>
 
-                        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
-                            <div className="text-sm font-medium text-amber-900">Password Saat Ini</div>
-                            <div className="mt-2 flex items-center gap-2">
-                                <div className="flex-1 font-mono text-sm text-gray-900">
-                                    {showResetCurrentPassword ? (resetTargetUser.password || '-') : '••••••'}
-                                </div>
-                                <button
-                                    type="button"
-                                    onClick={() => setShowResetCurrentPassword(!showResetCurrentPassword)}
-                                    className="text-gray-600 hover:text-gray-800"
-                                    title={showResetCurrentPassword ? 'Sembunyikan password' : 'Lihat password'}
-                                >
-                                    {showResetCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                </button>
+                        <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
+                            <div className="text-sm text-blue-800">
+                                <span className="font-medium">Info:</span> Password tersimpan dalam bentuk terenkripsi dan tidak bisa ditampilkan. Anda dapat langsung mengganti password user ini dengan yang baru.
                             </div>
                         </div>
 

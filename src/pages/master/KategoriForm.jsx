@@ -4,21 +4,27 @@ import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 
 export default function KategoriForm({ initialData, mode = 'create', onSubmit, onCancel }) {
-  const { register, handleSubmit, formState: { errors }, setValue } = useForm({
-    defaultValues: initialData || { kode: '', nama: '' }
+  const { register, handleSubmit, formState: { errors }, setValue, reset } = useForm({
+    defaultValues: { kode: '', nama: '' }
   });
 
+  // Reset form when initialData changes (for edit mode)
   useEffect(() => {
-    if (mode === 'create' && !initialData) {
-      // Auto-generate kode kategori
-      // TODO: Replace with actual API call to get last kode
+    if (mode === 'edit' && initialData) {
+      // Map dari field database ke field form
+      reset({
+        kode: initialData.kode_kategori || initialData.kode || '',
+        nama: initialData.nama_kategori || initialData.nama || ''
+      });
+    } else if (mode === 'create') {
+      // Auto-generate kode kategori untuk create
       const generateKode = () => {
         const random = Math.floor(Math.random() * 1000);
         return `KTG${String(random).padStart(3, '0')}`;
       };
-      setValue('kode', generateKode());
+      reset({ kode: generateKode(), nama: '' });
     }
-  }, [mode, initialData, setValue]);
+  }, [mode, initialData, reset]);
 
   const submitHandler = (values) => {
     onSubmit?.(values);

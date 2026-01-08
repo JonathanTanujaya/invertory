@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useDeferredValue } from 'react';
 import Card from '@/components/ui/Card';
 import DataTable from '@/components/ui/DataTable';
 import Input from '@/components/ui/Input';
@@ -27,6 +27,7 @@ export default function KartuStok() {
   const today = new Date().toISOString().split('T')[0];
   const [kodeBarang, setKodeBarang] = useState('');
   const [searchItem, setSearchItem] = useState('');
+  const deferredSearchItem = useDeferredValue(searchItem);
   const [showItemList, setShowItemList] = useState(false);
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
@@ -53,15 +54,15 @@ export default function KartuStok() {
     };
   }, []);
 
-  // Filter barang berdasarkan pencarian
+  // Filter barang berdasarkan pencarian (using deferred value for smoother typing)
   const filteredBarang = useMemo(() => {
-    if (!searchItem) return availableItems;
-    const search = searchItem.toLowerCase();
+    if (!deferredSearchItem) return availableItems;
+    const search = deferredSearchItem.toLowerCase();
     return availableItems.filter(item =>
       item.kode.toLowerCase().includes(search) ||
       item.nama.toLowerCase().includes(search)
     );
-  }, [searchItem, availableItems]);
+  }, [deferredSearchItem, availableItems]);
 
   // Hitung statistik
   const stats = useMemo(() => {

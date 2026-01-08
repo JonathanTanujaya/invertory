@@ -4,27 +4,32 @@ import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 
 export default function SupplierForm({ initialData, mode = 'create', onSubmit, onCancel }) {
-  const { register, handleSubmit, formState: { errors }, setValue } = useForm({
-    defaultValues: initialData || {
-      kode_supplier: '',
-      nama_supplier: '',
-      alamat: '',
-      telepon: '',
-      email: ''
-    }
+  const emptyDefaults = {
+    kode_supplier: '',
+    nama_supplier: '',
+    alamat: '',
+    telepon: '',
+    email: ''
+  };
+
+  const { register, handleSubmit, formState: { errors }, setValue, reset } = useForm({
+    defaultValues: emptyDefaults
   });
 
+  // Reset form when initialData or mode changes
   useEffect(() => {
-    if (mode === 'create' && !initialData) {
-      // Auto-generate kode supplier
-      // TODO: Replace with actual API call to get last kode from backend
+    if (mode === 'edit' && initialData) {
+      reset(initialData);
+    } else if (mode === 'create') {
       const generateKode = () => {
         const random = Math.floor(Math.random() * 1000);
         return `SUP${String(random).padStart(3, '0')}`;
       };
-      setValue('kode_supplier', generateKode());
+      reset({ ...emptyDefaults, kode_supplier: generateKode() });
+    } else if (mode === 'view' && initialData) {
+      reset(initialData);
     }
-  }, [mode, initialData, setValue]);
+  }, [mode, initialData, reset]);
 
   const submitHandler = (values) => onSubmit?.(values);
   const readOnly = mode === 'view';
@@ -56,7 +61,7 @@ export default function SupplierForm({ initialData, mode = 'create', onSubmit, o
           placeholder="Jl. Sudirman No. 123, Jakarta Selatan"
           disabled={readOnly}
           rows={3}
-          className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none ${readOnly ? 'bg-gray-50 text-gray-500' : ''
+          className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none caret-gray-900 ${readOnly ? 'bg-gray-50 text-gray-500' : ''
             } ${errors.alamat ? 'border-error-500' : ''}`}
           {...register('alamat', { required: 'Alamat wajib diisi' })}
         />
@@ -71,8 +76,9 @@ export default function SupplierForm({ initialData, mode = 'create', onSubmit, o
           type="text"
           inputMode="numeric"
           maxLength={13}
-          placeholder="021-12345678 atau 08123456789"
+          placeholder="08123456789"
           disabled={readOnly}
+          onInput={(e) => { e.target.value = e.target.value.replace(/\D/g, ''); }}
           {...register('telepon', {
             required: 'Telepon wajib diisi',
             setValueAs: (v) => String(v ?? '').replace(/\D+/g, ''),

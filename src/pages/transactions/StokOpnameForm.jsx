@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef, useDeferredValue } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Save,
@@ -30,6 +30,7 @@ export default function StokOpnameForm() {
   });
 
   const [searchBarang, setSearchBarang] = useState('');
+  const deferredSearchBarang = useDeferredValue(searchBarang);
   const [showBarangDropdown, setShowBarangDropdown] = useState(false);
   const [opnameItems, setOpnameItems] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -37,6 +38,22 @@ export default function StokOpnameForm() {
 
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmSnapshot, setConfirmSnapshot] = useState(null);
+
+  const barangDropdownRef = useRef(null);
+
+  // Close dropdown when clicking outside (avoid full-screen overlays that can block inputs)
+  useEffect(() => {
+    if (!showBarangDropdown) return;
+
+    const handleMouseDown = (event) => {
+      if (barangDropdownRef.current && !barangDropdownRef.current.contains(event.target)) {
+        setShowBarangDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleMouseDown);
+    return () => document.removeEventListener('mousedown', handleMouseDown);
+  }, [showBarangDropdown]);
 
   // Generate nomor opname
   useEffect(() => {
@@ -62,15 +79,15 @@ export default function StokOpnameForm() {
     };
   }, []);
 
-  // Filter barang berdasarkan pencarian
+  // Filter barang berdasarkan pencarian (using deferred value for smoother typing)
   const filteredBarang = useMemo(() => {
-    if (!searchBarang) return allItems.slice(0, 10);
-    const query = searchBarang.toLowerCase();
+    if (!deferredSearchBarang) return allItems.slice(0, 10);
+    const query = deferredSearchBarang.toLowerCase();
     return allItems.filter((barang) =>
       String(barang.kode_barang || '').toLowerCase().includes(query) ||
       String(barang.nama_barang || '').toLowerCase().includes(query)
     ).slice(0, 10);
-  }, [searchBarang, allItems]);
+  }, [deferredSearchBarang, allItems]);
 
   // Handle pilih barang
   const handleSelectBarang = (barang) => {
@@ -277,7 +294,7 @@ export default function StokOpnameForm() {
             </div>
 
             {/* Search Barang */}
-            <div className="relative z-40 w-full">
+            <div className="relative z-40 w-full" ref={barangDropdownRef}>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Tambah Barang
               </label>
@@ -556,13 +573,6 @@ export default function StokOpnameForm() {
         )}
       </Modal>
 
-      {/* Click outside to close dropdown */}
-      {showBarangDropdown && (
-        <div
-          className="fixed inset-0 z-0"
-          onClick={() => setShowBarangDropdown(false)}
-        />
-      )}
     </div>
   );
 }

@@ -28,6 +28,7 @@ if (!app.isPackaged) {
 let mainWindow;
 let server;
 let actualApiPort = API_PORT;
+let isQuitting = false;
 
 async function startServerOnPort(port) {
   const instance = await createServer({
@@ -156,6 +157,27 @@ app.whenReady().then(async () => {
   });
 
   await createMainWindow();
+
+  // Handle logout complete signal from renderer
+  ipcMain.on("stoir:logout-complete", () => {
+    // Logout recorded, allow quit to proceed
+  });
+
+  // Handle window close - notify renderer to log out first
+  mainWindow.on("close", (e) => {
+    if (!isQuitting && mainWindow && !mainWindow.isDestroyed()) {
+      e.preventDefault();
+      isQuitting = true;
+      // Notify renderer to perform logout
+      mainWindow.webContents.send("stoir:app-closing");
+      // Give renderer time to log out, then close
+      setTimeout(() => {
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          mainWindow.destroy();
+        }
+      }, 500);
+    }
+  });
 
   app.on("activate", async () => {
     if (BrowserWindow.getAllWindows().length === 0) {

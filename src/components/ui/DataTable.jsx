@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useDeferredValue } from 'react';
 import { clsx } from 'clsx';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import Button from './Button';
@@ -25,6 +25,7 @@ export default function DataTable({
 }) {
   const [selectedRows, setSelectedRows] = useState(new Set());
   const [searchQuery, setSearchQuery] = useState('');
+  const deferredSearchQuery = useDeferredValue(searchQuery);
   const [internalSortBy, setInternalSortBy] = useState(undefined);
   const [internalSortOrder, setInternalSortOrder] = useState('asc');
 
@@ -61,7 +62,7 @@ export default function DataTable({
   const filteredData = useMemo(() => {
     const base = (() => {
       if (!searchPlaceholder) return data;
-      const q = (searchQuery || '').trim().toLowerCase();
+      const q = (deferredSearchQuery || '').trim().toLowerCase();
       if (!q) return data;
       return data.filter((row) => {
         try {
@@ -92,7 +93,7 @@ export default function DataTable({
     });
 
     return effectiveSortOrder === 'desc' ? sorted.reverse() : sorted;
-  }, [data, searchPlaceholder, searchQuery, effectiveSortBy, effectiveSortOrder]);
+  }, [data, searchPlaceholder, deferredSearchQuery, effectiveSortBy, effectiveSortOrder]);
 
   const totalPages = Math.ceil(totalItems / pageSize);
 

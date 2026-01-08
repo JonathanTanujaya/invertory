@@ -342,6 +342,7 @@ export default function KategoriList() {
         title={kategoriMode === 'create' ? 'Tambah Kategori' : kategoriMode === 'edit' ? 'Edit Kategori' : 'Detail Kategori'}
       >
         <KategoriForm
+          key={`kategori-${kategoriMode}-${selectedKategori?.kode_kategori || 'new'}`}
           initialData={selectedKategori}
           mode={kategoriMode}
           onSubmit={handleKategoriSubmit}
@@ -356,6 +357,7 @@ export default function KategoriList() {
         title={areaMode === 'create' ? 'Tambah Area' : areaMode === 'edit' ? 'Edit Area' : 'Detail Area'}
       >
         <AreaForm
+          key={`area-${areaMode}-${selectedArea?.kode_area || 'new'}`}
           initialData={selectedArea}
           mode={areaMode}
           onSubmit={handleAreaSubmit}

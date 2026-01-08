@@ -4,22 +4,28 @@ import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 
 export default function AreaForm({ initialData, mode = 'create', onSubmit, onCancel }) {
-  const { register, handleSubmit, formState: { errors }, setValue } = useForm({
-    defaultValues: initialData || {
+  const { register, handleSubmit, formState: { errors }, setValue, reset } = useForm({
+    defaultValues: {
       kode_area: '',
       nama_area: ''
     }
   });
 
+  // Reset form when initialData or mode changes
   useEffect(() => {
-    if (mode === 'create' && !initialData) {
+    if (mode === 'edit' && initialData) {
+      reset({
+        kode_area: initialData.kode_area || '',
+        nama_area: initialData.nama_area || ''
+      });
+    } else if (mode === 'create') {
       const generateKode = () => {
         const random = Math.floor(Math.random() * 1000);
         return `AR${String(random).padStart(3, '0')}`;
       };
-      setValue('kode_area', generateKode());
+      reset({ kode_area: generateKode(), nama_area: '' });
     }
-  }, [mode, initialData, setValue]);
+  }, [mode, initialData, reset]);
 
   const submitHandler = (values) => {
     // Convert kode_area to uppercase

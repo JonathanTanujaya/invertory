@@ -7,4 +7,10 @@ const apiBaseUrl =
 contextBridge.exposeInMainWorld("stoir", {
   apiBaseUrl,
   restartApp: (opts) => ipcRenderer.invoke("stoir:restart", opts),
+  // Listen for app closing event to trigger logout
+  onAppClosing: (callback) => {
+    ipcRenderer.on("stoir:app-closing", () => callback());
+  },
+  // Notify main process that logout is complete
+  logoutComplete: () => ipcRenderer.send("stoir:logout-complete"),
 });

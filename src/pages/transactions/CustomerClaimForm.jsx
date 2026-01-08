@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef, useDeferredValue } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Save,
@@ -30,9 +30,11 @@ export default function CustomerClaimForm() {
   });
 
   const [searchCustomer, setSearchCustomer] = useState('');
+  const deferredSearchCustomer = useDeferredValue(searchCustomer);
   const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [searchBarang, setSearchBarang] = useState('');
+  const deferredSearchBarang = useDeferredValue(searchBarang);
   const [showBarangDropdown, setShowBarangDropdown] = useState(false);
   const [claimItems, setClaimItems] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -42,6 +44,35 @@ export default function CustomerClaimForm() {
 
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmSnapshot, setConfirmSnapshot] = useState(null);
+
+  const customerDropdownRef = useRef(null);
+  const barangDropdownRef = useRef(null);
+
+  // Close dropdown(s) when clicking outside (avoid full-screen overlays that can block inputs)
+  useEffect(() => {
+    if (!showCustomerDropdown && !showBarangDropdown) return;
+
+    const handleMouseDown = (event) => {
+      if (
+        showCustomerDropdown &&
+        customerDropdownRef.current &&
+        !customerDropdownRef.current.contains(event.target)
+      ) {
+        setShowCustomerDropdown(false);
+      }
+
+      if (
+        showBarangDropdown &&
+        barangDropdownRef.current &&
+        !barangDropdownRef.current.contains(event.target)
+      ) {
+        setShowBarangDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleMouseDown);
+    return () => document.removeEventListener('mousedown', handleMouseDown);
+  }, [showCustomerDropdown, showBarangDropdown]);
 
   // Generate nomor claim
   useEffect(() => {
@@ -68,25 +99,25 @@ export default function CustomerClaimForm() {
     };
   }, []);
 
-  // Filter customer berdasarkan pencarian
+  // Filter customer berdasarkan pencarian (using deferred value for smoother typing)
   const filteredCustomer = useMemo(() => {
-    if (!searchCustomer) return allCustomers.slice(0, 10);
-    const query = searchCustomer.toLowerCase();
+    if (!deferredSearchCustomer) return allCustomers.slice(0, 10);
+    const query = deferredSearchCustomer.toLowerCase();
     return allCustomers.filter((customer) =>
       String(customer.kode_customer || '').toLowerCase().includes(query) ||
       String(customer.nama_customer || '').toLowerCase().includes(query)
     ).slice(0, 10);
-  }, [searchCustomer, allCustomers]);
+  }, [deferredSearchCustomer, allCustomers]);
 
-  // Filter barang berdasarkan pencarian
+  // Filter barang berdasarkan pencarian (using deferred value for smoother typing)
   const filteredBarang = useMemo(() => {
-    if (!searchBarang) return allItems.slice(0, 10);
-    const query = searchBarang.toLowerCase();
+    if (!deferredSearchBarang) return allItems.slice(0, 10);
+    const query = deferredSearchBarang.toLowerCase();
     return allItems.filter((barang) =>
       String(barang.kode_barang || '').toLowerCase().includes(query) ||
       String(barang.nama_barang || '').toLowerCase().includes(query)
     ).slice(0, 10);
-  }, [searchBarang, allItems]);
+  }, [deferredSearchBarang, allItems]);
 
   // Handle pilih customer
   const handleSelectCustomer = (customer) => {
@@ -287,7 +318,7 @@ export default function CustomerClaimForm() {
               />
 
               {/* Pilih Customer */}
-              <div className="relative w-full">
+              <div className="relative w-full" ref={customerDropdownRef}>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Customer <span className="text-red-500">*</span>
                 </label>
@@ -310,7 +341,7 @@ export default function CustomerClaimForm() {
 
                 {/* Dropdown Customer */}
                 {showCustomerDropdown && (
-                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto">
                     {filteredCustomer.length === 0 ? (
                       <div className="p-4 text-center text-gray-500">
                         Tidak ada customer ditemukan
@@ -342,7 +373,7 @@ export default function CustomerClaimForm() {
             {/* Search Barang & Alasan */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Tambah Barang */}
-              <div className="relative w-full">
+              <div className="relative w-full" ref={barangDropdownRef}>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Tambah Barang
                 </label>
@@ -361,7 +392,7 @@ export default function CustomerClaimForm() {
 
                 {/* Dropdown Barang */}
                 {showBarangDropdown && searchBarang && (
-                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto">
                     {filteredBarang.length === 0 ? (
                       <div className="p-4 text-center text-gray-500">
                         Tidak ada barang ditemukan
@@ -604,16 +635,6 @@ export default function CustomerClaimForm() {
         )}
       </Modal>
 
-      {/* Click outside to close dropdown */}
-      {(showCustomerDropdown || showBarangDropdown) && (
-        <div
-          className="fixed inset-0 z-0"
-          onClick={() => {
-            setShowCustomerDropdown(false);
-            setShowBarangDropdown(false);
-          }}
-        />
-      )}
     </div>
   );
 }

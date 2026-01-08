@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Card from '@/components/ui/Card';
 import DataTable from '@/components/ui/DataTable';
 import Input from '@/components/ui/Input';
@@ -40,6 +40,22 @@ export default function StokBarang() {
 
   // Export dropdown
   const [showExportMenu, setShowExportMenu] = useState(false);
+
+  const exportMenuRef = useRef(null);
+
+  // Close export menu when clicking outside (avoid full-screen overlays that can block interactions)
+  useEffect(() => {
+    if (!showExportMenu) return;
+
+    const handleMouseDown = (event) => {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(event.target)) {
+        setShowExportMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleMouseDown);
+    return () => document.removeEventListener('mousedown', handleMouseDown);
+  }, [showExportMenu]);
 
   useEffect(() => { load(); }, []);
 
@@ -460,7 +476,7 @@ export default function StokBarang() {
 
             {/* Export Dropdown / Filter Periode */}
             {statusFilter === 'tidak-laku' ? (
-              <div className="relative">
+              <div className="relative" ref={exportMenuRef}>
                 <Button
                   variant="outline"
                   size="sm"
@@ -491,7 +507,7 @@ export default function StokBarang() {
                 )}
               </div>
             ) : (
-              <div className="relative">
+              <div className="relative" ref={exportMenuRef}>
                 <Button
                   variant="outline"
                   size="sm"
@@ -581,16 +597,15 @@ export default function StokBarang() {
 
         {/* Table Content */}
         {viewMode === 'table' ? (
-          <DataTable
-            columns={columns}
-            data={paginatedData}
-            loading={loading}
-            pagination
-            currentPage={currentPage}
-            pageSize={pageSize}
-            totalItems={filtered.length}
-            onPageChange={setCurrentPage}
-          />
+          <div className="flex-1 min-h-0 overflow-hidden">
+            <DataTable
+              columns={columns}
+              data={filtered}
+              loading={loading}
+              stickyHeader
+              maxHeight="calc(100vh - 340px)"
+            />
+          </div>
         ) : null}
       </div>
 
@@ -670,13 +685,6 @@ export default function StokBarang() {
         )}
       </Modal>
 
-      {/* Click outside to close export menu */}
-      {showExportMenu && (
-        <div
-          className="fixed inset-0 z-0"
-          onClick={() => setShowExportMenu(false)}
-        />
-      )}
     </div>
   );
 }

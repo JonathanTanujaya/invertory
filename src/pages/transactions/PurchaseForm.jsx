@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useDeferredValue } from 'react';
 import { useForm } from 'react-hook-form';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -29,10 +29,12 @@ export default function PurchaseForm() {
 
   const [items, setItems] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const deferredSearchQuery = useDeferredValue(searchQuery);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [highlightIndex, setHighlightIndex] = useState(-1);
   const [pendingQty, setPendingQty] = useState(1);
   const [supplierQuery, setSupplierQuery] = useState('');
+  const deferredSupplierQuery = useDeferredValue(supplierQuery);
   const [showSupplierSuggestions, setShowSupplierSuggestions] = useState(false);
   const [supplierHighlightIndex, setSupplierHighlightIndex] = useState(-1);
 
@@ -86,22 +88,22 @@ export default function PurchaseForm() {
     };
   }, []);
 
-  const filteredItems = searchQuery
+  const filteredItems = deferredSearchQuery
     ? allItems
       .filter(
         (it) =>
-          it.nama_barang.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          it.kode_barang.toLowerCase().includes(searchQuery.toLowerCase())
+          it.nama_barang.toLowerCase().includes(deferredSearchQuery.toLowerCase()) ||
+          it.kode_barang.toLowerCase().includes(deferredSearchQuery.toLowerCase())
       )
       .slice(0, 5)
     : [];
 
-  const filteredSuppliers = supplierQuery
+  const filteredSuppliers = deferredSupplierQuery
     ? supplierOptions
       .filter(
         (s) =>
-          s.label.toLowerCase().includes(supplierQuery.toLowerCase()) ||
-          s.value.toLowerCase().includes(supplierQuery.toLowerCase())
+          s.label.toLowerCase().includes(deferredSupplierQuery.toLowerCase()) ||
+          s.value.toLowerCase().includes(deferredSupplierQuery.toLowerCase())
       )
       .slice(0, 5)
     : [];
