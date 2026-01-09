@@ -287,14 +287,6 @@ export default function RiwayatTransaksi() {
             </Button>
           </div>
         </div>
-
-        {/* Info: batasan 100 data */}
-        {!dateFrom && !dateTo && data.length > 100 && (
-          <div className="mt-3 text-sm text-amber-600 bg-amber-50 px-3 py-2 rounded-lg flex items-center gap-2">
-            <span>⚠️</span>
-            <span>Menampilkan 100 transaksi terakhir. Gunakan filter tanggal untuk melihat data lebih banyak.</span>
-          </div>
-        )}
       </Card>
 
       {/* Table */}

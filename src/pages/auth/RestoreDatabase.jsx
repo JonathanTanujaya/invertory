@@ -96,7 +96,7 @@ export default function RestoreDatabase() {
                         <div className="w-10 h-10 bg-white/10 border border-white/30 rounded-xl flex items-center justify-center">
                             <Box className="w-5 h-5" />
                         </div>
-                        <span className="text-xl font-bold tracking-tight">STOIR</span>
+                        <span className="text-xl font-bold tracking-tight">CV. AAN MOTOR</span>
                     </div>
                 </div>
 
@@ -109,7 +109,7 @@ export default function RestoreDatabase() {
                     </p>
                 </div>
 
-                <div className="relative z-10 text-sm text-primary-200">&copy; 2024 STOIR</div>
+                <div className="relative z-10 text-sm text-primary-200">&copy; 2024 CV. AAN MOTOR</div>
             </div>
 
             {/* Right Panel - Restore Form */}
@@ -121,7 +121,7 @@ export default function RestoreDatabase() {
                             <div className="w-8 h-8 bg-primary-50 border border-primary-200 rounded-lg flex items-center justify-center">
                                 <Box className="w-4 h-4" />
                             </div>
-                            <span className="text-lg font-bold">STOIR</span>
+                            <span className="text-lg font-bold">CV. AAN MOTOR</span>
                         </div>
                     </div>
 

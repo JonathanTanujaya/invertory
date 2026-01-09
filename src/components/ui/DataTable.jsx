@@ -170,15 +170,15 @@ export default function DataTable({
       <div
         className={clsx(
           "border border-gray-200 rounded-lg",
-          stickyHeader ? "flex-1 overflow-hidden min-h-0" : "overflow-x-auto"
+          stickyHeader ? "flex-1 overflow-hidden min-h-0 flex flex-col" : "overflow-x-auto"
         )}
-        style={stickyHeader ? { maxHeight } : undefined}
+        style={stickyHeader ? { height: maxHeight === '100%' ? '100%' : maxHeight } : undefined}
       >
-        <div className={clsx(stickyHeader ? "h-full overflow-auto" : "")}>
+        <div className={clsx(stickyHeader ? "flex-1 overflow-auto min-h-0" : "")}>
           <table className={clsx("min-w-full divide-y divide-gray-200", stickyHeader && "relative")}>
             <thead className={clsx(
               "bg-gray-50",
-              stickyHeader && "sticky top-0 z-10"
+              stickyHeader && "sticky top-0 z-10 shadow-sm"
             )}>
               <tr>
                 {selectable && (

@@ -167,7 +167,7 @@ export default function Sidebar() {
       {/* Header */}
       <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 flex-shrink-0">
         {!sidebarCollapsed && (
-          <h1 className="text-xl font-bold text-primary-600">STOIR</h1>
+          <h1 className="text-xl font-bold text-primary-600">CV. AAN MOTOR</h1>
         )}
         <button
           onClick={toggleSidebar}

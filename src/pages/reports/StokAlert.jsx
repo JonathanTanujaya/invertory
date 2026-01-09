@@ -326,9 +326,9 @@ export default function StokAlert() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col h-full" style={{ minHeight: 'calc(100vh - 120px)' }}>
       {/* Filter Section - Separate Card */}
-      <Card>
+      <Card className="flex-shrink-0 mb-6">
         <div className="space-y-3">
           {/* Search Bar + Toggle */}
           <div className="flex items-center gap-3">
@@ -469,14 +469,15 @@ export default function StokAlert() {
 
       {/* Table Section - Separate Card */}
       {viewMode === 'table' && (
-        <Card padding={false} className="flex-1 flex flex-col min-h-0 overflow-hidden">
-          <div className="flex-1 min-h-0 overflow-hidden">
+        <Card padding={false} className="flex-1 flex flex-col min-h-0 overflow-hidden" style={{ minHeight: '400px' }}>
+          <div className="flex-1 min-h-0 overflow-auto">
             <DataTable
               columns={columns}
               data={filtered}
               loading={loading}
               stickyHeader
-              maxHeight="calc(100vh - 300px)"
+              maxHeight="100%"
+              pagination={false}
             />
           </div>
         </Card>

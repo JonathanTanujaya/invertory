@@ -153,6 +153,7 @@ export default function Dashboard() {
           subtitle="SKU terdaftar"
           icon={Package}
           color="primary"
+          href="/master/sparepart"
         />
         <StatCard
           title="Stok Masuk"
@@ -160,6 +161,7 @@ export default function Dashboard() {
           subtitle="Hari ini"
           icon={TrendingUp}
           color="success"
+          href="/transactions/pembelian"
         />
         <StatCard
           title="Stok Keluar"
@@ -167,6 +169,7 @@ export default function Dashboard() {
           subtitle="Hari ini"
           icon={TrendingDown}
           color="info"
+          href="/transactions/penjualan"
         />
         <StatCard
           title="Stok Alert"
@@ -175,6 +178,7 @@ export default function Dashboard() {
           icon={AlertTriangle}
           color="warning"
           isAlert={stats.stokAlertCount > 0}
+          href="/reports/stok-alert"
         />
       </div>
 
@@ -348,36 +352,13 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      {/* BARIS 4: Aksi Cepat */}
-      <Card title="Aksi Cepat">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <QuickAction
-            icon={TrendingUp}
-            title="Stok Masuk"
-            href="/transactions/pembelian"
-          />
-          <QuickAction
-            icon={TrendingDown}
-            title="Stok Keluar"
-            href="/transactions/penjualan"
-          />
-          <QuickAction
-            icon={Package}
-            title="Data Barang"
-            href="/master/sparepart"
-          />
-          <QuickAction
-            icon={AlertTriangle}
-            title="Stok Opname"
-            href="/transactions/stok-opname"
-          />
-        </div>
-      </Card>
+      {/* Bottom padding */}
+      <div className="pb-6"></div>
     </div>
   );
 }
 
-function StatCard({ title, value, subtitle, icon: Icon, color = 'primary', isAlert = false }) {
+function StatCard({ title, value, subtitle, icon: Icon, color = 'primary', isAlert = false, href }) {
   const colors = {
     primary: 'bg-primary-50 text-primary-500',
     success: 'bg-green-50 text-green-500',
@@ -386,20 +367,34 @@ function StatCard({ title, value, subtitle, icon: Icon, color = 'primary', isAle
     info: 'bg-indigo-50 text-indigo-500',
   };
 
-  return (
-    <Card padding={false}>
-      <div className="p-5">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-sm text-gray-500 mb-1">{title}</p>
-            <p className="text-2xl font-bold text-gray-900">{value}</p>
-            <p className="text-xs text-gray-400 mt-1">{subtitle}</p>
-          </div>
-          <div className={`p-3 rounded-xl ${colors[color]} ${isAlert ? 'animate-pulse' : ''}`}>
-            <Icon className="w-5 h-5" />
-          </div>
+  const content = (
+    <div className="p-5">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-sm text-gray-500 mb-1">{title}</p>
+          <p className="text-2xl font-bold text-gray-900">{value}</p>
+          <p className="text-xs text-gray-400 mt-1">{subtitle}</p>
+        </div>
+        <div className={`p-3 rounded-xl ${colors[color]} ${isAlert ? 'animate-pulse' : ''}`}>
+          <Icon className="w-5 h-5" />
         </div>
       </div>
+    </div>
+  );
+
+  if (href) {
+    return (
+      <Link to={href}>
+        <Card padding={false} className="cursor-pointer hover:shadow-md hover:border-primary-300 transition-all">
+          {content}
+        </Card>
+      </Link>
+    );
+  }
+
+  return (
+    <Card padding={false}>
+      {content}
     </Card>
   );
 }
@@ -423,17 +418,5 @@ function ComparisonItem({ label, value, percent, isPositive }) {
         {Math.abs(percent)}%
       </div>
     </div>
-  );
-}
-
-function QuickAction({ icon: Icon, title, href }) {
-  return (
-    <Link
-      to={href}
-      className="flex flex-col items-center gap-2 p-4 rounded-lg border-2 border-gray-200 hover:border-primary-500 hover:bg-primary-50 transition-all"
-    >
-      <Icon className="w-8 h-8 text-primary-500" />
-      <span className="text-sm font-medium text-gray-700">{title}</span>
-    </Link>
   );
 }

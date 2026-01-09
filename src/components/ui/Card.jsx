@@ -54,7 +54,7 @@ export function CardContent({ children, className, ...props }) {
 }
 
 // Default export for backward compatibility
-export default function CardLegacy({ children, className, title, subtitle, actions, padding = true, ...props }) {
+export default function CardLegacy({ children, className, title, subtitle, actions, padding = true, style, ...props }) {
   const hasOverflowHidden = className?.includes('overflow-hidden');
 
   return (
@@ -64,6 +64,7 @@ export default function CardLegacy({ children, className, title, subtitle, actio
         hasOverflowHidden && 'flex flex-col',
         className
       )}
+      style={style}
       {...props}
     >
       {(title || actions) && (
@@ -75,7 +76,7 @@ export default function CardLegacy({ children, className, title, subtitle, actio
           {actions && <div className="flex items-center gap-2">{actions}</div>}
         </div>
       )}
-      <div className={clsx(padding && 'p-6', hasOverflowHidden && 'flex-1 min-h-0 overflow-hidden')}>{children}</div>
+      <div className={clsx(padding && 'p-6', hasOverflowHidden && 'flex-1 min-h-0 overflow-auto')}>{children}</div>
     </div>
   );
 }

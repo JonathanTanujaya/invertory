@@ -395,9 +395,9 @@ export default function StokBarang() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col h-full" style={{ minHeight: 'calc(100vh - 120px)' }}>
       {/* Quick Stats - Clickable */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6 flex-shrink-0">
         <StatCard
           title="Total Item"
           value={stats.total}
@@ -441,9 +441,9 @@ export default function StokBarang() {
       </div>
 
       {/* Filter + Table Container */}
-      <div className="bg-white rounded-lg shadow-soft border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-lg shadow-soft border border-gray-200 overflow-hidden flex flex-col flex-1" style={{ minHeight: '400px' }}>
         {/* Filter Section */}
-        <div className="px-6 py-3 space-y-3 border-b border-gray-200">
+        <div className="px-6 py-3 space-y-3 border-b border-gray-200 flex-shrink-0">
           {/* Search Bar + Toggle */}
           <div className="flex items-center gap-3">
             <div className="relative flex-1">
@@ -603,7 +603,8 @@ export default function StokBarang() {
               data={filtered}
               loading={loading}
               stickyHeader
-              maxHeight="calc(100vh - 340px)"
+              maxHeight="100%"
+              pagination={false}
             />
           </div>
         ) : null}
