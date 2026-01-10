@@ -102,7 +102,7 @@ export default function SetupOwner() {
                     </p>
                 </div>
 
-                <div className="relative z-10 text-sm text-primary-200">&copy; 2024 CV. AAN MOTOR</div>
+                <div className="relative z-10 text-sm text-primary-200">&copy; 2025 CV. AAN MOTOR</div>
             </div>
 
             {/* Right Panel - Setup Form */}
@@ -193,15 +193,6 @@ export default function SetupOwner() {
                                     <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                                 </>
                             )}
-                        </button>
-
-                        <button
-                            type="button"
-                            onClick={() => navigate('/restore-database')}
-                            className="w-full bg-white hover:bg-gray-50 text-gray-700 font-medium py-3 px-4 rounded-xl transition-all border border-gray-200"
-                            disabled={isLoading}
-                        >
-                            Restore database
                         </button>
                     </form>
                 </div>
