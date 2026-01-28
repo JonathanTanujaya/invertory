@@ -518,20 +518,20 @@ export default function StokBarang() {
                   Export
                 </Button>
                 {showExportMenu && (
-                  <div className="absolute top-full right-0 mt-1 w-36 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10">
-                    <button
-                      className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
-                      onClick={exportCsv}
-                    >
-                      <Download className="w-4 h-4" />
-                      Export CSV
-                    </button>
+                  <div className="absolute top-full right-0 mt-1 w-36 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
                     <button
                       className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
                       onClick={printReport}
                     >
                       <FileText className="w-4 h-4" />
                       Print
+                    </button>
+                    <button
+                      className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+                      onClick={exportCsv}
+                    >
+                      <Download className="w-4 h-4" />
+                      CSV
                     </button>
                   </div>
                 )}
@@ -595,7 +595,7 @@ export default function StokBarang() {
           )}
         </div>
 
-        {/* Table Content */}
+        {/* Content - Table or Grid */}
         {viewMode === 'table' ? (
           <div className="flex-1 min-h-0 overflow-hidden">
             <DataTable
@@ -607,59 +607,54 @@ export default function StokBarang() {
               pagination={false}
             />
           </div>
-        ) : null}
-      </div>
-
-      {/* Grid View - Outside Container */}
-      {viewMode === 'grid' && (
-        <div>
-          {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
-            </div>
-          ) : paginatedData.length === 0 ? (
-            <Card>
+        ) : (
+          <div className="flex-1 min-h-0 overflow-auto p-4">
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
+              </div>
+            ) : paginatedData.length === 0 ? (
               <div className="text-center py-12 text-gray-500">
                 <Package className="w-12 h-12 mx-auto mb-3 text-gray-300" />
                 <p>Tidak ada data yang ditemukan</p>
               </div>
-            </Card>
-          ) : (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {paginatedData.map(item => (
-                  <GridItem key={item.kode_barang} item={item} />
-                ))}
-              </div>
-
-              {/* Pagination for Grid */}
-              {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-2 mt-6">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
-                  >
-                    Sebelumnya
-                  </Button>
-                  <span className="text-sm text-gray-600">
-                    Halaman {currentPage} dari {totalPages}
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                    disabled={currentPage === totalPages}
-                  >
-                    Selanjutnya
-                  </Button>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {paginatedData.map(item => (
+                    <GridItem key={item.kode_barang} item={item} />
+                  ))}
                 </div>
-              )}
-            </>
-          )}
-        </div>
-      )}
+
+                {/* Pagination for Grid */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-center gap-2 mt-6 pb-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                    >
+                      Sebelumnya
+                    </Button>
+                    <span className="text-sm text-gray-600">
+                      Halaman {currentPage} dari {totalPages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                    >
+                      Selanjutnya
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Detail Modal */}
       <Modal
