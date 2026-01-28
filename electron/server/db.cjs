@@ -13,7 +13,7 @@ function migrate(sqlDb) {
       username TEXT NOT NULL UNIQUE,
       password_hash TEXT NOT NULL,
       nama TEXT NOT NULL,
-      role TEXT NOT NULL CHECK (role IN ('owner', 'admin', 'staff')),
+      role TEXT NOT NULL CHECK (role IN ('owner', 'admin')),
       avatar TEXT,
       must_change_password INTEGER NOT NULL DEFAULT 0 CHECK (must_change_password IN (0, 1)),
       is_active INTEGER NOT NULL DEFAULT 1 CHECK (is_active IN (0, 1)),
@@ -305,7 +305,7 @@ function migrate(sqlDb) {
   // Best-effort: default to customer name if kontak_person is missing.
   try {
     sqlDb.exec(
-      "UPDATE m_customer SET kontak_person = nama WHERE (kontak_person IS NULL OR TRIM(kontak_person) = '') AND nama IS NOT NULL"
+      "UPDATE m_customer SET kontak_person = nama WHERE (kontak_person IS NULL OR TRIM(kontak_person) = '') AND nama IS NOT NULL",
     );
   } catch {
     // ignore
@@ -341,22 +341,22 @@ function seedIfEmpty(sqlDb, { seedDir }) {
   if (!seedDir || !fs.existsSync(seedDir)) return;
 
   const userCount = Number(
-    getScalar(sqlDb, "SELECT COUNT(*) FROM m_user") ?? 0
+    getScalar(sqlDb, "SELECT COUNT(*) FROM m_user") ?? 0,
   );
   const areaCount = Number(
-    getScalar(sqlDb, "SELECT COUNT(*) FROM m_area") ?? 0
+    getScalar(sqlDb, "SELECT COUNT(*) FROM m_area") ?? 0,
   );
   const kategoriCount = Number(
-    getScalar(sqlDb, "SELECT COUNT(*) FROM m_kategori") ?? 0
+    getScalar(sqlDb, "SELECT COUNT(*) FROM m_kategori") ?? 0,
   );
   const supplierCount = Number(
-    getScalar(sqlDb, "SELECT COUNT(*) FROM m_supplier") ?? 0
+    getScalar(sqlDb, "SELECT COUNT(*) FROM m_supplier") ?? 0,
   );
   const customerCount = Number(
-    getScalar(sqlDb, "SELECT COUNT(*) FROM m_customer") ?? 0
+    getScalar(sqlDb, "SELECT COUNT(*) FROM m_customer") ?? 0,
   );
   const barangCount = Number(
-    getScalar(sqlDb, "SELECT COUNT(*) FROM m_barang") ?? 0
+    getScalar(sqlDb, "SELECT COUNT(*) FROM m_barang") ?? 0,
   );
 
   // IMPORTANT: do not seed users. Owner is created via bootstrap flow.
@@ -365,7 +365,7 @@ function seedIfEmpty(sqlDb, { seedDir }) {
     const areas = readJsonArrayIfExists(path.join(seedDir, "m_area.json"));
     if (areas) {
       const stmt = sqlDb.prepare(
-        "INSERT OR IGNORE INTO m_area (kode, nama) VALUES (?, ?)"
+        "INSERT OR IGNORE INTO m_area (kode, nama) VALUES (?, ?)",
       );
       try {
         for (const row of areas) {
@@ -379,11 +379,11 @@ function seedIfEmpty(sqlDb, { seedDir }) {
 
   if (kategoriCount === 0) {
     const kategori = readJsonArrayIfExists(
-      path.join(seedDir, "m_kategori.json")
+      path.join(seedDir, "m_kategori.json"),
     );
     if (kategori) {
       const stmt = sqlDb.prepare(
-        "INSERT OR IGNORE INTO m_kategori (kode, nama) VALUES (?, ?)"
+        "INSERT OR IGNORE INTO m_kategori (kode, nama) VALUES (?, ?)",
       );
       try {
         for (const row of kategori) {
@@ -397,11 +397,11 @@ function seedIfEmpty(sqlDb, { seedDir }) {
 
   if (supplierCount === 0) {
     const suppliers = readJsonArrayIfExists(
-      path.join(seedDir, "m_supplier.json")
+      path.join(seedDir, "m_supplier.json"),
     );
     if (suppliers) {
       const stmt = sqlDb.prepare(
-        "INSERT OR IGNORE INTO m_supplier (kode, nama, telepon, email, alamat) VALUES (?, ?, ?, ?, ?)"
+        "INSERT OR IGNORE INTO m_supplier (kode, nama, telepon, email, alamat) VALUES (?, ?, ?, ?, ?)",
       );
       try {
         for (const row of suppliers) {
@@ -421,11 +421,11 @@ function seedIfEmpty(sqlDb, { seedDir }) {
 
   if (customerCount === 0) {
     const customers = readJsonArrayIfExists(
-      path.join(seedDir, "m_customer.json")
+      path.join(seedDir, "m_customer.json"),
     );
     if (customers) {
       const stmt = sqlDb.prepare(
-        "INSERT OR IGNORE INTO m_customer (kode, nama, area_kode, telepon, kontak_person, alamat) VALUES (?, ?, ?, ?, ?, ?)"
+        "INSERT OR IGNORE INTO m_customer (kode, nama, area_kode, telepon, kontak_person, alamat) VALUES (?, ?, ?, ?, ?, ?)",
       );
       try {
         for (const row of customers) {
@@ -448,7 +448,7 @@ function seedIfEmpty(sqlDb, { seedDir }) {
     const items = readJsonArrayIfExists(path.join(seedDir, "m_barang.json"));
     if (items) {
       const stmt = sqlDb.prepare(
-        "INSERT OR IGNORE INTO m_barang (kode_barang, nama_barang, kategori_kode, satuan, stok, stok_minimal, harga_beli, harga_jual) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+        "INSERT OR IGNORE INTO m_barang (kode_barang, nama_barang, kategori_kode, satuan, stok, stok_minimal, harga_beli, harga_jual) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
       );
       try {
         for (const row of items) {
@@ -487,12 +487,12 @@ function seedIfEmpty(sqlDb, { seedDir }) {
 
   const ensureSuppliers = () => {
     const count = Number(
-      getScalar(sqlDb, "SELECT COUNT(*) FROM m_supplier") ?? 0
+      getScalar(sqlDb, "SELECT COUNT(*) FROM m_supplier") ?? 0,
     );
     if (count >= targetMasterRows) return;
 
     const stmt = sqlDb.prepare(
-      "INSERT OR IGNORE INTO m_supplier (kode, nama, telepon, email, alamat) VALUES (?, ?, ?, ?, ?)"
+      "INSERT OR IGNORE INTO m_supplier (kode, nama, telepon, email, alamat) VALUES (?, ?, ?, ?, ?)",
     );
     try {
       for (let i = count + 1; i <= targetMasterRows; i += 1) {
@@ -512,7 +512,7 @@ function seedIfEmpty(sqlDb, { seedDir }) {
 
   const ensureCustomers = () => {
     const count = Number(
-      getScalar(sqlDb, "SELECT COUNT(*) FROM m_customer") ?? 0
+      getScalar(sqlDb, "SELECT COUNT(*) FROM m_customer") ?? 0,
     );
     if (count >= targetMasterRows) return;
 
@@ -521,7 +521,7 @@ function seedIfEmpty(sqlDb, { seedDir }) {
     ).map((r) => r[0]);
 
     const stmt = sqlDb.prepare(
-      "INSERT OR IGNORE INTO m_customer (kode, nama, area_kode, telepon, kontak_person, alamat) VALUES (?, ?, ?, ?, ?, ?)"
+      "INSERT OR IGNORE INTO m_customer (kode, nama, area_kode, telepon, kontak_person, alamat) VALUES (?, ?, ?, ?, ?, ?)",
     );
     try {
       for (let i = count + 1; i <= targetMasterRows; i += 1) {
@@ -543,7 +543,7 @@ function seedIfEmpty(sqlDb, { seedDir }) {
 
   const ensureItems = () => {
     const count = Number(
-      getScalar(sqlDb, "SELECT COUNT(*) FROM m_barang") ?? 0
+      getScalar(sqlDb, "SELECT COUNT(*) FROM m_barang") ?? 0,
     );
     if (count >= targetMasterRows) return;
 
@@ -568,7 +568,7 @@ function seedIfEmpty(sqlDb, { seedDir }) {
     ];
 
     const stmt = sqlDb.prepare(
-      "INSERT OR IGNORE INTO m_barang (kode_barang, nama_barang, kategori_kode, satuan, stok, stok_minimal, harga_beli, harga_jual) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+      "INSERT OR IGNORE INTO m_barang (kode_barang, nama_barang, kategori_kode, satuan, stok, stok_minimal, harga_beli, harga_jual) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
     );
     try {
       for (let i = count + 1; i <= targetMasterRows; i += 1) {
@@ -607,13 +607,13 @@ function seedIfEmpty(sqlDb, { seedDir }) {
 
   // Seed transactional history to support dashboard/reports (stok masuk/keluar, stok alert, barang habis/rendah, dll).
   const stokMasukExisting = Number(
-    getScalar(sqlDb, "SELECT COUNT(*) FROM t_stok_masuk") ?? 0
+    getScalar(sqlDb, "SELECT COUNT(*) FROM t_stok_masuk") ?? 0,
   );
   const stokKeluarExisting = Number(
-    getScalar(sqlDb, "SELECT COUNT(*) FROM t_stok_keluar") ?? 0
+    getScalar(sqlDb, "SELECT COUNT(*) FROM t_stok_keluar") ?? 0,
   );
   const kartuExisting = Number(
-    getScalar(sqlDb, "SELECT COUNT(*) FROM t_kartu_stok") ?? 0
+    getScalar(sqlDb, "SELECT COUNT(*) FROM t_kartu_stok") ?? 0,
   );
 
   if (
@@ -628,54 +628,55 @@ function seedIfEmpty(sqlDb, { seedDir }) {
 
     // Make sure master data for referenced codes exists.
     const ensureSupplierStmt = sqlDb.prepare(
-      "INSERT OR IGNORE INTO m_supplier (kode, nama, telepon, email, alamat) VALUES (?, ?, ?, ?, ?)"
+      "INSERT OR IGNORE INTO m_supplier (kode, nama, telepon, email, alamat) VALUES (?, ?, ?, ?, ?)",
     );
     const ensureCustomerStmt = sqlDb.prepare(
-      "INSERT OR IGNORE INTO m_customer (kode, nama, area_kode, telepon, kontak_person, alamat) VALUES (?, ?, ?, ?, ?, ?)"
+      "INSERT OR IGNORE INTO m_customer (kode, nama, area_kode, telepon, kontak_person, alamat) VALUES (?, ?, ?, ?, ?, ?)",
     );
     const ensureItemStmt = sqlDb.prepare(
-      "INSERT OR IGNORE INTO m_barang (kode_barang, nama_barang, kategori_kode, satuan, stok, stok_minimal, harga_beli, harga_jual) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+      "INSERT OR IGNORE INTO m_barang (kode_barang, nama_barang, kategori_kode, satuan, stok, stok_minimal, harga_beli, harga_jual) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
     );
 
     const stockGetStmt = sqlDb.prepare(
-      "SELECT stok, stok_minimal, COALESCE(harga_beli, 0) AS harga_beli, COALESCE(harga_jual, 0) AS harga_jual, satuan FROM m_barang WHERE kode_barang = ?"
+      "SELECT stok, stok_minimal, COALESCE(harga_beli, 0) AS harga_beli, COALESCE(harga_jual, 0) AS harga_jual, satuan FROM m_barang WHERE kode_barang = ?",
     );
     const stockSetStmt = sqlDb.prepare(
-      "UPDATE m_barang SET stok = ? WHERE kode_barang = ?"
+      "UPDATE m_barang SET stok = ? WHERE kode_barang = ?",
     );
 
     const insMasukHdr = sqlDb.prepare(
-      "INSERT OR IGNORE INTO t_stok_masuk (no_faktur, tanggal, supplier_kode, catatan) VALUES (?, ?, ?, ?)"
+      "INSERT OR IGNORE INTO t_stok_masuk (no_faktur, tanggal, supplier_kode, catatan) VALUES (?, ?, ?, ?)",
     );
     const insMasukDet = sqlDb.prepare(
-      "INSERT INTO t_stok_masuk_detail (stok_masuk_id, barang_kode, qty, harga_beli) VALUES (?, ?, ?, ?)"
+      "INSERT INTO t_stok_masuk_detail (stok_masuk_id, barang_kode, qty, harga_beli) VALUES (?, ?, ?, ?)",
     );
     const insKeluarHdr = sqlDb.prepare(
-      "INSERT OR IGNORE INTO t_stok_keluar (no_faktur, tanggal, customer_kode, catatan) VALUES (?, ?, ?, ?)"
+      "INSERT OR IGNORE INTO t_stok_keluar (no_faktur, tanggal, customer_kode, catatan) VALUES (?, ?, ?, ?)",
     );
     const insKeluarDet = sqlDb.prepare(
-      "INSERT INTO t_stok_keluar_detail (stok_keluar_id, barang_kode, qty, harga_jual) VALUES (?, ?, ?, ?)"
+      "INSERT INTO t_stok_keluar_detail (stok_keluar_id, barang_kode, qty, harga_jual) VALUES (?, ?, ?, ?)",
     );
     const insKartu = sqlDb.prepare(
-      "INSERT INTO t_kartu_stok (waktu, ref_type, ref_no, barang_kode, qty_in, qty_out, stok_after, keterangan) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+      "INSERT INTO t_kartu_stok (waktu, ref_type, ref_no, barang_kode, qty_in, qty_out, stok_after, keterangan) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
     );
 
     const insClaimHdr = sqlDb.prepare(
-      "INSERT OR IGNORE INTO t_customer_claim (no_claim, tanggal, customer_kode, catatan) VALUES (?, ?, ?, ?)"
+      "INSERT OR IGNORE INTO t_customer_claim (no_claim, tanggal, customer_kode, catatan) VALUES (?, ?, ?, ?)",
     );
     const insClaimDet = sqlDb.prepare(
-      "INSERT INTO t_customer_claim_detail (customer_claim_id, barang_kode, qty) VALUES (?, ?, ?)"
+      "INSERT INTO t_customer_claim_detail (customer_claim_id, barang_kode, qty) VALUES (?, ?, ?)",
     );
     const insOpnameHdr = sqlDb.prepare(
-      "INSERT OR IGNORE INTO t_stok_opname (no_opname, tanggal, catatan) VALUES (?, ?, ?)"
+      "INSERT OR IGNORE INTO t_stok_opname (no_opname, tanggal, catatan) VALUES (?, ?, ?)",
     );
     const insOpnameDet = sqlDb.prepare(
-      "INSERT INTO t_stok_opname_detail (stok_opname_id, barang_kode, stok_sistem, stok_fisik, selisih, keterangan) VALUES (?, ?, ?, ?, ?, ?)"
+      "INSERT INTO t_stok_opname_detail (stok_opname_id, barang_kode, stok_sistem, stok_fisik, selisih, keterangan) VALUES (?, ?, ?, ?, ?, ?)",
     );
 
     const getIdByNo = (table, col, val) =>
       Number(
-        getScalar(sqlDb, `SELECT id FROM ${table} WHERE ${col} = ?`, [val]) ?? 0
+        getScalar(sqlDb, `SELECT id FROM ${table} WHERE ${col} = ?`, [val]) ??
+          0,
       );
 
     const parseItemsArray = (row) => {
@@ -893,7 +894,7 @@ function seedIfEmpty(sqlDb, { seedDir }) {
     // If JSON is shorter, generate extra demo rows.
     const allItemCodes = (
       sqlDb.exec(
-        "SELECT kode_barang FROM m_barang ORDER BY kode_barang ASC"
+        "SELECT kode_barang FROM m_barang ORDER BY kode_barang ASC",
       )?.[0]?.values || []
     ).map((r) => r[0]);
     const allSupplierCodes = (
@@ -1012,8 +1013,8 @@ function seedIfEmpty(sqlDb, { seedDir }) {
             drift === 0
               ? "Sesuai"
               : drift > 0
-              ? "Selisih lebih"
-              : "Selisih kurang",
+                ? "Selisih lebih"
+                : "Selisih kurang",
         });
       }
 
@@ -1069,7 +1070,7 @@ function createDbFacade({ sqlDb, dbPath, save }) {
     run(sql, params = []) {
       sqlDb.run(sql, params);
       const changesRow = get(
-        "SELECT changes() AS changes, last_insert_rowid() AS lastInsertRowid"
+        "SELECT changes() AS changes, last_insert_rowid() AS lastInsertRowid",
       );
       // Persist after each write for non-transactional writes.
       save();
@@ -1083,7 +1084,7 @@ function createDbFacade({ sqlDb, dbPath, save }) {
         run(sql, params = []) {
           sqlDb.run(sql, params);
           return get(
-            "SELECT changes() AS changes, last_insert_rowid() AS lastInsertRowid"
+            "SELECT changes() AS changes, last_insert_rowid() AS lastInsertRowid",
           );
         },
         exec(sql) {
@@ -1148,7 +1149,7 @@ async function initDb({ dataDir }) {
     "..",
     "src",
     "data",
-    "dummy"
+    "dummy",
   );
   const noSeedMarkerPath = path.join(dataDir, "stoir.no-seed");
   if (!fs.existsSync(noSeedMarkerPath)) {

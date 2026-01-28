@@ -68,12 +68,10 @@ export default function LogAktivitas() {
         const colors = {
             owner: 'bg-purple-100 text-purple-700',
             admin: 'bg-blue-100 text-blue-700',
-            staff: 'bg-gray-100 text-gray-700',
         };
         const labels = {
             owner: 'Owner',
             admin: 'Admin',
-            staff: 'Staf',
         };
         return (
             <span className={`px-2 py-1 rounded-full text-xs font-medium ${colors[role]}`}>

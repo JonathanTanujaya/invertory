@@ -10,7 +10,6 @@ files:
       - electron/**
       - package.json
 win:
-  icon: build/icon.ico
   target:
     - target: nsis
       arch:
@@ -18,8 +17,6 @@ win:
 nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
-  installerIcon: build/icon.ico
-  uninstallerIcon: build/icon.ico
   createDesktopShortcut: true
   createStartMenuShortcut: true
 electronVersion: 35.7.5

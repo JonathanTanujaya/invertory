@@ -1,8 +1,8 @@
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 
 async function getApi() {
-  const mod = await import('@/api/axios');
+  const mod = await import("@/api/axios");
   return mod.default;
 }
 
@@ -24,9 +24,9 @@ export const useActivityLogStore = create(
       clearLogs: () => set({ logs: [] }),
     }),
     {
-      name: 'activity-log-storage',
-    }
-  )
+      name: "activity-log-storage",
+    },
+  ),
 );
 
 // Auth store with user management
@@ -38,7 +38,14 @@ export const useAuthStore = create(
       token: null,
       users: [],
 
-      _logActivity: ({ action, description, targetUserId, targetUsername, targetUserName, meta }) => {
+      _logActivity: ({
+        action,
+        description,
+        targetUserId,
+        targetUsername,
+        targetUserName,
+        meta,
+      }) => {
         const actor = get().user;
         if (!actor) return;
 
@@ -59,7 +66,7 @@ export const useAuthStore = create(
       // Login (via local API)
       login: async (username, password) => {
         const api = await getApi();
-        const res = await api.post('/auth/login', { username, password });
+        const res = await api.post("/auth/login", { username, password });
         const token = res?.data?.token;
         const user = res?.data?.user;
 
@@ -71,7 +78,7 @@ export const useAuthStore = create(
           username: user.username,
           userName: user.nama,
           userRole: user.role,
-          action: 'login',
+          action: "login",
           description: `${user.nama} berhasil login`,
         });
 
@@ -88,14 +95,14 @@ export const useAuthStore = create(
             username: currentUser.username,
             userName: currentUser.nama,
             userRole: currentUser.role,
-            action: 'logout',
+            action: "logout",
             description: `${currentUser.nama} logout`,
           });
         }
 
         try {
           const api = await getApi();
-          await api.post('/auth/logout');
+          await api.post("/auth/logout");
         } catch (_) {
           // ignore
         }
@@ -108,7 +115,7 @@ export const useAuthStore = create(
         if (!token) return false;
         try {
           const api = await getApi();
-          const res = await api.get('/auth/me');
+          const res = await api.get("/auth/me");
           const user = res?.data?.user;
           if (user) {
             set({ user, isAuthenticated: true });
@@ -123,7 +130,7 @@ export const useAuthStore = create(
 
       fetchUsers: async () => {
         const api = await getApi();
-        const res = await api.get('/users');
+        const res = await api.get("/users");
         const rows = Array.isArray(res?.data) ? res.data : [];
         set({ users: rows });
         return rows;
@@ -132,13 +139,13 @@ export const useAuthStore = create(
       // Add user
       addUser: async (userData) => {
         const api = await getApi();
-        const res = await api.post('/users', userData);
+        const res = await api.post("/users", userData);
         await get().fetchUsers();
 
         const created = res?.data;
         if (created) {
           get()._logActivity({
-            action: 'user_create',
+            action: "user_create",
             description: `Membuat user @${created.username} (${created.nama})`,
             targetUserId: created.id,
             targetUsername: created.username,
@@ -157,7 +164,7 @@ export const useAuthStore = create(
         const updated = res?.data;
         if (updated) {
           get()._logActivity({
-            action: 'user_update',
+            action: "user_update",
             description: `Mengubah profil user @${updated.username} (${updated.nama})`,
             targetUserId: updated.id,
             targetUsername: updated.username,
@@ -178,7 +185,7 @@ export const useAuthStore = create(
 
         if (toDelete) {
           get()._logActivity({
-            action: 'user_delete',
+            action: "user_delete",
             description: `Menghapus user @${toDelete.username} (${toDelete.nama})`,
             targetUserId: toDelete.id,
             targetUsername: toDelete.username,
@@ -190,58 +197,76 @@ export const useAuthStore = create(
       // Change password (self-only)
       changeOwnPassword: async (currentPassword, newPassword) => {
         const actor = get().user;
-        if (!actor) return { ok: false, message: 'Anda belum login.' };
+        if (!actor) return { ok: false, message: "Anda belum login." };
 
         try {
           const api = await getApi();
-          await api.post('/auth/change-password', { currentPassword, newPassword });
+          await api.post("/auth/change-password", {
+            currentPassword,
+            newPassword,
+          });
           get()._logActivity({
-            action: 'password_change',
+            action: "password_change",
             description: `Mengubah password akun sendiri (@${actor.username})`,
             targetUserId: actor.id,
             targetUsername: actor.username,
             targetUserName: actor.nama,
           });
-          return { ok: true, message: 'Password berhasil diubah.' };
+          return { ok: true, message: "Password berhasil diubah." };
         } catch (err) {
           const msg = err?.response?.data?.error;
-          return { ok: false, message: msg || 'Gagal mengubah password.' };
+          return { ok: false, message: msg || "Gagal mengubah password." };
         }
       },
 
       // Owner-only: set password explicitly for another user (admin/staff)
       ownerSetUserPassword: async (targetUserId, newPassword) => {
         const actor = get().user;
-        if (!actor) return { ok: false, message: 'Anda belum login.' };
-        if (actor.role !== 'owner') return { ok: false, message: 'Hanya Owner yang bisa mengubah password user lain.' };
-        if (actor.id === targetUserId) return { ok: false, message: 'Gunakan menu profil untuk mengubah password akun sendiri.' };
+        if (!actor) return { ok: false, message: "Anda belum login." };
+        if (actor.role !== "owner")
+          return {
+            ok: false,
+            message: "Hanya Owner yang bisa mengubah password user lain.",
+          };
+        if (actor.id === targetUserId)
+          return {
+            ok: false,
+            message:
+              "Gunakan menu profil untuk mengubah password akun sendiri.",
+          };
 
         if (!newPassword || newPassword.length < 4) {
-          return { ok: false, message: 'Password baru minimal 4 karakter.' };
+          return { ok: false, message: "Password baru minimal 4 karakter." };
         }
 
         const users = get().users;
         const target = users.find((u) => u.id === targetUserId);
-        if (!target) return { ok: false, message: 'User tidak ditemukan.' };
-        if (target.role === 'owner') return { ok: false, message: 'Tidak bisa mengubah password akun owner lain.' };
+        if (!target) return { ok: false, message: "User tidak ditemukan." };
+        if (target.role === "owner")
+          return {
+            ok: false,
+            message: "Tidak bisa mengubah password akun owner lain.",
+          };
 
         try {
           const api = await getApi();
-          await api.post(`/users/${targetUserId}/reset-password`, { newPassword });
+          await api.post(`/users/${targetUserId}/reset-password`, {
+            newPassword,
+          });
           await get().fetchUsers();
 
           get()._logActivity({
-            action: 'password_set',
+            action: "password_set",
             description: `Mengubah password untuk @${target.username} (${target.nama})`,
             targetUserId: target.id,
             targetUsername: target.username,
             targetUserName: target.nama,
           });
 
-          return { ok: true, message: 'Password user berhasil diubah.' };
+          return { ok: true, message: "Password user berhasil diubah." };
         } catch (err) {
           const msg = err?.response?.data?.error;
-          return { ok: false, message: msg || 'Gagal mengubah password user.' };
+          return { ok: false, message: msg || "Gagal mengubah password user." };
         }
       },
 
@@ -252,29 +277,25 @@ export const useAuthStore = create(
 
         const permissions = {
           owner: [
-            'dashboard',
-            'master-data',
-            'master-data.create',
-            'master-data.edit',
-            'master-data.delete',
-            'transaksi',
-            'laporan',
-            'user-management',
-            'activity-log',
-            'settings',
+            "dashboard",
+            "master-data",
+            "master-data.create",
+            "master-data.edit",
+            "master-data.delete",
+            "transaksi",
+            "laporan",
+            "user-management",
+            "activity-log",
+            "settings",
           ],
           admin: [
-            'dashboard',
-            'master-data',
-            'master-data.create',
-            'master-data.edit',
-            'master-data.delete',
-            'transaksi',
-            'laporan',
-          ],
-          staff: [
-            'master-data',
-            // Staff hanya bisa view, tidak ada .create, .edit, .delete
+            "dashboard",
+            "master-data",
+            "master-data.create",
+            "master-data.edit",
+            "master-data.delete",
+            "transaksi",
+            "laporan",
           ],
         };
 
@@ -284,25 +305,24 @@ export const useAuthStore = create(
       // Get role label
       getRoleLabel: () => {
         const user = get().user;
-        if (!user) return '';
+        if (!user) return "";
 
         const labels = {
-          owner: 'Owner',
-          admin: 'Administrator',
-          staff: 'Staff',
+          owner: "Owner",
+          admin: "Administrator",
         };
 
         return labels[user.role] || user.role;
       },
     }),
     {
-      name: 'auth-storage',
+      name: "auth-storage",
       storage: createJSONStorage(() => sessionStorage),
       version: 1,
       migrate: (persistedState) => ({
         ...persistedState,
         users: [],
       }),
-    }
-  )
+    },
+  ),
 );
