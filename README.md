@@ -504,5 +504,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Built with ❤️ by STOIR Development Team**
 
-**Version**: 1.3.0  
+**Version**: 1.6.0  
 **Last Updated**: January 2026
