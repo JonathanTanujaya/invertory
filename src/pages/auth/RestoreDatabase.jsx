@@ -109,7 +109,7 @@ export default function RestoreDatabase() {
                     </p>
                 </div>
 
-                <div className="relative z-10 text-sm text-primary-200">&copy; 2024 CV. AAN MOTOR</div>
+                <div className="relative z-10 text-sm text-primary-200">&copy; 2025 CV. AAN MOTOR</div>
             </div>
 
             {/* Right Panel - Restore Form */}
